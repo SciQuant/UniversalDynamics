@@ -1,0 +1,13 @@
+name = "UniversalDynamics"
+uuid = "e34ebe0d-adf9-4359-84c2-dfdf884d416d"
+authors = ["SciQuant"]
+version = "0.1.0"
+
+[compat]
+julia = "1.5"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

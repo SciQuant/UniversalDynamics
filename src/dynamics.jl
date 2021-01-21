@@ -12,7 +12,7 @@ function gprototype(d::AbstractDynamics{IIP,D,M,DN,T}) where {IIP,D,M,DN,T}
     return IIP ? ones(T, gprototype_size(d)...) : @SArray(ones(T, gprototype_size(d)...))
 end
 
-gprototype_size(::AbstractDynamics{IIP,1,1}) where {IIP} = () # either DiagonalNoise or ScalarNoise, i.e. size(::Real) = ()
+gprototype_size(::AbstractDynamics{IIP,1,1}) where {IIP} = (1, ) # either DiagonalNoise or ScalarNoise. Should we return ()? Note that size(::Real) = ()
 gprototype_size(::AbstractDynamics{IIP,D,1,false}) where {IIP,D} = (D, ) # ScalarNoise
 gprototype_size(::AbstractDynamics{IIP,D,M,true}) where {IIP,D,M} = (D, ) # DiagonalNoise
 gprototype_size(::AbstractDynamics{IIP,D,M,false}) where {IIP,D,M} = (D, M) # NonDiagonalNoise

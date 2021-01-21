@@ -86,7 +86,15 @@ function DynamicalSystemAttributes(dynamics::Tuple{Vararg{AbstractDynamics}})
         # a aquellos que vienen de una dynamica con DN, habria que poner Diagonal(v1),
         # aunque estoy viendo que cat me devuelve un sparse, cosa que no necesariamente
         # quiero, por lo que quizas deberia hacer Matrix(Diagonal(v1))
-        noise_rate_prototype = cat(gprototype.(dynamics)..., dims = (1, 2))
+        prototypes = []
+        for dynamic in dynamics
+            if diagonalnoise(dynamic)
+                push!(prototypes, Diagonal(gprototype(dynamic)))
+            else
+                push!(prototypes, gprototype(dynamic))
+            end
+        end
+        noise_rate_prototype = cat(prototypes...; dims=(1, 2))
 
         if IIP
             #! la verdad que no siempre conviene que sea sparse, por lo que deberia ser un

@@ -28,7 +28,7 @@ function DynamicalSystemAttributes(dynamics::Tuple{Vararg{AbstractDynamics}})
 
     # si no es ninguno de los dos, es porque estan mal dadas las condiciones inciales
     if isequal(IIP, OOP)
-        error("all dynamics *must* be either `IIP` or `OOP`.")
+        error("all dynamics *must* be either `InPlace` or `OutOfPlace`.")
     end
 
     D = sum(dimension.(dynamics))
@@ -47,25 +47,6 @@ function DynamicalSystemAttributes(dynamics::Tuple{Vararg{AbstractDynamics}})
     ρ = cat(cor.(dynamics)..., dims = (1, 2))
     ρ = IIP ? ρ : SMatrix{size(ρ)...}(ρ)
 
-    # if isequal(ρ, I)
-    #     noise = nothing
-    # else
-    #     # IDEA: podria crear y guardar tambien el noise que no tiene condicion inicial para
-    #     # el extra noise process W.dZ, i.e., el ultimo argumento le pongo nothing. De esta
-    #     # forma, voy a evitar el sampling de W.dZ en los algoritmos que no necesiten el
-    #     # extra process, ya que puedo mandar al solver el noise process con nothing como
-    #     # condicion inicial del extra. De la forma que esta ahora, es muy probable que los
-    #     # W.dZ se sorteen, pero no se use, en los algoritmos que no necesitan el extra
-    #     # process. Es muy importante entender que estos se sortean antes de perform_step!,
-    #     # no es que se sortea lo que se necesita en cada step.
-    #     noise = IIP ?
-    #         CorrelatedWienerProcess!(ρ, t0, zeros(D), zeros(D)) :
-    #         CorrelatedWienerProcess(ρ, t0, @SVector(zeros(D)), @SVector(zeros(D))) # nunca probe esto, analizar
-
-    #     # TODO: scalar noise deberia tambien construir un noise y esto deberia ir por algun
-    #     # lado. O por ahi magicamente ya lo estoy handleando.
-    # end
-
     if DN
         # DiagonalNoise
         noise_rate_prototype = nothing
@@ -78,17 +59,11 @@ function DynamicalSystemAttributes(dynamics::Tuple{Vararg{AbstractDynamics}})
         noise_rate_prototype = nothing
 
     else
-        # TODO: esto funciona bien cuando tenemos mezclados systemas con DN y con NDN?
-        # evidentemente no, probar:
-        # m1 = rand(3, 4)
-        # v1 = rand(3)
-        # cat(m1, v1, dims = (1, 2))
-        # a aquellos que vienen de una dynamica con DN, habria que poner Diagonal(v1),
-        # aunque estoy viendo que cat me devuelve un sparse, cosa que no necesariamente
-        # quiero, por lo que quizas deberia hacer Matrix(Diagonal(v1))
         prototypes = []
         for dynamic in dynamics
             if diagonalnoise(dynamic)
+                # For DiagonalNoise, gprototype is a vector. But, when mixed with other
+                # dynamics, it should be casted to a diagonal matrix.
                 push!(prototypes, Diagonal(gprototype(dynamic)))
             else
                 push!(prototypes, gprototype(dynamic))
@@ -105,6 +80,9 @@ function DynamicalSystemAttributes(dynamics::Tuple{Vararg{AbstractDynamics}})
         end
     end
 
+    #! Quizas la definicion del noise aqui no es tan necesaria y puede hacerse en el solve,
+    #! antes de simular. El problema es que en esta instancia no conozco el solver y por lo
+    #! tanto estoy mandando que exista un second noise process.
     if DN
         if isequal(ρ, I)
             noise = nothing

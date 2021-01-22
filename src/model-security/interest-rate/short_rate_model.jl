@@ -197,7 +197,6 @@ function (L::ShortRateModelForwardRate)(t::Real, T::Real, S::Real)
     return 1 / (S - T) * (P(t, T) / P(t, S) - 1)
 end
 
-(L::ShortRateModelForwardRate)(t::Real, T::Real, S::Real) = 1 / (S - T) * (L.P(t, T) / L.P(t, S) - 1)
 (L::ShortRateModelForwardRate)(T::Real, S::Real) = L(T, T, S)
 
 struct ShortRateModelInstantaneousForwardRate{

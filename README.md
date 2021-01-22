@@ -2,9 +2,7 @@
 
 [![Build Status](https://github.com/SciQuant/UniversalDynamics.jl/workflows/CI/badge.svg)](https://github.com/SciQuant/UniversalDynamics.jl/actions)
 
-UniversalDynamics provides a simple way for defining a Stochastic Dynamical System formed up by different Stochastic Dynamics.
-
-mmm escribo documentation de una mejor?
+UniversalDynamics provides a simple way for defining a Dynamical System formed up by different Dynamics in the financial domain.
 
 ```julia
 using UniversalDynamics

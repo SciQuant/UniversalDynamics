@@ -18,13 +18,26 @@ gprototype_size(::AbstractDynamics{IIP,D,M,true}) where {IIP,D,M} = (D, ) # Diag
 gprototype_size(::AbstractDynamics{IIP,D,M,false}) where {IIP,D,M} = (D, M) # NonDiagonalNoise
 
 
-abstract type ModelDynamics{D,M,IIP,DN,T} <: AbstractDynamics{D,M,IIP,DN,T} end
-
-
-struct SystemDynamics{IIP,D,M,DN,T,S,R} <: AbstractDynamics{IIP,D,M,DN,T}
+struct DynamicsAttributes{T,S,R,N,P}
     t0::T
     x0::S
     ρ::R
+    noise::N # diffeq noise always
+    noise_rate_prototype::P # it holds my gprototype for SystemDynamics while diffeq gprototype for DynamicalSystem
+end
+
+initialtime(attrs::DynamicsAttributes) = attrs.t0
+state(attrs::DynamicsAttributes) = attrs.x0
+cor(attrs::DynamicsAttributes) = attrs.ρ
+noise(attrs::DynamicsAttributes) = attrs.noise
+noise_rate_prototype(attrs::DynamicsAttributes) = attrs.noise_rate_prototype
+
+
+abstract type ModelDynamics{D,M,IIP,DN,T} <: AbstractDynamics{D,M,IIP,DN,T} end
+
+
+struct SystemDynamics{IIP,D,M,DN,T,A} <: AbstractDynamics{IIP,D,M,DN,T}
+    attributes::A
 end
 
 function SystemDynamics(
@@ -57,11 +70,24 @@ function SystemDynamics(
 
     DN = isa(noise, DiagonalNoise) || (isa(noise, ScalarNoise) && isequal(D, 1))
 
-    return SystemDynamics{IIP,D,M,DN,T,S,R}(t0, x0, ρ)
+    if isnothing(ρ)
+        ρ = IIP ? one(T)*I(M) : Diagonal(SVector{M,T}(ones(M)))
+    else
+        ρsize = (M, M)
+        size(ρ) == ρsize || throw(DimensionMismatch("`ρ` *must* be a $(string(ρsize)) matrix."))
+        ρ = IIP ? Array{T,2}(ρ) : SMatrix{ρsize...,T}(ρ)
+    end
+
+    diffeq_noise = diffeqnoise(t0, ρ, IIP, D, M, DN)
+    diffeq_noise_rate_prototype = gprototype(SystemDynamics{IIP,D,M,DN,T,Nothing}(nothing)) # trick?
+
+    attrs = DynamicsAttributes(t0, x0, ρ, diffeq_noise, diffeq_noise_rate_prototype)
+
+    return SystemDynamics{IIP,D,M,DN,T,typeof(attrs)}(attrs)
 end
 
-initialtime(sd::SystemDynamics) = sd.t0
-state(sd::SystemDynamics) = sd.x0
-cor(sd::SystemDynamics{true,D,M,DN,T}) where {D,M,DN,T} = isnothing(sd.ρ) ? one(T)*I(M) : sd.ρ
-cor(sd::SystemDynamics{false,D,M,DN,T}) where {D,M,DN,T} = isnothing(sd.ρ) ? Diagonal(SVector{M,T}(ones(M))) : sd.ρ
-# ρ(sd::SystemDynamics{false,D,M,DN,T}) where {D,M,DN,T} = isnothing(sd.ρ) ? convert(SMatrix{M,M,T}, I(M)) : sd.ρ
+initialtime(sd::SystemDynamics) = initialtime(sd.attributes)
+state(sd::SystemDynamics) = state(sd.attributes)
+cor(sd::SystemDynamics) = cor(sd.attributes)
+noise(sd::SystemDynamics) = noise(sd.attributes)
+noise_rate_prototype(sd::SystemDynamics) = noise_rate_prototype(sd.attributes)

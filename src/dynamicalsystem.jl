@@ -1,27 +1,25 @@
 
-# TODO: hacer esto:
-#! creo que una buena idea es que esto se llame DynamicsAttributes y que este en todos los
-#! AbstractDynamics que tengamos. Entonces solo 1 vez tengo que definir el isinplace, state,
-#! etc! Creo que asi va a quedar mucho mas prolijo!
-struct DynamicalSystemAttributes{IIP,D,M,DN,T,S,R,N,ND}
-    t0::T
-    x0::S
-    ρ::R
-    noise::N
-    noise_rate_prototype::ND
-end
+struct DynamicalSystem{IIP,D,M,DN,T,F,G,A,P} <: AbstractDynamics{IIP,D,M,DN,T}
+    f::F
+    g::G
+    attributes::A
+    params::P
 
-DynamicalSystemAttributes(p::NamedTuple) = DynamicalSystemAttributes(values(p))
-
-function DynamicalSystemAttributes(p::Tuple)
-    dynamics = filter(d -> d isa AbstractDynamics, p)
-    if isempty(dynamics)
-        throw(ArgumentError("the container does not have any <: AbstractDynamics."))
+    function DynamicalSystem{IIP,D,M,DN,T}(f::F, g::G, attrs::A, params::P) where {IIP,D,M,DN,T,F,G,A,P}
+        return new{IIP,D,M,DN,T,F,G,A,P}(f, g, attrs, params)
     end
-   return DynamicalSystemAttributes(dynamics)
 end
 
-function DynamicalSystemAttributes(dynamics::Tuple{Vararg{AbstractDynamics}})
+function DynamicalSystem(f, g, params)
+    dynamics = filter(d -> d isa AbstractDynamics, values(params))
+   return DynamicalSystem(f, g, dynamics, params)
+end
+
+function DynamicalSystem(f, g, dynamics, params)
+
+    if isempty(dynamics)
+        throw(ArgumentError("provide at least one `AbstractDynamics`."))
+    end
 
     IIP = all(isinplace.(dynamics))
     OOP = all((!isinplace).(dynamics))
@@ -36,16 +34,18 @@ function DynamicalSystemAttributes(dynamics::Tuple{Vararg{AbstractDynamics}})
 
     DN = !any((!diagonalnoise).(dynamics))
 
-    t0s = [d.t0 for d in dynamics]
+    t0s = [initialtime(d) for d in dynamics]
     if !all(t -> t == first(t0s), t0s)
         error("all dynamics *must* have the same initial time.")
     end
-    t0 = first(dynamics).t0
+    t0 = initialtime(first(dynamics))
+
+    T = typeof(t0)
 
     x0 = IIP ? vcat(state.(dynamics)...) : vcat(SVector.(state.(dynamics))...)
 
     ρ = cat(cor.(dynamics)..., dims = (1, 2))
-    ρ = IIP ? ρ : SMatrix{size(ρ)...}(ρ)
+    ρ = IIP ? Array{T,2}(ρ) : SMatrix{size(ρ)...,T}(ρ)
 
     if DN
         # DiagonalNoise
@@ -80,80 +80,18 @@ function DynamicalSystemAttributes(dynamics::Tuple{Vararg{AbstractDynamics}})
         end
     end
 
-    #! Quizas la definicion del noise aqui no es tan necesaria y puede hacerse en el solve,
-    #! antes de simular. El problema es que en esta instancia no conozco el solver y por lo
-    #! tanto estoy mandando que exista un second noise process.
-    if DN
-        if isequal(ρ, I)
-            noise = nothing
-        else
-            if IIP
-                noise = CorrelatedWienerProcess!(ρ, t0, zeros(M), zeros(M))
-            else
-                noise = CorrelatedWienerProcess(ρ, t0, @SVector(zeros(M)), @SVector(zeros(M))) #! nunca probe con SArrays, analizar
-            end
-        end
-    else
-        if isequal(D, M)
-            if isequal(ρ, I)
-                # NonDiagonalNoise with a square matrix and no correlations
-                noise = nothing
-            else
-                if IIP
-                    noise = CorrelatedWienerProcess!(ρ, t0, zeros(M), zeros(M))
-                else
-                    noise = CorrelatedWienerProcess(ρ, t0, @SVector(zeros(M)), @SVector(zeros(M))) #! nunca probe con SArrays, analizar
-                end
-            end
-        else
-            if isequal(ρ, I)
-                # NonDiagonalNoise with non-square matrix and no correlations
-                if IIP
-                    noise = WienerProcess!(t0, zeros(M), zeros(M))
-                else
-                    noise = WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M)))
-                end
-            else
-                if IIP
-                    noise = CorrelatedWienerProcess!(ρ, t0, zeros(M), zeros(M))
-                else
-                    noise = CorrelatedWienerProcess(ρ, t0, @SVector(zeros(M)), @SVector(zeros(M))) #! nunca probe con SArrays, analizar
-                end
-            end
-        end
-    end
+    #! Quizas la definicion del noise aqui no es tan necesaria y puede hacerse antes de
+    #! simular. El problema es que en esta instancia no conozco el solver y puedo estar
+    #! mandando que exista un second noise process en vano.
+    noise = diffeqnoise(t0, ρ, IIP, D, M, DN)
 
-    T, S, R, N, ND = typeof.((t0, x0, ρ, noise, noise_rate_prototype))
+    attrs = DynamicsAttributes(t0, x0, ρ, noise, noise_rate_prototype)
 
-    return DynamicalSystemAttributes{IIP,D,M,DN,T,S,R,N,ND}(
-        t0, x0, ρ, noise, noise_rate_prototype
-    )
-end
-
-initialtime(attrs::DynamicalSystemAttributes) = attrs.t0
-state(attrs::DynamicalSystemAttributes) = attrs.x0
-cor(attrs::DynamicalSystemAttributes) = attrs.ρ
-
-
-struct DynamicalSystem{IIP,D,M,DN,T,F,G,A,P} <: AbstractDynamics{IIP,D,M,DN,T}
-    f::F
-    g::G
-    attributes::A
-    params::P
-end
-
-function DynamicalSystem(f, g, params)
-    attrs = DynamicalSystemAttributes(params)
-    #! aca se puede chequear que lo que las funciones que mandamos a dynamical system reflejen
-    #! lo mismo que los atributos que se estan calculando
-    return DynamicalSystem(f, g, attrs, params)
-end
-
-function DynamicalSystem(f, g, attrs::DynamicalSystemAttributes{IIP,D,M,DN,T}, params) where {IIP,D,M,DN,T}
     return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params)
 end
 
-# should be inner constructor?
-function DynamicalSystem{IIP,D,M,DN,T}(f::F, g::G, attrs::A, params::P) where {IIP,D,M,DN,T,F,G,A,P}
-    return DynamicalSystem{IIP,D,M,DN,T,F,G,A,P}(f, g, attrs, params)
-end
+initialtime(ds::DynamicalSystem) = initialtime(ds.attributes)
+state(ds::DynamicalSystem) = state(ds.attributes)
+cor(ds::DynamicalSystem) = cor(ds.attributes)
+noise(ds::DynamicalSystem) = noise(ds.attributes)
+noise_rate_prototype(ds::DynamicalSystem) = noise_rate_prototype(ds.attributes)

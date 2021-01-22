@@ -5,222 +5,144 @@ using DiffEqNoiseProcess
 using LinearAlgebra
 using StaticArrays
 
+
+function test_dynamics(sd, IIP, D, M, DN, T, t0, x0, ρ, noise, noise_rate_prototype)
+    @test isinplace(sd) == IIP
+    @test dimension(sd) == D
+    @test noise_dimension(sd) == M
+    @test diagonalnoise(sd) == DN
+    @test UniversalDynamics.eltype(sd) == T
+
+    # TODO: checkear tmb los types, verdad? isa(attrs.noise_rate_prototype, SMatrix{(D,M)...,T})
+    @test initialtime(sd) == t0
+    @test state(sd) == x0
+    @test cor(sd) == ρ
+    @test UniversalDynamics.noise(sd) == noise
+    @test UniversalDynamics.noise_rate_prototype(sd) == noise_rate_prototype
+
+    return nothing
+end
+
 @testset "Out of Place" begin
 
     @testset "OneDimensional + ScalarNoise" begin
-        IIP = false
-        D = 1
-        M = 1
-        DN = true
-        T = Float64
+        IIP, D, M, DN, T = false, 1, 1, true, Float64
 
         t0 = zero(T)
+
         x0 = T(0.1) # SVector(0.1)
         x_dynamics = SystemDynamics(x0; t0=t0, noise=ScalarNoise())
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == D
-        @test noise_dimension(x_dynamics) == M
-        @test diagonalnoise(x_dynamics) == DN
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == x0
-        @test cor(x_dynamics) == Diagonal(SVector{M,T}(ones(M))) == I
-
-        attrs = DynamicalSystemAttributes((x_dynamics, ))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == SVector(x0) # once we define a system, we use vectors. Check!
-        @test cor(attrs) == I
-        @test isnothing(attrs.noise)
-        @test isnothing(attrs.noise_rate_prototype) # define gprototype?
+        test_dynamics(
+            x_dynamics, IIP, D, M, DN, T,
+            t0, x0, I, nothing, @SVector(ones(D))
+        )
 
         ds = DynamicalSystem(nothing, nothing, (x_dynamics, )) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        test_dynamics(
+            ds,
+            IIP, D, M, DN, T,
+            t0, SVector(x0), I, nothing, nothing
+        )
     end
 
     # should yield to same results as the "OneDimensional + ScalarNoise" test
     @testset "OneDimensional + DiagonalNoise" begin
-        IIP = false
-        D = 1
-        M = 1
-        DN = true
-        T = Float64
+        IIP, D, M, DN, T = false, 1, 1, true, Float64
 
         t0 = zero(T)
+
         x0 = T(0.1) # SVector(0.1)
         x_dynamics = SystemDynamics(x0; t0=t0, noise=DiagonalNoise(M))
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == D
-        @test noise_dimension(x_dynamics) == M
-        @test diagonalnoise(x_dynamics) == DN
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == x0
-        @test cor(x_dynamics) == Diagonal(SVector{M,T}(ones(M))) == I
-
-        attrs = DynamicalSystemAttributes((x_dynamics, ))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == SVector(x0) # once we define a system, we use vectors. Check!
-        @test cor(attrs) == I
-        @test isnothing(attrs.noise)
-        @test isnothing(attrs.noise_rate_prototype) # define gprototype?
+        test_dynamics(x_dynamics, IIP, D, M, DN, T, t0, x0, I, nothing, @SVector(ones(D)))
 
         ds = DynamicalSystem(nothing, nothing, (x_dynamics, )) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        test_dynamics(ds, IIP, D, M, DN, T, t0, SVector(x0), I, nothing, nothing)
     end
 
     @testset "OneDimensional + NonDiagonalNoise" begin
-        IIP = false
-        D = 1
-        M = 3
-        DN = false
-        T = Float64
+        IIP, D, M, DN, T = false, 1, 3, false, Float64
 
         t0 = zero(T)
-        x0 = 0.1
+
+        x0 = T(0.1)
         @test_throws ArgumentError SystemDynamics(x0; t0=t0, noise=NonDiagonalNoise(M))
         x0 = SVector{1,T}(0.1) # must be a Vector
         x_dynamics = SystemDynamics(x0; t0=t0, noise=NonDiagonalNoise(M))
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == D
-        @test noise_dimension(x_dynamics) == M
-        @test diagonalnoise(x_dynamics) == DN
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == x0
-        @test cor(x_dynamics) == Diagonal(SVector{M,T}(ones(M))) == I
-
-        attrs = DynamicalSystemAttributes((x_dynamics, ))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == x0
-        @test cor(attrs) == I
-        @test attrs.noise == WienerProcess(attrs.t0, @SVector(zeros(M)), @SVector(zeros(M)))
-        @test isa(attrs.noise_rate_prototype, SMatrix{(D,M)...,T})
-        @test attrs.noise_rate_prototype == @SMatrix(ones(D, M))
+        test_dynamics(
+            x_dynamics,
+            IIP, D, M, DN, T,
+            t0, x0, I, WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M))), @SMatrix(ones(D, M))
+        )
 
         ds = DynamicalSystem(nothing, nothing, (x_dynamics, )) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        test_dynamics(
+            ds,
+            IIP, D, M, DN, T,
+            t0, x0, I, WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M))), @SMatrix(ones(D, M))
+        )
     end
 
-
     @testset "MultiDimensional + ScalarNoise" begin
-        IIP = false
-        D = 3
-        M = 1
-        DN = false
-        T = Float64
+        IIP, D, M, DN, T = false, 3, 1, false, Float64
 
         t0 = zero(T)
+
         x0 = @SVector rand(D)
         x_dynamics = SystemDynamics(x0; t0=t0, noise=ScalarNoise())
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == D
-        @test noise_dimension(x_dynamics) == M
-        @test diagonalnoise(x_dynamics) == DN
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == x0
-        @test cor(x_dynamics) == Diagonal(SVector{M,T}(ones(M))) == I
-
-        attrs = DynamicalSystemAttributes((x_dynamics, ))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == x0
-        @test cor(attrs) == I
-        @test attrs.noise == WienerProcess(attrs.t0, @SVector(zeros(M)), @SVector(zeros(M)))
-        @test isnothing(attrs.noise_rate_prototype) # diffeq will use u0 as prototype!
+        test_dynamics(
+            x_dynamics,
+            IIP, D, M, DN, T,
+            t0, x0, I, WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M))), @SVector(ones(D))
+        )
 
         ds = DynamicalSystem(nothing, nothing, (x_dynamics, )) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        test_dynamics(
+            ds,
+            IIP, D, M, DN, T,
+            t0, x0, I, WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M))), nothing # diffeq will use u0 as gprototype!
+        )
     end
 
     @testset "MultiDimensional + DiagonalNoise" begin
-        IIP = false
-        D = 3
-        M = 3
-        DN = true
-        T = Float64
+        IIP, D, M, DN, T = false, 3, 3, true, Float64
 
         t0 = zero(T)
+
         x0 = @SVector rand(D)
         x_dynamics = SystemDynamics(x0; t0=t0, noise=DiagonalNoise(M))
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == D
-        @test noise_dimension(x_dynamics) == M
-        @test diagonalnoise(x_dynamics) == DN
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == x0
-        @test cor(x_dynamics) == Diagonal(SVector{M,T}(ones(M))) == I
-
-        attrs = DynamicalSystemAttributes((x_dynamics, ))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == x0
-        @test cor(attrs) == I
-        @test isnothing(attrs.noise)
-        @test isnothing(attrs.noise_rate_prototype)
+        test_dynamics(
+            x_dynamics,
+            IIP, D, M, DN, T,
+            t0, x0, I, nothing, @SVector(ones(D))
+        )
 
         ds = DynamicalSystem(nothing, nothing, (x_dynamics, )) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        test_dynamics(
+            ds,
+            IIP, D, M, DN, T,
+            t0, x0, I, nothing, nothing
+        )
     end
 
     @testset "MultiDimensional + NonDiagonalNoise" begin
-        IIP = false
-        D = 3
-        M = 5
-        DN = false
-        T = Float64
+        IIP, D, M, DN, T = false, 3, 5, false, Float64
 
         t0 = zero(T)
+
         x0 = @SVector rand(D)
         x_dynamics = SystemDynamics(x0; t0=t0, noise=NonDiagonalNoise(M))
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == D
-        @test noise_dimension(x_dynamics) == M
-        @test diagonalnoise(x_dynamics) == DN
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == x0
-        @test cor(x_dynamics) == Diagonal(SVector{M,T}(ones(M))) == I
-
-        attrs = DynamicalSystemAttributes((x_dynamics, ))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == x0
-        @test cor(attrs) == I
-        @test attrs.noise == WienerProcess(attrs.t0, @SVector(zeros(M)), @SVector(zeros(M)))
-        @test isa(attrs.noise_rate_prototype, SMatrix{(D,M)...,T})
-        @test attrs.noise_rate_prototype == @SMatrix(ones(D, M))
+        test_dynamics(
+            x_dynamics,
+            IIP, D, M, DN, T,
+            t0, x0, I, WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M))), @SMatrix(ones(D, M))
+        )
 
         ds = DynamicalSystem(nothing, nothing, (x_dynamics, )) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        test_dynamics(
+            ds,
+            IIP, D, M, DN, T,
+            t0, x0, I, WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M))), @SMatrix(ones(D, M))
+        )
     end
 
     @testset "Mixed One and Multi Dimensional + ScalarNoises" begin
@@ -242,45 +164,30 @@ using StaticArrays
 
         t0 = zero(T)
 
-        x0 = 0.1
+        x0 = T(0.1)
         x_dynamics = SystemDynamics(x0; t0=t0, noise=ScalarNoise())
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == Dx
-        @test noise_dimension(x_dynamics) == Mx
-        @test diagonalnoise(x_dynamics) == DNx
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == x0
-        @test cor(x_dynamics) == Diagonal(SVector{Mx,T}(ones(Mx))) == I
+        test_dynamics(
+            x_dynamics,
+            IIP, Dx, Mx, DNx, T,
+            t0, x0, I, nothing, @SVector(ones(Dx))
+        )
 
         y0 = @SVector rand(Dy)
-        y_dynamics = SystemDynamics(y0; t0=t0, noise=NonDiagonalNoise(My))
+        y_dynamics = SystemDynamics(y0; t0=t0, noise=ScalarNoise())
+        test_dynamics(
+            y_dynamics,
+            IIP, Dy, My, DNy, T,
+            t0, y0, I, WienerProcess(t0, @SVector(zeros(My)), @SVector(zeros(My))), @SVector(ones(Dy))
+        )
 
-        @test isinplace(y_dynamics) == IIP
-        @test dimension(y_dynamics) == Dy
-        @test noise_dimension(y_dynamics) == My
-        @test diagonalnoise(y_dynamics) == DNy
-        @test UniversalDynamics.eltype(y_dynamics) == T
-        @test initialtime(y_dynamics) == t0
-        @test state(y_dynamics) == y0
-        @test cor(y_dynamics) == Diagonal(SVector{My,T}(ones(My))) == I
-        @test UniversalDynamics.gprototype(y_dynamics) == @SVector(ones(Dy))
-
-        attrs = DynamicalSystemAttributes((x_dynamics, y_dynamics, ))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == vcat(SVector(x0), y0)
-        @test cor(attrs) == I
-        @test attrs.noise == WienerProcess(attrs.t0, @SVector(zeros(M)), @SVector(zeros(M)))
-        @test isa(attrs.noise_rate_prototype, SMatrix{(D,M)...,T})
-        @test attrs.noise_rate_prototype == @SMatrix [1. 0.; 0. 1.; 0. 1.; 0. 1.]
-
-        ds = DynamicalSystem(nothing, nothing, (x_dynamics, y_dynamics, )) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        ds = DynamicalSystem(nothing, nothing, (x_dynamics, y_dynamics)) # dummy `f` and `g`
+        test_dynamics(
+            ds,
+            IIP, D, M, DN, T,
+            t0, vcat(SVector(x0), y0), I,
+            WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M))),
+            @SMatrix [1. 0.; 0. 1.; 0. 1.; 0. 1.]
+        )
     end
 
     @testset "Mixed One and Multi Dimensional + DiagonalNoises" begin
@@ -302,44 +209,28 @@ using StaticArrays
 
         t0 = zero(T)
 
-        x0 = 0.1
+        x0 = T(0.1)
         x_dynamics = SystemDynamics(x0; t0=t0, noise=DiagonalNoise(Mx))
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == Dx
-        @test noise_dimension(x_dynamics) == Mx
-        @test diagonalnoise(x_dynamics) == DNx
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == x0
-        @test cor(x_dynamics) == Diagonal(SVector{Mx,T}(ones(Mx))) == I
+        test_dynamics(
+            x_dynamics,
+            IIP, Dx, Mx, DNx, T,
+            t0, x0, I, nothing, @SVector(ones(Dx))
+        )
 
         y0 = @SVector rand(Dy)
         y_dynamics = SystemDynamics(y0; t0=t0, noise=DiagonalNoise(My))
+        test_dynamics(
+            y_dynamics,
+            IIP, Dy, My, DNy, T,
+            t0, y0, I, nothing, @SVector(ones(Dy))
+        )
 
-        @test isinplace(y_dynamics) == IIP
-        @test dimension(y_dynamics) == Dy
-        @test noise_dimension(y_dynamics) == My
-        @test diagonalnoise(y_dynamics) == DNy
-        @test UniversalDynamics.eltype(y_dynamics) == T
-        @test initialtime(y_dynamics) == t0
-        @test state(y_dynamics) == y0
-        @test cor(y_dynamics) == Diagonal(SVector{My,T}(ones(My))) == I
-        @test UniversalDynamics.gprototype(y_dynamics) == @SVector(ones(Dy))
-
-        attrs = DynamicalSystemAttributes((x_dynamics, y_dynamics, ))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == vcat(SVector(x0), y0)
-        @test cor(attrs) == I
-        @test isnothing(attrs.noise)
-        @test isnothing(attrs.noise_rate_prototype)
-
-        ds = DynamicalSystem(nothing, nothing, (x_dynamics, y_dynamics, )) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        ds = DynamicalSystem(nothing, nothing, (x_dynamics, y_dynamics)) # dummy `f` and `g`
+        test_dynamics(
+            ds,
+            IIP, D, M, DN, T,
+            t0, vcat(SVector(x0), y0), I, nothing, nothing
+        )
     end
 
     @testset "Mixed One and Multi Dimensional + NonDiagonalNoises" begin
@@ -363,43 +254,32 @@ using StaticArrays
 
         x0 = SVector(0.1)
         x_dynamics = SystemDynamics(x0; t0=t0, noise=NonDiagonalNoise(Mx))
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == Dx
-        @test noise_dimension(x_dynamics) == Mx
-        @test diagonalnoise(x_dynamics) == DNx
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == SVector(x0)
-        @test cor(x_dynamics) == Diagonal(SVector{Mx,T}(ones(Mx))) == I
-        @test UniversalDynamics.gprototype(x_dynamics) == @SMatrix(ones(Dx, Mx))
+        test_dynamics(
+            x_dynamics,
+            IIP, Dx, Mx, DNx, T,
+            t0, x0, I,
+            WienerProcess(t0, @SVector(zeros(Mx)), @SVector(zeros(Mx))),
+            @SMatrix(ones(Dx, Mx))
+        )
 
         y0 = @SVector rand(Dy)
         y_dynamics = SystemDynamics(y0; t0=t0, noise=NonDiagonalNoise(My))
+        test_dynamics(
+            y_dynamics,
+            IIP, Dy, My, DNy, T,
+            t0, y0, I,
+            WienerProcess(t0, @SVector(zeros(My)), @SVector(zeros(My))),
+            @SMatrix(ones(Dy, My))
+        )
 
-        @test isinplace(y_dynamics) == IIP
-        @test dimension(y_dynamics) == Dy
-        @test noise_dimension(y_dynamics) == My
-        @test diagonalnoise(y_dynamics) == DNy
-        @test UniversalDynamics.eltype(y_dynamics) == T
-        @test initialtime(y_dynamics) == t0
-        @test state(y_dynamics) == y0
-        @test cor(y_dynamics) == Diagonal(SVector{My,T}(ones(My))) == I
-        @test UniversalDynamics.gprototype(y_dynamics) == @SMatrix(ones(Dy, My))
-
-        attrs = DynamicalSystemAttributes((x_dynamics, y_dynamics, ))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == vcat(x0, y0)
-        @test cor(attrs) == I
-        @test attrs.noise == WienerProcess(attrs.t0, @SVector(zeros(M)), @SVector(zeros(M)))
-        @test attrs.noise_rate_prototype == @SMatrix [1. 1. 1. 1. 0. 0. 0. 0. 0.; 0. 0. 0. 0. 1. 1. 1. 1. 1.; 0. 0. 0. 0. 1. 1. 1. 1. 1.; 0. 0. 0. 0. 1. 1. 1. 1. 1.]
-
-        ds = DynamicalSystem(nothing, nothing, (x_dynamics, y_dynamics, )) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        ds = DynamicalSystem(nothing, nothing, (x_dynamics, y_dynamics)) # dummy `f` and `g`
+        test_dynamics(
+            ds,
+            IIP, D, M, DN, T,
+            t0, vcat(SVector(x0), y0), I,
+            WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M))),
+            @SMatrix [1. 1. 1. 1. 0. 0. 0. 0. 0.; 0. 0. 0. 0. 1. 1. 1. 1. 1.; 0. 0. 0. 0. 1. 1. 1. 1. 1.; 0. 0. 0. 0. 1. 1. 1. 1. 1.]
+        )
     end
 
     @testset "OneDimensional + Mixed Noises" begin
@@ -428,58 +308,44 @@ using StaticArrays
 
         t0 = zero(T)
 
-        x0 = 0.1
+        x0 = T(0.1)
         x_dynamics = SystemDynamics(x0; t0=t0, noise=ScalarNoise())
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == Dx
-        @test noise_dimension(x_dynamics) == Mx
-        @test diagonalnoise(x_dynamics) == DNx
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == x0
-        @test cor(x_dynamics) == Diagonal(SVector{Mx,T}(ones(Mx))) == I
+        test_dynamics(
+            x_dynamics,
+            IIP, Dx, Mx, DNx, T,
+            t0, x0, I,
+            nothing,
+            @SVector(ones(Dx))
+        )
 
         y0 = @SVector rand(Dy)
         y_dynamics = SystemDynamics(y0; t0=t0, noise=DiagonalNoise(My))
-
-        @test isinplace(y_dynamics) == IIP
-        @test dimension(y_dynamics) == Dy
-        @test noise_dimension(y_dynamics) == My
-        @test diagonalnoise(y_dynamics) == DNy
-        @test UniversalDynamics.eltype(y_dynamics) == T
-        @test initialtime(y_dynamics) == t0
-        @test state(y_dynamics) == y0
-        @test cor(y_dynamics) == Diagonal(SVector{My,T}(ones(My))) == I
-        @test UniversalDynamics.gprototype(y_dynamics) == @SVector(ones(Dy))
+        test_dynamics(
+            y_dynamics,
+            IIP, Dy, My, DNy, T,
+            t0, y0, I,
+            nothing,
+            @SVector(ones(Dy))
+        )
 
         z0 = @SVector rand(Dz)
         z_dynamics = SystemDynamics(z0; t0=t0, noise=NonDiagonalNoise(Mz))
-
-        @test isinplace(z_dynamics) == IIP
-        @test dimension(z_dynamics) == Dz
-        @test noise_dimension(z_dynamics) == Mz
-        @test diagonalnoise(z_dynamics) == DNz
-        @test UniversalDynamics.eltype(z_dynamics) == T
-        @test initialtime(z_dynamics) == t0
-        @test state(z_dynamics) == z0
-        @test cor(z_dynamics) == Diagonal(SVector{Mz,T}(ones(Mz))) == I
-        @test UniversalDynamics.gprototype(z_dynamics) == @SMatrix(ones(Dz, Mz))
-
-        attrs = DynamicalSystemAttributes((x_dynamics, y_dynamics, z_dynamics))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == vcat(SVector(x0), y0, z0)
-        @test cor(attrs) == I
-        @test attrs.noise == WienerProcess(attrs.t0, @SVector(zeros(M)), @SVector(zeros(M)))
-        @test isa(attrs.noise_rate_prototype, SMatrix{(D,M)...,T})
-        @test attrs.noise_rate_prototype == @SMatrix [1. 0. 0. 0. 0.; 0. 1. 0. 0. 0.; 0. 0. 1. 1. 1.]
+        test_dynamics(
+            z_dynamics,
+            IIP, Dz, Mz, DNz, T,
+            t0, z0, I,
+            WienerProcess(t0, @SVector(zeros(Mz)), @SVector(zeros(Mz))),
+            @SMatrix(ones(Dz, Mz))
+        )
 
         ds = DynamicalSystem(nothing, nothing, (x_dynamics, y_dynamics, z_dynamics)) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        test_dynamics(
+            ds,
+            IIP, D, M, DN, T,
+            t0, vcat(SVector(x0), y0, z0), I,
+            WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M))),
+            @SMatrix [1. 0. 0. 0. 0.; 0. 1. 0. 0. 0.; 0. 0. 1. 1. 1.]
+        )
     end
 
     @testset "MultiDimensional + Mixed Noises" begin
@@ -510,55 +376,41 @@ using StaticArrays
 
         x0 = @SVector rand(Dx)
         x_dynamics = SystemDynamics(x0; t0=t0, noise=ScalarNoise())
-
-        @test isinplace(x_dynamics) == IIP
-        @test dimension(x_dynamics) == Dx
-        @test noise_dimension(x_dynamics) == Mx
-        @test diagonalnoise(x_dynamics) == DNx
-        @test UniversalDynamics.eltype(x_dynamics) == T
-        @test initialtime(x_dynamics) == t0
-        @test state(x_dynamics) == x0
-        @test cor(x_dynamics) == Diagonal(SVector{Mx,T}(ones(Mx))) == I
+        test_dynamics(
+            x_dynamics,
+            IIP, Dx, Mx, DNx, T,
+            t0, x0, I,
+            WienerProcess(t0, @SVector(zeros(Mx)), @SVector(zeros(Mx))),
+            @SVector(ones(Dx))
+        )
 
         y0 = @SVector rand(Dy)
         y_dynamics = SystemDynamics(y0; t0=t0, noise=DiagonalNoise(My))
-
-        @test isinplace(y_dynamics) == IIP
-        @test dimension(y_dynamics) == Dy
-        @test noise_dimension(y_dynamics) == My
-        @test diagonalnoise(y_dynamics) == DNy
-        @test UniversalDynamics.eltype(y_dynamics) == T
-        @test initialtime(y_dynamics) == t0
-        @test state(y_dynamics) == y0
-        @test cor(y_dynamics) == Diagonal(SVector{My,T}(ones(My))) == I
-        @test UniversalDynamics.gprototype(y_dynamics) == @SVector(ones(Dy))
+        test_dynamics(
+            y_dynamics,
+            IIP, Dy, My, DNy, T,
+            t0, y0, I,
+            nothing,
+            @SVector(ones(Dy))
+        )
 
         z0 = @SVector rand(Dz)
         z_dynamics = SystemDynamics(z0; t0=t0, noise=NonDiagonalNoise(Mz))
-
-        @test isinplace(z_dynamics) == IIP
-        @test dimension(z_dynamics) == Dz
-        @test noise_dimension(z_dynamics) == Mz
-        @test diagonalnoise(z_dynamics) == DNz
-        @test UniversalDynamics.eltype(z_dynamics) == T
-        @test initialtime(z_dynamics) == t0
-        @test state(z_dynamics) == z0
-        @test cor(z_dynamics) == Diagonal(SVector{Mz,T}(ones(Mz))) == I
-        @test UniversalDynamics.gprototype(z_dynamics) == @SMatrix(ones(Dz, Mz))
-
-        attrs = DynamicalSystemAttributes((x_dynamics, y_dynamics, z_dynamics))
-        @test initialtime(attrs) == t0
-        @test state(attrs) == vcat(x0, y0, z0)
-        @test cor(attrs) == I
-        @test attrs.noise == WienerProcess(attrs.t0, @SVector(zeros(M)), @SVector(zeros(M)))
-        @test isa(attrs.noise_rate_prototype, SMatrix{(D,M)...,T})
-        @test attrs.noise_rate_prototype == @SMatrix [1.0 0.0 0.0 0.0 0.0 0.0 0.0; 1.0 0.0 0.0 0.0 0.0 0.0 0.0; 0.0 1.0 0.0 0.0 0.0 0.0 0.0; 0.0 0.0 1.0 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 1.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0 1.0 1.0 1.0; 0.0 0.0 0.0 0.0 1.0 1.0 1.0; 0.0 0.0 0.0 0.0 1.0 1.0 1.0; 0.0 0.0 0.0 0.0 1.0 1.0 1.0]
+        test_dynamics(
+            z_dynamics,
+            IIP, Dz, Mz, DNz, T,
+            t0, z0, I,
+            WienerProcess(t0, @SVector(zeros(Mz)), @SVector(zeros(Mz))),
+            @SMatrix(ones(Dz, Mz))
+        )
 
         ds = DynamicalSystem(nothing, nothing, (x_dynamics, y_dynamics, z_dynamics)) # dummy `f` and `g`
-        @test isinplace(ds) == IIP
-        @test dimension(ds) == D
-        @test noise_dimension(ds) == M
-        @test diagonalnoise(ds) == DN
-        @test UniversalDynamics.eltype(ds) == T
+        test_dynamics(
+            ds,
+            IIP, D, M, DN, T,
+            t0, vcat(SVector(x0), y0, z0), I,
+            WienerProcess(t0, @SVector(zeros(M)), @SVector(zeros(M))),
+            @SMatrix [1.0 0.0 0.0 0.0 0.0 0.0 0.0; 1.0 0.0 0.0 0.0 0.0 0.0 0.0; 0.0 1.0 0.0 0.0 0.0 0.0 0.0; 0.0 0.0 1.0 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 1.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0 1.0 1.0 1.0; 0.0 0.0 0.0 0.0 1.0 1.0 1.0; 0.0 0.0 0.0 0.0 1.0 1.0 1.0; 0.0 0.0 0.0 0.0 1.0 1.0 1.0]
+        )
     end
 end

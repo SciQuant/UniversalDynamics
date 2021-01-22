@@ -54,3 +54,62 @@ struct NonDiagonalNoise{M} <: AbstractNoise{M} end
 
 DiagonalNoise(M::Integer) = DiagonalNoise{M}()
 NonDiagonalNoise(M::Integer) = NonDiagonalNoise{M}()
+
+function diffeqnoise(t0, ρ, IIP, D, M, DN)
+    if DN
+        if isequal(ρ, I)
+            noise = nothing
+        else
+            if IIP
+                W0 = zeros(M)
+                Z0 = zeros(M)
+                noise = CorrelatedWienerProcess!(ρ, t0, W0, Z0)
+            else
+                W0 = @SVector zeros(M)
+                Z0 = @SVector zeros(M)
+                noise = CorrelatedWienerProcess(ρ, t0, W0, Z0)
+            end
+        end
+    else
+        if isequal(D, M)
+            if isequal(ρ, I)
+                # NonDiagonalNoise with a square matrix and no correlations
+                noise = nothing
+            else
+                if IIP
+                    W0 = zeros(M)
+                    Z0 = zeros(M)
+                    noise = CorrelatedWienerProcess!(ρ, t0, W0, Z0)
+                else
+                    W0 = @SVector zeros(M)
+                    Z0 = @SVector zeros(M)
+                    noise = CorrelatedWienerProcess(ρ, t0, W0, Z0)
+                end
+            end
+        else
+            if isequal(ρ, I)
+                # NonDiagonalNoise with non-square matrix and no correlations
+                if IIP
+                    W0 = zeros(M)
+                    Z0 = zeros(M)
+                    noise = WienerProcess!(t0, W0, Z0)
+                else
+                    W0 = @SVector zeros(M)
+                    Z0 = @SVector zeros(M)
+                    noise = WienerProcess(t0, W0, Z0)
+                end
+            else
+                if IIP
+                    W0 = zeros(M)
+                    Z0 = zeros(M)
+                    noise = CorrelatedWienerProcess!(ρ, t0, W0, Z0)
+                else
+                    W0 = @SVector zeros(M)
+                    Z0 = @SVector zeros(M)
+                    noise = CorrelatedWienerProcess(ρ, t0, W0, Z0)
+                end
+            end
+        end
+    end
+    return noise
+end

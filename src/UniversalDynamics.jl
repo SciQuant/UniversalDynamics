@@ -1,5 +1,6 @@
 module UniversalDynamics
 
+using UnPack: @unpack
 using StaticArrays
 using LinearAlgebra
 using OrdinaryDiffEq

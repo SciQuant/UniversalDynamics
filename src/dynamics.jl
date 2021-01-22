@@ -33,9 +33,6 @@ noise(attrs::DynamicsAttributes) = attrs.noise
 noise_rate_prototype(attrs::DynamicsAttributes) = attrs.noise_rate_prototype
 
 
-abstract type ModelDynamics{D,M,IIP,DN,T} <: AbstractDynamics{D,M,IIP,DN,T} end
-
-
 struct SystemDynamics{IIP,D,M,DN,T,A} <: AbstractDynamics{IIP,D,M,DN,T}
     attributes::A
 end
@@ -70,7 +67,8 @@ function SystemDynamics(
 
     DN = isa(noise, DiagonalNoise) || (isa(noise, ScalarNoise) && isequal(D, 1))
 
-    if isnothing(ρ)
+    if isnothing(ρ) || isequal(ρ, I)
+        # should we set or keep ρ to I insted of the following?
         ρ = IIP ? one(T)*I(M) : Diagonal(SVector{M,T}(ones(M)))
     else
         ρsize = (M, M)
@@ -86,8 +84,16 @@ function SystemDynamics(
     return SystemDynamics{IIP,D,M,DN,T,typeof(attrs)}(attrs)
 end
 
-initialtime(sd::SystemDynamics) = initialtime(sd.attributes)
-state(sd::SystemDynamics) = state(sd.attributes)
-cor(sd::SystemDynamics) = cor(sd.attributes)
-noise(sd::SystemDynamics) = noise(sd.attributes)
-noise_rate_prototype(sd::SystemDynamics) = noise_rate_prototype(sd.attributes)
+for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
+    @eval begin
+        $method(sd::SystemDynamics) = $method(sd.attributes)
+    end
+end
+
+
+abstract type ModelDynamics{D,M,IIP,DN,T} <: AbstractDynamics{D,M,IIP,DN,T} end
+
+# include("model-dynamics/equity.jl")
+include("model-dynamics/interest_rate.jl")
+# include("model-dynamics/local_volatility.jl")
+# include("model-dynamics/stochastic_volatility.jl")

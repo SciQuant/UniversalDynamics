@@ -414,3 +414,7 @@ end
         )
     end
 end
+
+r0 = ones(1)
+κ = θ = Σ = α = β = one
+r = OneFactorAffineModelDynamics(r0, κ, θ, Σ, α, β)

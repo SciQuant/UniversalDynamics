@@ -24,9 +24,8 @@ function DynamicalSystem(f, g, dynamics, params)
     IIP = all(isinplace.(dynamics))
     OOP = all((!isinplace).(dynamics))
 
-    # si no es ninguno de los dos, es porque estan mal dadas las condiciones inciales
     if isequal(IIP, OOP)
-        error("all dynamics *must* be either `InPlace` or `OutOfPlace`.")
+        error("all dynamics *must* be either In-Place or Out-Of-Place.")
     end
 
     D = sum(dimension.(dynamics))
@@ -72,9 +71,7 @@ function DynamicalSystem(f, g, dynamics, params)
         noise_rate_prototype = cat(prototypes...; dims=(1, 2))
 
         if IIP
-            #! la verdad que no siempre conviene que sea sparse, por lo que deberia ser un
-            #! argumento que de la opcion de hacerla o no sparse
-            noise_rate_prototype = sparse(noise_rate_prototype)
+            noise_rate_prototype = noise_rate_prototype # sparse(noise_rate_prototype)
         else
             noise_rate_prototype = convert(SMatrix{D,M}, noise_rate_prototype)
         end
@@ -90,8 +87,10 @@ function DynamicalSystem(f, g, dynamics, params)
     return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params)
 end
 
-initialtime(ds::DynamicalSystem) = initialtime(ds.attributes)
-state(ds::DynamicalSystem) = state(ds.attributes)
-cor(ds::DynamicalSystem) = cor(ds.attributes)
-noise(ds::DynamicalSystem) = noise(ds.attributes)
-noise_rate_prototype(ds::DynamicalSystem) = noise_rate_prototype(ds.attributes)
+DynamicalSystem(dynamics) = DynamicalSystem(nothing, nothing, dynamics, nothing) # ver si mando dynamics a params tmb
+
+for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
+    @eval begin
+        $method(ds::DynamicalSystem) = $method(ds.attributes)
+    end
+end

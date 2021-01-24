@@ -77,7 +77,7 @@ function (P::ShortRateModelZeroCouponBond)(t::Real, T::Real, xt::Union{Real,Abst
     if 0 ≤ t < T
         return zerocouponbond(shortratemodel(P), P, t, T, xt) # dispatch by model
     elseif isequal(t, T)
-        return one(eltype(P.prob.u0)) # one(Base.promote_eltype(1/t, 1/T))
+        return one(eltype(P.r.srm)) # one(Base.promote_eltype(1/t, 1/T))
     else
         throw(DomainError("`t` must be ≤ `T` when computing a Zero Coupon Bond P(t, T)."))
     end

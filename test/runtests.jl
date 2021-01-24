@@ -448,24 +448,6 @@ dynamics = (r, x, y)
 ds = DynamicalSystem(dynamics)
 
 
-function drift(u, p, t)
-    @unpack security_x = p
-
-    x = s -> security_x(u) # esto lo construye ModelMacro, quizas con error si t no es el esperado, es decir, x = s -> isequal(t, s) ? sec(t) : error(...)
-
-
-    x(t) # ya queda disponible
-end
-
-function drift!(du, u, p, t)
-    @unpack security_x = p
-
-    x = s -> security_x(u)
-    dx = security_x(du) # esto tambien lo construye model macro
-
-
-end
-
 include("../../UniversalMonteCarlo/test/DaiSingletonParameters_A3_1.jl")
 N = 3
 # x0 = @SVector [υ₀, θ₀, r₀]
@@ -499,3 +481,25 @@ B = SystemDynamics(0.)
 ds = DynamicalSystem((x, B))
 
 IR = FixedIncomeSecurities(x, ds.securities[1], ds.securities[2])
+
+IR.P(0.15, 0.15)
+
+function drift(u, p, t)
+    @unpack security_x = p
+
+    x = remake(security_x, u)
+
+    # ambos funcionan
+    x()
+    x(t)
+end
+
+function drift!(du, u, p, t)
+    @unpack security_x = p
+
+    x = remake(security_x, u, du)
+
+    x()
+    x(t)
+    x.dx # ver de agregar σ(x) or μ(x)
+end

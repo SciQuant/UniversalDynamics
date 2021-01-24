@@ -2,6 +2,7 @@ module UniversalDynamics
 
 using UnPack: @unpack
 using Memoize
+using Setfield
 using StaticArrays
 using LinearAlgebra
 using OrdinaryDiffEq
@@ -20,6 +21,7 @@ export initialtime, state, cor
 
 include("securities.jl")
 export SystemSecurity
+export remake
 
 include("dynamicalsystem.jl")
 export DynamicalSystem

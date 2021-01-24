@@ -109,7 +109,7 @@ function DynamicalSystem(f, g, dynamics, params)
         =#
 
         # leer lo de arriba y notar q todo se reduce a esto.
-        x = Security(sd, d, m)
+        x = Security(sd, d, m, x0, noise_rate_prototype)
         push!(s, x)
 
         d += dimension(sd)

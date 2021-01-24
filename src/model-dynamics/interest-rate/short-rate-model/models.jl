@@ -1,7 +1,7 @@
 @doc raw"""
     OneFactorAffineModelDynamics{IIP,T,A,P,O} <: AffineModelDynamics{OneFactor,IIP,1,true,T}
 
-Defines a [`OneFactor`](@ref) [`ShortRateModel`](@ref) of [`Affine`](@ref) type.
+Defines a [`OneFactor`](@ref) [`ShortRateModelDynamics`](@ref) of [`Affine`](@ref) type.
 """
 struct OneFactorAffineModelDynamics{IIP,T,A,P,O} <: AffineModelDynamics{OneFactor,IIP,1,true,T}
     attributes::A
@@ -45,7 +45,7 @@ end
 @doc raw"""
     MultiFactorAffineModelDynamics{IIP,D,DN,T,A,P,O} <: AffineModelDynamics{MultiFactor,IIP,D,DN,T}
 
-Defines a [`MultiFactor`](@ref) [`ShortRateModel`](@ref) of [`Affine`](@ref) type.
+Defines a [`MultiFactor`](@ref) [`ShortRateModelDynamics`](@ref) of [`Affine`](@ref) type.
 """
 struct MultiFactorAffineModelDynamics{IIP,D,DN,T,A,P,O} <: AffineModelDynamics{MultiFactor,IIP,D,DN,T}
     attributes::A

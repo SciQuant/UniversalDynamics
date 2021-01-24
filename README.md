@@ -7,13 +7,9 @@ UniversalDynamics provides a simple way for defining a Dynamical System formed u
 ```julia
 using UniversalDynamics
 
-x0 = rand(1)
+x0, y0, z0 = rand(1), rand(2), rand(3)
 x = SystemDynamics(x0; ρ=ρx, noise=ScalarNoise())
-
-y0 = rand(2)
 y = SystemDynamics(y0; ρ=ρy) # defaults to DiagonalNoise
-
-z0 = rand(3)
 z = SystemDynamics(z0; ρ=ρz, noise=NonDiagonalNoise(Mz))
 
 dynamics = (x, y, z)

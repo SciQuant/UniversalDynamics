@@ -39,7 +39,7 @@ function AffineParameters(
     ::Type{MultiFactor}, t0::Real, x0::AbstractVector, κ::K, θ::T, Σ::S, α::A, β::B, ξ₀::X0, ξ₁::X1
 ) where {K,T,S,A,B,X0,X1}
 
-    IIP = isinplace(r0)
+    IIP = isinplace(x0)
     D = length(x0)
     # pedimos que el usuario explicitamente introduzca un objeto diagonal y no isdiag(Σ(t0))
     DN = isa(Σ(t0), Diagonal)

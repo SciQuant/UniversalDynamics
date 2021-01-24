@@ -1,12 +1,16 @@
 
-struct DynamicalSystem{IIP,D,M,DN,T,F,G,A,P} <: AbstractDynamics{IIP,D,M,DN,T}
+struct DynamicalSystem{IIP,D,M,DN,T,F,G,A,P,S} <: AbstractDynamics{IIP,D,M,DN,T}
     f::F
     g::G
+    # dynamics::D
     attributes::A
     params::P
+    securities::S
 
-    function DynamicalSystem{IIP,D,M,DN,T}(f::F, g::G, attrs::A, params::P) where {IIP,D,M,DN,T,F,G,A,P}
-        return new{IIP,D,M,DN,T,F,G,A,P}(f, g, attrs, params)
+    function DynamicalSystem{IIP,D,M,DN,T}(
+        f::F, g::G, attrs::A, params::P, securities::S
+    ) where {IIP,D,M,DN,T,F,G,A,P,S}
+        return new{IIP,D,M,DN,T,F,G,A,P,S}(f, g, attrs, params, securities)
     end
 end
 
@@ -84,7 +88,37 @@ function DynamicalSystem(f, g, dynamics, params)
 
     attrs = DynamicsAttributes(t0, x0, ρ, noise, noise_rate_prototype)
 
-    return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params)
+    # securities
+    s = []
+    d = m = 1
+    for sd in dynamics
+
+        #=
+        if sd isa SystemDynamics
+            x = SystemSecurity(sd, d, m)
+        elseif sd isa OneFactorAffineModelDynamics
+            x = SystemSecurity(sd, d, m)
+            # en algun lado tengo que crear la SystemDynamics para la MoneyMarket account
+            # basicamente tnego que crear un SystemDynamics
+
+            # mmm, esto que lo cree el usuario!!!! y asi me evito de tener que crear yo el
+            # B. Es decir, el usuario se da cuenta que lo tiene que crear para poder
+            # definir el FixedIncomeSecurities de un modelo de short rate luego
+            # ir = FixedIncomeSecurities(sd, x, B)
+        end
+        =#
+
+        # leer lo de arriba y notar q todo se reduce a esto.
+        x = Security(sd, d, m)
+        push!(s, x)
+
+        d += dimension(sd)
+        m += noise_dimension(sd)
+    end
+
+    securities = tuple(s...)
+
+    return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params, securities)
 end
 
 DynamicalSystem(dynamics) = DynamicalSystem(nothing, nothing, dynamics, nothing) # ver si mando dynamics a params tmb
@@ -93,4 +127,16 @@ for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
     @eval begin
         $method(ds::DynamicalSystem) = $method(ds.attributes)
     end
+end
+
+# la llamo desde aca y no desde StochasticDiffEq? es mas liviano DiffEqBase
+function DiffEqBase.SDEProblem(ds::DynamicalSystem{IIP}, tspan; u0=state(ds)) where {IIP}
+    return SDEProblem{IIP}(
+        SDEFunction(ds.f, ds.g),
+        u0,
+        tspan,
+        ds.params,
+        noise=noise(ds),
+        noise_rate_prototype=noise_rate_prototype(ds)
+    )
 end

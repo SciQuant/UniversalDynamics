@@ -25,4 +25,4 @@ include("interest-rate/short_rate_model.jl")
 export OneFactorAffineModelDynamics, OneFactorQuadraticModelDynamics,
        MultiFactorAffineModelDynamics, MultiFactorQuadraticModelDynamics
 
-# include("interest-rate/libor_market_model.jl")
+include("interest-rate/libor_market_model.jl")

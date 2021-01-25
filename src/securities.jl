@@ -19,48 +19,11 @@ struct Security{Di,Df,Mi,Mf,U,X,DU,DX} <: AbstractSecurity
     end
 end
 
-function Security(
-    ::AbstractDynamics{IIP,D,M}, d::Integer, m::Integer, u::AbstractVector, du::AbstractVector
-) where {IIP,D,M}
-
+function Security(::AbstractDynamics{IIP,D,M}, d::Integer, m::Integer) where {IIP,D,M}
     Di, Df = d, d + D - 1
     Mi, Mf = m, m + M - 1
 
-    # la verdad es que en realidad no importan los views aca, ya que luego uso remake.
-    # aca lo que me interesa es completar Di, Df, Mi y Mf
-    x = view(u, Di:Df)
-    dx = view(du, Di:Df)
-
-    return Security{Di,Df,Mi,Mf}(u, x, du, dx)
-end
-
-function Security(
-    ::AbstractDynamics{IIP,D,M}, d::Integer, m::Integer, u::AbstractVector, du::AbstractMatrix
-) where {IIP,D,M}
-
-    Di, Df = d, d + D - 1
-    Mi, Mf = m, m + M - 1
-
-    # la verdad es que en realidad no importan los views aca, ya que luego uso remake.
-    # aca lo que me interesa es completar Di, Df, Mi y Mf
-    x = view(u, Di:Df)
-    dx = view(du, Di:Df, Mi:Mf)
-
-    return Security{Di,Df,Mi,Mf}(u, x, du, dx)
-end
-
-function Security(
-    ::AbstractDynamics{IIP,D,M}, d::Integer, m::Integer, u::AbstractVector, ::Nothing
-) where {IIP,D,M}
-
-    Di, Df = d, d + D - 1
-    Mi, Mf = m, m + M - 1
-
-    # la verdad es que en realidad no importan los views aca, ya que luego uso remake.
-    # aca lo que me interesa es completar Di, Df, Mi y Mf
-    x = view(u, Di:Df)
-
-    return Security{Di,Df,Mi,Mf}(u, x, nothing, nothing)
+    return Security{Di,Df,Mi,Mf}(ntuple(_ -> nothing, 4)...)
 end
 
 function remake(::Security{Di,Df,Mi,Mf}, u::AbstractVector) where {Di,Df,Mi,Mf}

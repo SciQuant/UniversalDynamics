@@ -38,7 +38,7 @@ end
             t0, x0, I, nothing, @SVector(ones(D))
         )
 
-        ds = DynamicalSystem(nothing, nothing, (x_dynamics, )) # dummy `f` and `g`
+        ds = DynamicalSystem(nothing, nothing, Dict(:x => x_dynamics, )) # dummy `f` and `g`
         test_dynamics(
             ds,
             IIP, D, M, DN, T,
@@ -476,23 +476,58 @@ x0 = @SVector ones(N)
 ]
 
 x = MultiFactorAffineModelDynamics(x0, ϰ, θ, Σ, α, β, ξ₀, ξ₁)
-B = SystemDynamics(0.)
+B = SystemDynamics(one(eltype(x_dynamics)))
 
-ds = DynamicalSystem((x, B))
-
-IR = FixedIncomeSecurities(x, ds.securities[1], ds.securities[2])
-
-IR.P(0.15, 0.15)
+# define a dynamics container
+dynamics = OrderedDict(:x => x, :B => B)
 
 function drift(u, p, t)
-    @unpack security_x = p
+    @unpack x_dynamics, x_security, B_security = p
 
-    x = remake(security_x, u)
+    x = remake(x_security, u)
+    B = remake(B_security, u)
 
-    # ambos funcionan
-    x()
-    x(t)
+    IR = FixedIncomeSecurities(x_dynamics, x, B)
+
+    dx = UniversalDynamics.drift(x(t), UniversalDynamics.parameters(x_dynamics), t)
+    dB = IR.r(t) * B(t)
+
+    return vcat(dx, dB)
+
+    # just to show off
+    # IR.r(t)
+    # IR.P(0.2313123, 0.312)
+    # IR.L(0.1, 0.2)
 end
+
+function diffusion(u, p, t)
+    @unpack x_dynamics, x_security, B_security = p
+
+    x = remake(x_security, u)
+    B = remake(B_security, u)
+
+    dx = UniversalDynamics.diffusion(x(t), UniversalDynamics.parameters(x_dynamics), t)
+    dB = zero(eltype(u)) # @SMatrix zeros(eltype(u), 1, 1)
+
+    return @SMatrix [m1[1,1] m1[1,2] m1[1,3]       0
+                     m1[2,1] m1[2,2] m1[2,3]       0
+                     m1[3,1] m1[3,2] m1[3,3]       0
+                           0       0       0 m2[1,1]]
+end
+
+ds = DynamicalSystem(drift, diffusion, dynamics, nothing)
+
+params = UniversalDynamics.parameters(ds)
+
+
+
+
+
+
+
+
+
+
 
 function drift!(du, u, p, t)
     @unpack security_x = p

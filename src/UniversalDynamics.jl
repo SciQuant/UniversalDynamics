@@ -2,7 +2,6 @@ module UniversalDynamics
 
 using UnPack: @unpack
 using Memoize
-using Setfield
 using StaticArrays
 using LinearAlgebra
 using OrdinaryDiffEq
@@ -13,6 +12,9 @@ include("auxiliary.jl")
 
 include("noise.jl")
 export ScalarNoise, DiagonalNoise, NonDiagonalNoise
+
+include("measure.jl")
+export Spot, RiskNeutral, Terminal, ForwardTn
 
 include("dynamics.jl")
 export SystemDynamics

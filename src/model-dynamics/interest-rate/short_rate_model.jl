@@ -66,7 +66,7 @@ for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
 end
 
 # IDEA: usar Traits?
-parameters(srm::ShortRateModelDynamics) = srm.params
+parameters(srmd::ShortRateModelDynamics) = srmd.params
 
 include("short-rate-model/models.jl")
 include("short-rate-model/params.jl")

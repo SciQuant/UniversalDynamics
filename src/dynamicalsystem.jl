@@ -1,16 +1,16 @@
 
-struct DynamicalSystem{IIP,D,M,DN,T,F,G,A,P,S} <: AbstractDynamics{IIP,D,M,DN,T}
+struct DynamicalSystem{IIP,D,M,DN,T,F,G,A,P,DS,S} <: AbstractDynamics{IIP,D,M,DN,T}
     f::F
     g::G
-    # dynamics::D
     attributes::A
     params::P
+    dynamics::DS
     securities::S
 
     function DynamicalSystem{IIP,D,M,DN,T}(
-        f::F, g::G, attrs::A, params::P, securities::S
-    ) where {IIP,D,M,DN,T,F,G,A,P,S}
-        return new{IIP,D,M,DN,T,F,G,A,P,S}(f, g, attrs, params, securities)
+        f::F, g::G, attrs::A, params::P, dynamics::DS, securities::S
+    ) where {IIP,D,M,DN,T,F,G,A,P,DS,S}
+        return new{IIP,D,M,DN,T,F,G,A,P,DS,S}(f, g, attrs, params, dynamics, securities)
     end
 end
 
@@ -19,11 +19,13 @@ function DynamicalSystem(f, g, params)
    return DynamicalSystem(f, g, dynamics, params)
 end
 
-function DynamicalSystem(f, g, dynamics, params)
+function DynamicalSystem(f, g, dynamics_container, params)
 
-    if isempty(dynamics)
+    if isempty(dynamics_container)
         throw(ArgumentError("provide at least one `AbstractDynamics`."))
     end
+
+    dynamics = values(dynamics_container)
 
     IIP = all(isinplace.(dynamics))
     OOP = all((!isinplace).(dynamics))
@@ -88,37 +90,21 @@ function DynamicalSystem(f, g, dynamics, params)
 
     attrs = DynamicsAttributes(t0, x0, ρ, noise, noise_rate_prototype)
 
-    # securities
-    s = []
+    securities = Dict()
     d = m = 1
-    for sd in dynamics
-
-        #=
-        if sd isa SystemDynamics
-            x = SystemSecurity(sd, d, m)
-        elseif sd isa OneFactorAffineModelDynamics
-            x = SystemSecurity(sd, d, m)
-            # en algun lado tengo que crear la SystemDynamics para la MoneyMarket account
-            # basicamente tnego que crear un SystemDynamics
-
-            # mmm, esto que lo cree el usuario!!!! y asi me evito de tener que crear yo el
-            # B. Es decir, el usuario se da cuenta que lo tiene que crear para poder
-            # definir el FixedIncomeSecurities de un modelo de short rate luego
-            # ir = FixedIncomeSecurities(sd, x, B)
-        end
-        =#
-
-        # leer lo de arriba y notar q todo se reduce a esto.
-        x = Security(sd, d, m, x0, noise_rate_prototype)
-        push!(s, x)
-
-        d += dimension(sd)
-        m += noise_dimension(sd)
+    for (name, abstract_dynamics) in dynamics_container
+        x = Security(abstract_dynamics, d, m)
+        push!(securities, Symbol(name, :_security) => x)
+        d += dimension(abstract_dynamics)
+        m += noise_dimension(abstract_dynamics)
     end
 
-    securities = tuple(s...)
+    securities = (; securities...)
 
-    return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params, securities)
+    dynamics = Dict(Symbol(key, :_dynamics) => value for (key, value) in dynamics_container)
+    dynamics = (; dynamics...)
+
+    return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params, dynamics, securities)
 end
 
 DynamicalSystem(dynamics) = DynamicalSystem(nothing, nothing, dynamics, nothing) # ver si mando dynamics a params tmb
@@ -128,6 +114,10 @@ for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
         $method(ds::DynamicalSystem) = $method(ds.attributes)
     end
 end
+
+parameters(ds::DynamicalSystem) = parameters(ds, ds.params)
+parameters(ds::DynamicalSystem, params) = merge(params, ds.dynamics, ds.securities)
+parameters(ds::DynamicalSystem, ::Nothing) = merge(ds.dynamics, ds.securities)
 
 # la llamo desde aca y no desde StochasticDiffEq? es mas liviano DiffEqBase
 function DiffEqBase.SDEProblem(ds::DynamicalSystem{IIP}, tspan; u0=state(ds)) where {IIP}

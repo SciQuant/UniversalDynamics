@@ -63,7 +63,7 @@ function (D::ShortRateModelDiscountFactor)(t::Real, T::Real)
     elseif isequal(t, T)
         return one(Base.promote_eltype(1/t, 1/T))
     else
-        throw(DomainError("`t` must be ≤ `T` when computing a Discount Factor D(t, T)."))
+        throw(DomainError("`t` must be ≤ `T` for Discount Factor D(t, T)."))
     end
 end
 
@@ -79,7 +79,7 @@ function (P::ShortRateModelZeroCouponBond)(t::Real, T::Real, xt::Union{Real,Abst
     elseif isequal(t, T)
         return one(eltype(P.r.srm)) # one(Base.promote_eltype(1/t, 1/T))
     else
-        throw(DomainError("`t` must be ≤ `T` when computing a Zero Coupon Bond P(t, T)."))
+        throw(DomainError("`t` must be ≤ `T` for Zero Coupon Bond P(t, T)."))
     end
 end
 
@@ -155,12 +155,9 @@ function solve_riccati(P::ShortRateModelZeroCouponBond, t::Real, T::Real)
 
     # for now, both allocate (see #1270 in OrdinaryDiffEq)
     if isinplace(srm)
-        # sol(srm.cache.rout, t)
-        # return nothing
         u = srm.cache.rout
         sol(u, t)
     else
-        # return sol(t)
         u = sol(t)
     end
     return u # mmm
@@ -208,12 +205,12 @@ end
 # ver si cambia la cosa si paso el closure a la estructura de InstantaneousForwardRate
 (f::ShortRateModelInstantaneousForwardRate)(t::Real, T::Real) = ForwardDiff.derivative(s -> -log(f.P(t, s)), T)
 
-function FixedIncomeSecurities(srm::SRM, x::Security, β::Security) where {SRM<:ShortRateModelDynamics}
-    r = ShortRateModelSpotRate(srm, x)
+function FixedIncomeSecurities(srmd::SRMD, x::Security, β::Security) where {SRMD<:ShortRateModelDynamics}
+    r = ShortRateModelSpotRate(srmd, x)
     B = ShortRateModelMoneyMarketAccount(β)
     D = ShortRateModelDiscountFactor(B)
     P = ShortRateModelZeroCouponBond(r)
     L = ShortRateModelForwardRate(P)
     f = ShortRateModelInstantaneousForwardRate(P)
-    return FixedIncomeSecurities{SRM}(r, B, D, P, L, f)
+    return FixedIncomeSecurities{SRMD}(r, B, D, P, L, f)
 end

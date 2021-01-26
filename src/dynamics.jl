@@ -1,5 +1,10 @@
 import Base: eltype
 
+"""
+    AbstractDynamics{InPlace,Dim,NoiseDim,DiagNoise,elType}
+
+Supertype for all kind of dynamics.
+"""
 abstract type AbstractDynamics{InPlace,Dim,NoiseDim,DiagNoise,elType} end
 
 isinplace(::AbstractDynamics{InPlace}) where {InPlace} = InPlace
@@ -32,13 +37,43 @@ cor(attrs::DynamicsAttributes) = attrs.ρ
 noise(attrs::DynamicsAttributes) = attrs.noise
 noise_rate_prototype(attrs::DynamicsAttributes) = attrs.noise_rate_prototype
 
+"""
+    SystemDynamics{IIP,D,M,DN,T,A} <: AbstractDynamics{IIP,D,M,DN,T}
 
+Represents arbitrary system dynamics with:
+- In place coefficients if `IIP` is `true`, otherwise it is assumed to have out of place
+  coefficients,
+- Dynamics dimension `D`,
+- Noise dimension `M`,
+- Diagonal noise if `DN` is `true` and non-diagonal noise otherwise,
+- initial time `t0`,
+- initial state `x0`,
+- correlation matrix `ρ`, and
+- Wiener process `noise`.
+
+## System Dynamics declaration
+
+```julia
+SystemDynamics(x0::S;
+    t0=zero(eltype(S)), ρ::R=I, noise::AbstractNoise=DiagonalNoise{length(x0)}(),
+) -> SystemDynamics
+```
+
+returns a `SystemDynamics` with the given state or initial condition `x0`, intial time `t0`,
+correlation matrix `ρ` and a driving Wiener process `noise`. Remaining type parameters are
+obtained through:
+- `IIP` depends on the type of `x0` and it is `true` if `isa(x0, Vector)` or `false` if
+  `isa(x0, Real)` or `isa(x0, SVector)`,
+- `D` equals to `length(x0)`,
+- `M` is determined by `noise` and its default value is equal to `D`,
+- `DN` is determined by `noise`, which is `DiagonalNoise` by default.
+"""
 struct SystemDynamics{IIP,D,M,DN,T,A} <: AbstractDynamics{IIP,D,M,DN,T}
     attributes::A
 end
 
 function SystemDynamics(
-    x0::S; noise::AbstractNoise=DiagonalNoise{length(x0)}(), ρ::R=nothing, t0=zero(eltype(S))
+    x0::S; noise::AbstractNoise=DiagonalNoise{length(x0)}(), ρ::R=I, t0=zero(eltype(S))
 ) where {S,R}
 
     if !(S <: Union{Real,AbstractVector})
@@ -91,7 +126,7 @@ for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
 end
 
 
-abstract type ModelDynamics{D,M,IIP,DN,T} <: AbstractDynamics{D,M,IIP,DN,T} end
+abstract type ModelDynamics{IIP,D,M,DN,T} <: AbstractDynamics{IIP,D,M,DN,T} end
 
 # include("model-dynamics/equity.jl")
 include("model-dynamics/interest_rate.jl")

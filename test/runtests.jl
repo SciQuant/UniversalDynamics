@@ -477,7 +477,7 @@ x0 = @SVector ones(N)
 ]
 
 x = MultiFactorAffineModelDynamics(x0, ϰ, θ, Σ, α, β, ξ₀, ξ₁)
-B = SystemDynamics(one(eltype(x_dynamics)))
+B = SystemDynamics(one(eltype(x)))
 
 # define a dynamics container
 dynamics = OrderedDict(:x => x, :B => B)

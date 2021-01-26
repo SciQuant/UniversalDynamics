@@ -4,15 +4,33 @@ In **UniversalDynamics** a Dynamical System or, more precisely, a Stochastic Dyn
 Equations:
 
 ```math
-\begin{aligned}
-    d\vec{u}(t)  &= f(t, \vec{u}(t)) \cdot dt + g(t, \vec{u}(t)) \cdot d\vec{W}(t),\\
-    \vec{u}(t_0) &= \vec{u}_0,
-\end{aligned}
+d\vec{u}(t) = f(t, \vec{u}(t)) \cdot dt + g(t, \vec{u}(t)) \cdot d\vec{W}(t), \quad \vec{u}(t_0) = \vec{u}_0,\\
 ```
 
-where ``f \colon \left[t_0, T \right] \times \mathbb{R}^D \rightarrow \mathbb{R}^D`` represents the drift, ``g \colon \left[ t_0, T \right] \times \mathbb{R}^D \rightarrow \mathbb{R}^{D \times M}`` the diffusion and ``d\vec{W}(t)`` an ``M``-dimensional driving Wiener process.
+with drift coefficient ``f \colon \left[t_0, T \right] \times \mathbb{R}^D \rightarrow \mathbb{R}^D``, diffusion coefficient ``g \colon \left[ t_0, T \right] \times \mathbb{R}^D \rightarrow \mathbb{R}^{D \times M}``, ``M``-dimensional driving Wiener correlated or uncorrelated process ``d\vec{W}(t)`` and initial condition ``\vec{u}_0``.
 
-In the context of quantitative finance we might want to solve a `DynamicalSystem` formed by a set of sub-dynamics, such as:
+The previous equation represent the most general case of a Dynamical System, which is referenced as the non-diagonal noise case. There are other simpler cases that are really important and are implemented in the library, namely:
+
+```@docs
+ScalarNoise
+DiagonalNoise
+```
+
+In the context of quantitative finance we might want to declare a `DynamicalSystem` formed by a set of dynamics, with either arbitrary or known coefficients. To take this into account, **UniversalDynamics** uses the following type architecture:
+
+```julia
+abstract type AbstractDynamics{InPlace,Dim,NoiseDim,DiagNoise,elType} end
+
+abstract type ModelDynamics{D,M,IIP,DN,T} <: AbstractDynamics{D,M,IIP,DN,T} end
+
+struct SystemDynamics{IIP,D,M,DN,T,A} <: AbstractDynamics{IIP,D,M,DN,T}
+    attributes::A
+end
+```
+
+```@docs
+SystemDynamics
+```
 
 1. `SystemDynamics` representing arbitrary dynamics;
 2. `ModelDynamics` representing known models dynamics, such as:
@@ -23,9 +41,11 @@ In the context of quantitative finance we might want to solve a `DynamicalSystem
    - `HestonModelDynamics`,
    - ...
 
-## Example
+## Dynamical System definition
 
 Supose we want to price a european option on a stock `S` with stochastic interest rates (sacar del cap 1 del Andersen). In this context we need to simulate, for example, a short rate described by any `ShortRateModelDynamics` and a stock price given by a `SystemDynamics`.
+
+TODO: equations
 
 ```julia
 # define dynamics

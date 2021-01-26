@@ -13,6 +13,7 @@ makedocs(;
     ),
     pages=[
         "Introduction" => "index.md",
+        "Dynamical systems" => "dynamicalsystem.md"
     ],
 )
 

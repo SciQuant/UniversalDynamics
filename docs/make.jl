@@ -4,13 +4,19 @@ using Documenter
 makedocs(;
     modules=[UniversalDynamics],
     authors="SciQuant",
-    repo="https://github.com/rvignolo/UniversalDynamics.jl/blob/{commit}{path}#L{line}",
+    repo="https://github.com/SciQuant/UniversalDynamics.jl/blob/{commit}{path}#L{line}",
     sitename="UniversalDynamics.jl",
     format=Documenter.HTML(;
-        prettyurls=get(ENV, "CI", "false") == "true",
+        prettyurls=false,
+        canonical="https://SciQuant.github.io/UniversalDynamics.jl/dev",
         assets=String[],
     ),
     pages=[
-        "Home" => "index.md",
+        "Introduction" => "index.md",
     ],
+)
+
+deploydocs(;
+    repo="github.com/SciQuant/UniversalDynamics.jl",
+    devbranch = "main"
 )

@@ -1,6 +1,6 @@
 ## Dynamics
 
-*Dynamics* represents continuous time, ``D``-dimensional Ito Systems of Stochastic Differential Equations (SDEs):
+In **UniversalDynamics** a *Dynamics* represents continuous time, ``D``-dimensional Ito Systems of Stochastic Differential Equations (SDEs):
 
 ```math
 d\vec{u}(t) = f(t, \vec{u}(t)) \cdot dt + g(t, \vec{u}(t)) \cdot d\vec{W}(t), \quad \vec{u}(t_0) = \vec{u}_0,\\
@@ -47,3 +47,5 @@ UniversalDynamics.VolatilityModelDynamics
 ```
 
 See each corresponding model dynamics for detailed information.
+
+## Examples

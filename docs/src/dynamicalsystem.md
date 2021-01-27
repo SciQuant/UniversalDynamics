@@ -1,6 +1,6 @@
-# Dynamical System
+## Dynamical System
 
-Supose we would like to build a System of SDEs that results from the union of a given collection of [`AbstractDynamics`](@ref), with either arbitrary ([`SystemDynamics`](@ref)) or known ([`ModelDynamics`](@ref)) coefficients. To be more precise, given a set of *Dynamics* for ``\{ x(t), y(t), z(t) \}``:
+Supose we would like to build a System of SDEs that comes from the union of a given collection of [`AbstractDynamics`](@ref), with either arbitrary (see [`SystemDynamics`](@ref)) or known (see [`ModelDynamics`](@ref)) coefficients. To be more precise, given a set of *Dynamics* for ``\{ x(t), y(t), z(t) \}``:
 
 ```math
 \begin{aligned}
@@ -19,27 +19,58 @@ d\vec{u}(t) = f(t, \vec{u}(t)) \cdot dt + g(t, \vec{u}(t)) \cdot d\vec{W}(t), \q
 with:
 
 ```math
-\begin{aligned}
-\vec{u}(t)       &= \\
-f(t, \vec{u}(t)) &= \\
-g(t, \vec{u}(t)) &= \\
-d\vec{W}(t)      &= \\
-\end{aligned}
+\vec{u}(t) =
+    \begin{bmatrix}
+        \vec{x}(t) \\
+        \vec{y}(t) \\
+        \vec{z}(t)
+    \end{bmatrix}
+\quad
+f(t, \vec{u}(t)) =
+    \begin{bmatrix}
+        f_x(t, \vec{x}(t)) \\
+        f_y(t, \vec{y}(t)) \\
+        f_z(t, \vec{z}(t))
+    \end{bmatrix}
+\quad
+g(t, \vec{u}(t)) =
+    \begin{bmatrix}
+        g_x(t, \vec{x}(t)) & 0 & 0 \\
+        0 & g_y(t, \vec{y}(t)) & 0 \\
+        0 & 0 & g_z(t, \vec{z}(t))
+    \end{bmatrix}
+\quad
+d\vec{W}(t) =
+    \begin{bmatrix}
+        \vec{W}_x(t) \\
+        \vec{W}_y(t) \\
+        \vec{W}_z(t)
+    \end{bmatrix}
 ```
 
+A [`DynamicalSystem`](@ref) provides a shorthand for constructing all the previous prototypes which are needed in the Stochastic Differential Equation solvers. However, it does not construct the general functions ``f`` and ``g``. This task is left to the user. It does provide many useful handlers that come in handy when coding ``f`` and ``g``.
 
+```@docs
+DynamicalSystem
+```
 
-It provides the means to compute solver parameters.
+## Examples
 
-It also provides a binding to many solvers for the resulting System of SDEs.
-
-## Example
+```@example
+using UniversalDynamics # hide
+using OrderedCollections # hide
+x = SystemDynamics(rand(1); noise=ScalarNoise())
+y = SystemDynamics(rand(2); noise=DiagonalNoise(2), ρ=[1 0.3; 0.3 1])
+z = SystemDynamics(rand(3); noise=NonDiagonalNoise(2), ρ=[1 0.2; 0.2 1])
+dynamics = OrderedDict(:x => x, :y => y, :z => z)
+ds = DynamicalSystem(dynamics)
+```
 
 Supose we want to price a european option on a stock `S` with stochastic interest rates (sacar del cap 1 del Andersen). In this context we need to simulate, for example, a short rate described by any `ShortRateModelDynamics` and a stock price given by a `SystemDynamics`.
 
 TODO: equations
 
-```julia
+```@example
 # define dynamics
 x = MultiFactorAffineModelDynamics(x0, ϰ, θ, Σ, α, β, ξ₀, ξ₁)
 S = SystemDynamics(S0; noise=NonDiagonalNoise(Mₛ))

@@ -1,7 +1,7 @@
 import Base: eltype
 
 """
-    AbstractDynamics{InPlace,Dim,NoiseDim,DiagNoise,elType}
+    abstract type AbstractDynamics{InPlace,Dim,NoiseDim,DiagNoise,elType} end
 
 Supertype for all kind of dynamics.
 """
@@ -40,18 +40,22 @@ noise_rate_prototype(attrs::DynamicsAttributes) = attrs.noise_rate_prototype
 """
     SystemDynamics{IIP,D,M,DN,T,A} <: AbstractDynamics{IIP,D,M,DN,T}
 
-Represents arbitrary system dynamics with:
-- In place coefficients if `IIP` is `true`, otherwise it is assumed to have out of place
-  coefficients,
-- Dynamics dimension `D`,
-- Noise dimension `M`,
-- Diagonal noise if `DN` is `true` and non-diagonal noise otherwise,
-- initial time `t0`,
-- initial state `x0`,
-- correlation matrix `ρ`, and
-- Wiener process `noise`.
+Represents dynamics with arbitrary coefficients.
 
-## System Dynamics declaration
+## Type parameters:
+- `IIP`: states wether coefficients are in or out of place,
+- `D`: dynamics dimension,
+- `M`: noise dimension,
+- `DN`: indicates if the noise is of [`DiagonalNoise`](@ref) or [`NonDiagonalNoise`](@ref)
+  type,
+
+## Fields:
+- `t0`: initial time,
+- `x0`: initial state,
+- `ρ`: correlation matrix, and
+- `noise`: Wiener process.
+
+## Declaration
 
 ```julia
 SystemDynamics(x0::S;
@@ -59,14 +63,14 @@ SystemDynamics(x0::S;
 ) -> SystemDynamics
 ```
 
-returns a `SystemDynamics` with the given state or initial condition `x0`, intial time `t0`,
-correlation matrix `ρ` and a driving Wiener process `noise`. Remaining type parameters are
-obtained through:
-- `IIP` depends on the type of `x0` and it is `true` if `isa(x0, Vector)` or `false` if
-  `isa(x0, Real)` or `isa(x0, SVector)`,
-- `D` equals to `length(x0)`,
-- `M` is determined by `noise` and its default value is equal to `D`,
-- `DN` is determined by `noise`, which is `DiagonalNoise` by default.
+returns a `SystemDynamics` with the given fields, such as state or initial condition `x0`,
+intial time `t0`, correlation matrix `ρ` and a driving Wiener process `noise`. Remaining
+type parameters are obtained through:
+
+- `IIP`: `true` if `isa(x0, Vector)` or `false` if `isa(x0, Union{Real,SVector})`,
+- `D`: equals to `length(x0)`,
+- `M`: is determined by `noise` and its default value is equal to `D`,
+- `DN`: is determined by `noise`, which is [`DiagonalNoise{D}`](@ref) by default.
 """
 struct SystemDynamics{IIP,D,M,DN,T,A} <: AbstractDynamics{IIP,D,M,DN,T}
     attributes::A
@@ -125,7 +129,11 @@ for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
     end
 end
 
+"""
+    ModelDynamics{IIP,D,M,DN,T} <: AbstractDynamics{IIP,D,M,DN,T}
 
+Represents dynamics with known coefficients.
+"""
 abstract type ModelDynamics{IIP,D,M,DN,T} <: AbstractDynamics{IIP,D,M,DN,T} end
 
 # include("model-dynamics/equity.jl")

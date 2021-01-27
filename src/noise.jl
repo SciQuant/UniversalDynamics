@@ -13,7 +13,7 @@ dimension(::AbstractNoise{M}) where {M} = M
 A ``D``-dimensional system has `ScalarNoise` when there is only a unique noise process that
 affects all the Stochastic Differential Equations. In that sense, the system is given by:
 ```math
-du⃗(t) = f(t, u⃗(t)) ⋅ dt + g(t, u⃗(t)) ⋅ dW(t), \quad u⃗(t_0) = u⃗₀,
+du⃗(t) = f(t, u⃗(t)) ⋅ dt + g(t, u⃗(t)) ⋅ dW(t), \quad u⃗(t₀) = u⃗₀,
 ```
 with drift coefficient ``f \colon \left[ t₀, T \right] × \mathbb{R}ᴰ → \mathbb{R}ᴰ``,
 diffusion coefficient ``g \colon \left[ t₀, T \right] × \mathbb{R}ᴰ → \mathbb{R}ᴰ``,
@@ -28,12 +28,16 @@ A ``D``-dimensional system has `DiagonalNoise` when there are ``M = D`` noise pr
 affect each Stochastic Differential Equation individually. In that sense, the system is
 given by:
 ```math
-du⃗(t) = f(t, u⃗(t)) ⋅ dt + g(t, u⃗(t)) ⋅ d\vec{W}(t), \quad u⃗(t_0) = u⃗₀,
+du⃗(t) = f(t, u⃗(t)) ⋅ dt + g(t, u⃗(t)) ⋅ d\vec{W}(t), \quad u⃗(t₀) = u⃗₀,
 ```
 with drift coefficient ``f \colon \left[ t₀, T \right] × \mathbb{R}ᴰ → \mathbb{R}ᴰ``,
 diffusion coefficient ``g \colon \left[ t₀, T \right] × \mathbb{R}^D → \mathrm{diag} \colon
 \mathbb{R}^{D × D}``, ``D``-dimensional driving Wiener correlated or uncorrelated process
 ``d\vec{W}(t)`` and initial condition ``u⃗₀``.
+
+In these kind of systems, the diagonal of ``g(t, u⃗(t))`` is represented by a
+``D``-dimensional vector. Then, the product ``g(t, u⃗(t)) ⋅ d\vec{W}(t)`` is replaced by the
+broadcasted product `.*`.
 """
 struct DiagonalNoise{M} <: AbstractNoise{M} end
 
@@ -41,16 +45,18 @@ DiagonalNoise{1}() = ScalarNoise()
 
 DiagonalNoise(M::Integer) = DiagonalNoise{M}()
 
-"""
+@doc raw"""
     NonDiagonalNoise{M} <: AbstractNoise{M}
 
-A System of SDEs has `NonDiagonalNoise`... tenemos que `D != M` o que σ no es una matriz
-diagonal.
+A ``D``-dimensional system has `NonDiagonalNoise` when there are M noise processes that
+affect the Stochastic Differential Equations. In that sense, the system is given by:
 ```math
-dX⃗(t) = μ(X⃗(t), t) ⋅ dt + σ(X⃗(t), t) ⋅ dW⃗(t),
+du⃗(t) = f(t, u⃗(t)) ⋅ dt + g(t, u⃗(t)) ⋅ d\vec{W}(t), \quad u⃗(t₀) = u⃗₀,
 ```
-with ``μ`` and ``σ``
-TODO: Obviamente escribir esto mejor.
+with drift coefficient ``f \colon \left[ t₀, T \right] × \mathbb{R}ᴰ → \mathbb{R}ᴰ``,
+diffusion coefficient ``g \colon \left[ t₀, T \right] × \mathbb{R}ᴰ → \mathbb{R}^{D × M}``,
+``M``-dimensional driving Wiener correlated or uncorrelated process ``d\vec{W}(t)`` and
+initial condition ``u⃗₀``.
 """
 struct NonDiagonalNoise{M} <: AbstractNoise{M} end
 

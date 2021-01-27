@@ -1,7 +1,6 @@
-# Dynamical System
+# Dynamics
 
-In **UniversalDynamics** a Dynamical System or, more precisely, a Stochastic Dynamical System represents a continuous time, ``D``-dimensional Ito System of Stochastic Differential
-Equations:
+The `AbstractDynamics` type represents continuous time, ``D``-dimensional Ito Systems of Stochastic Differential Equations:
 
 ```math
 d\vec{u}(t) = f(t, \vec{u}(t)) \cdot dt + g(t, \vec{u}(t)) \cdot d\vec{W}(t), \quad \vec{u}(t_0) = \vec{u}_0,\\
@@ -9,37 +8,36 @@ d\vec{u}(t) = f(t, \vec{u}(t)) \cdot dt + g(t, \vec{u}(t)) \cdot d\vec{W}(t), \q
 
 with drift coefficient ``f \colon \left[t_0, T \right] \times \mathbb{R}^D \rightarrow \mathbb{R}^D``, diffusion coefficient ``g \colon \left[ t_0, T \right] \times \mathbb{R}^D \rightarrow \mathbb{R}^{D \times M}``, ``M``-dimensional driving Wiener correlated or uncorrelated process ``d\vec{W}(t)`` and initial condition ``\vec{u}_0``.
 
-The previous equation represent the most general case of a Dynamical System, which is referenced as the non-diagonal noise case. There are other simpler cases that are really important and are implemented in the library, namely:
+The previous equation states the most general case of a *Dynamics*, which has non-diagonal noise. There are other simpler noise cases that are really common, namely:
 
 ```@docs
 ScalarNoise
 DiagonalNoise
+NonDiagonalNoise
 ```
 
-In the context of quantitative finance we might want to declare a `DynamicalSystem` formed by a set of dynamics, with either arbitrary or known coefficients. To take this into account, **UniversalDynamics** uses the following type architecture:
+## Dynamics representation
 
-```julia
-abstract type AbstractDynamics{InPlace,Dim,NoiseDim,DiagNoise,elType} end
-
-abstract type ModelDynamics{D,M,IIP,DN,T} <: AbstractDynamics{D,M,IIP,DN,T} end
-
-struct SystemDynamics{IIP,D,M,DN,T,A} <: AbstractDynamics{IIP,D,M,DN,T}
-    attributes::A
-end
-```
+*Dynamics* are represented by two main types:
 
 ```@docs
 SystemDynamics
 ```
 
-1. `SystemDynamics` representing arbitrary dynamics;
-2. `ModelDynamics` representing known models dynamics, such as:
-   - `BlackScholesMerton`,
-   - `ShortRateModelDynamics`,
-   - `LiborMarketModelDynamics`,
-   - `HeathJarrowMortonFrameworkDynamics`,
-   - `HestonModelDynamics`,
-   - ...
+1. `ModelDynamics` representing dynamics with known coefficients.
+
+Dynamics with known coefficients are implemented as subtypes of `ModelDynamics`. Some examples include:
+
+- `BlackScholesMerton`,
+- `ShortRateModelDynamics`,
+- `LiborMarketModelDynamics`,
+- `HeathJarrowMortonFrameworkDynamics`,
+- `HestonModelDynamics`,
+- ...
+
+# Dynamical System
+
+A `DynamicalSystem` is formed by a collection of `AbstractDynamics`, with either arbitrary or known coefficients.
 
 ## Dynamical System definition
 

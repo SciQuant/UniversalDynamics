@@ -1,9 +1,12 @@
 
 """
-    InterestRateModelDynamics
+    abstract type InterestRateModelDynamics{IIP,D,M,DN,T} <: ModelDynamics{IIP,D,M,DN,T} end
 
-Supertype for all Interest Rate Models, such as the [`ShortRateModel`](@ref),
-[`LiborMarketModel`](@ref), ForwardMarketModel and Heath-Jarrow-Morton framework.
+Supertype for all Interest Rate Models, such as:
+- [`ShortRateModelDynamics`](@ref),
+- [`LiborMarketModelDynamics`](@ref),
+- `ForwardMarketModelDynamics`,
+- `HeathJarrowMortonModelDynamics`.
 """
 abstract type InterestRateModelDynamics{IIP,D,M,DN,T} <: ModelDynamics{IIP,D,M,DN,T} end
 

@@ -4,6 +4,13 @@ import Base: eltype
     abstract type AbstractDynamics{InPlace,Dim,NoiseDim,DiagNoise,elType} end
 
 Supertype for all kind of dynamics.
+
+## Type parameters:
+- `InPlace`: states wether coefficients are in or out of place,
+- `Dim`: dynamics dimension,
+- `NoiseDim`: noise dimension,
+- `DiagNoise`: indicates if the noise is of [`DiagonalNoise`](@ref) or
+  [`NonDiagonalNoise`](@ref) type,
 """
 abstract type AbstractDynamics{InPlace,Dim,NoiseDim,DiagNoise,elType} end
 
@@ -38,16 +45,12 @@ noise(attrs::DynamicsAttributes) = attrs.noise
 noise_rate_prototype(attrs::DynamicsAttributes) = attrs.noise_rate_prototype
 
 """
-    SystemDynamics{IIP,D,M,DN,T,A} <: AbstractDynamics{IIP,D,M,DN,T}
+    SystemDynamics{IIP,D,M,DN,T} <: AbstractDynamics{IIP,D,M,DN,T}
 
 Represents dynamics with arbitrary coefficients.
 
 ## Type parameters:
-- `IIP`: states wether coefficients are in or out of place,
-- `D`: dynamics dimension,
-- `M`: noise dimension,
-- `DN`: indicates if the noise is of [`DiagonalNoise`](@ref) or [`NonDiagonalNoise`](@ref)
-  type,
+See [`AbstractDynamics`](@ref) for detailed information.
 
 ## Fields:
 - `t0`: initial time,
@@ -130,13 +133,12 @@ for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
 end
 
 """
-    ModelDynamics{IIP,D,M,DN,T} <: AbstractDynamics{IIP,D,M,DN,T}
+    abstract type ModelDynamics{IIP,D,M,DN,T} <: AbstractDynamics{IIP,D,M,DN,T} end
 
-Represents dynamics with known coefficients.
+Supertype for all dynamics with known coefficients.
 """
 abstract type ModelDynamics{IIP,D,M,DN,T} <: AbstractDynamics{IIP,D,M,DN,T} end
 
-# include("model-dynamics/equity.jl")
+include("model-dynamics/equity.jl")
 include("model-dynamics/interest_rate.jl")
-# include("model-dynamics/local_volatility.jl")
-# include("model-dynamics/stochastic_volatility.jl")
+include("model-dynamics/volatility.jl")

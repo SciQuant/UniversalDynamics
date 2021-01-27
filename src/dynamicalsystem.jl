@@ -1,4 +1,9 @@
+"""
+    DynamicalSystem{IIP,D,M,DN,T} <: AbstractDynamics{IIP,D,M,DN,T}
 
+The central structure of **UniversalDynamics**. It main purpose is to construct an
+[`AbstractDynamics`](@ref) given a collection of [`AbstractDynamics`](@ref).
+"""
 struct DynamicalSystem{IIP,D,M,DN,T,F,G,A,P,DS,S} <: AbstractDynamics{IIP,D,M,DN,T}
     f::F
     g::G

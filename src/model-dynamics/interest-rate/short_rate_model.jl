@@ -1,8 +1,7 @@
 """
     ShortRateModelDynamics{FM,IIP,D,DN,T} <: TermStructureModelDynamics{IIP,D,D,DN,T}
 
-Supertype for [`ShortRateModel`](@ref)s with [`FactorModel`](@ref) `FM`, dimension `D`,
-in-place or out of place version `IIP` and with or without diagonal noise `DS`.
+Supertype for all Short Rate Models.
 """
 abstract type ShortRateModelDynamics{FM,IIP,D,DN,T} <: TermStructureModelDynamics{IIP,D,D,DN,T} end
 

@@ -73,6 +73,8 @@ ds = DynamicalSystem(dynamics)
 
 ## Out of place example
 
+A [`MultiFactorAffineModelDynamics`](@ref) with its money market account. Checkout [Multi-Factor Affine Model](@ref) for detailed information about this kind of Short Rate Model.
+
 ```@example
 using OrderedCollections # hide
 using UniversalDynamics # hide
@@ -145,6 +147,110 @@ function g(u, p, t)
                      dx[2,1] dx[2,2] dx[2,3]  0
                      dx[3,1] dx[3,2] dx[3,3]  0
                            0       0       0 dB]
+end
+
+# group dynamics in a container
+dynamics = OrderedDict(:x => x, :B => B)
+
+# compute dynamical system
+ds = DynamicalSystem(f, g, dynamics, nothing)
+```
+
+## In place example
+
+```@example
+using OrderedCollections # hide
+using UniversalDynamics # hide
+using StaticArrays # hide
+using UnPack # hide
+# load some parameters
+include("../../test/DaiSingletonParameters_A3_1.jl")
+
+# define short rate model dynamics parameters
+x0 = [υ₀, θ₀, r₀]
+
+ξ₀!(t) = zero(t) # ξ₀ = zero
+
+function ξ₁!(u, t)
+    u[1] = 0
+    u[2] = 0
+    u[3] = 1
+    return nothing
+end
+
+function ϰ!(u, t)
+    u[1,1] = μ
+    u[2,2] = ν
+    u[3,1] = κ_rυ
+    u[3,2] = -κ
+    u[3,3] = κ
+    return nothing
+end
+
+function θ!(u, t)
+    u[1] = ῡ
+    u[2] = θ̄
+    u[3] = θ̄
+    return nothing
+end
+
+function Σ!(u, t)
+    u[1,1] = η
+    u[2,1] = η * σ_θυ
+    u[2,2] = 1
+    u[2,3] = σ_θr
+    u[3,1] = η * σ_rυ
+    u[3,2] = σ_rθ
+    u[3,3] = 1
+    return nothing
+end
+
+function α!(u, t)
+    u[1] = 0
+    u[2] = θζ^2
+    u[3] = α_r
+    return nothing
+end
+
+function β!(u, t)
+    u[1,1] = 1
+    u[2,1] = β_θ
+    u[3,1] = 1
+    return nothing
+end
+
+# declare short rate model dynamics
+x = MultiFactorAffineModelDynamics(x0, ϰ!, θ!, Σ!, α!, β!, ξ₀!, ξ₁!)
+
+# declare money market account dynamics
+B = SystemDynamics(one(eltype(x)))
+
+# in place drift coefficient
+function f(du, u, p, t)
+    @unpack x_dynamics, x_security, B_security = p
+
+    x = remake(x_security, u, du)
+    B = remake(B_security, u, du)
+
+    IR = FixedIncomeSecurities(x_dynamics, x, B)
+
+    drift!(x.dx, x(t), parameters(x_dynamics), t)
+    B.dx[] = IR.r(t) * B(t)
+
+    return nothing
+end
+
+# out of place diffusion coefficient
+function g(u, p, t)
+    @unpack x_dynamics, x_security, B_security = p
+
+    x = remake(x_security, u, du)
+    B = remake(B_security, u, du)
+
+    diffusion!(x.dx, x(t), parameters(x_dynamics), t)
+    B.dx[] = zero(eltype(u))
+
+    return nothing
 end
 
 # group dynamics in a container

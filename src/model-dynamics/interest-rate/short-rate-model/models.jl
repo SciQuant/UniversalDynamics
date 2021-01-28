@@ -3,9 +3,28 @@
 
 Represents a [`OneFactor`](@ref) [`AffineModelDynamics`](@ref) type.
 
+## Type parameters:
+See [`AbstractDynamics`](@ref) for detailed information.
+
 ## Fields:
+- `attributes`: see [`DynamicsAttributes`](@ref) for detailed information,
+- `params`: model parameters, see [`AffineParameters`](@ref) for detailed information,
+- `prob`: Riccati ODEs.
 
 ## Declaration:
+
+```julia
+OneFactorAffineModelDynamics(
+    r0::S, κ, θ, Σ, α, β;
+    ξ₀=zero, ξ₁=one, t0=zero(eltype(S))
+) -> OneFactorAffineModelDynamics
+```
+
+returns a `OneFactorAffineModelDynamics` with the given fields, such as state or initial
+condition of the spot rate `r0`, parameters `κ`, `θ`, `Σ`, `α`, `β`, `ξ₀` and `ξ₁` as time
+dependent functions and intial time `t0`. `IIP` is the only remaining type parameter left:
+
+- `IIP`: `true` if `isa(x0, Vector)` or `false` if `isa(x0, Union{Real,SVector})`,
 """
 struct OneFactorAffineModelDynamics{IIP,T,A,P,O} <: AffineModelDynamics{OneFactor,IIP,1,true,T}
     attributes::A
@@ -51,9 +70,30 @@ end
 
 Defines a [`MultiFactor`](@ref) [`AffineModelDynamics`](@ref).
 
+## Type parameters:
+See [`AbstractDynamics`](@ref) for detailed information.
+
 ## Fields:
+- `attributes`: see [`DynamicsAttributes`](@ref) for detailed information,
+- `params`: model parameters, see [`AffineParameters`](@ref) for detailed information,
+- `prob`: Riccati ODEs.
 
 ## Declaration:
+
+```julia
+MultiFactorAffineModelDynamics(
+    x0::S, κ, θ, Σ, α, β, ξ₀, ξ₁;
+    t0=zero(eltype(S))
+) -> MultiFactorAffineModelDynamics
+```
+
+returns a `MultiFactorAffineModelDynamics` with the given fields, such as state or initial
+condition of the factors `x0`, parameters `κ`, `θ`, `Σ`, `α`, `β`, `ξ₀` and `ξ₁` as time
+dependent functions and intial time `t0`. Remaining type parameters are obtained through:
+
+- `IIP`: `true` if `isa(x0, Vector)` or `false` if `isa(x0, Union{Real,SVector})`,
+- `D`: equals to `length(x0)`,
+- `DN`: `true` id `isa(Σ(t0), Diagonal)`.
 """
 struct MultiFactorAffineModelDynamics{IIP,D,DN,T,A,P,O} <: AffineModelDynamics{MultiFactor,IIP,D,DN,T}
     attributes::A

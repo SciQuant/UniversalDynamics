@@ -1,16 +1,15 @@
 """
-    ShortRateParameters{FM,D,IIP,DN}
+    ShortRateParameters{FM,IIP,D,DN} <: InterestRateModelDynamicsParameters
 
-Supertype for [`ShortRateModel`](@ref) parameters with [`FactorModel`](@ref) `FM`, dimension
-`D`, in-place or out of place version `IIP` and with or without diagonal noise `DS`.
+Supertype for [`ShortRateModelDynamics`](@ref) parameters.
 """
 abstract type ShortRateParameters{FM,IIP,D,DN} <: InterestRateModelDynamicsParameters end
 
 """
-    AffineParameters{FM,D,IIP,DN,K,T,S,A,B,X0,X1,C} <: ShortRateParameters{FM,D,IIP,DN}
+    AffineParameters{FM,IIP,D,DN} <: ShortRateParameters{FM,IIP,D,DN}
 
-Wraps the parameters of an [`Affine`](@ref) Term Structure (ATS) model in a unique object,
-for either [`OneFactor`](@ref) and [`MultiFactor`](@ref) models.
+Wraps the model parameters of an [`AffineModelDynamics`](@ref) in a unique object, for
+either [`OneFactor`](@ref) and [`MultiFactor`](@ref) cases.
 """
 struct AffineParameters{FM,IIP,D,DN,K,T,S,A,B,X0,X1,C} <: ShortRateParameters{FM,IIP,D,DN}
     κ::K
@@ -42,6 +41,10 @@ function AffineParameters(
     IIP = isinplace(x0)
     D = length(x0)
     # pedimos que el usuario explicitamente introduzca un objeto diagonal y no isdiag(Σ(t0))
+    # para IIP me fijo si el cache que tengo que crear para Σ isa Diagonal y para fijarme
+    # eso lo que hago es... evaluo Σ mandandole un `u` diagonal y si me tira error es porque
+    # no espera una matrix de ese tipo, si no que espera una matrix comun, por lo que no es
+    # diagonal noise
     DN = isa(Σ(t0), Diagonal)
     cache = IIP ? AffineCache(MultiFactorAffineModelDynamics{IIP,D}, x0) : nothing
     C = typeof(cache)
@@ -52,7 +55,7 @@ end
 (p::AffineParameters)(t::Real) = (p.κ(t), p.θ(t), p.Σ(t), p.α(t), p.β(t), p.ξ₀(t), p.ξ₁(t))
 
 @doc raw"""
-    QuadraticParameters{FM,D,IIP,DN,K,T,S,X0,X1,X2,C} <: ShortRateParameters{FM,D,IIP,DN}
+    QuadraticParameters{FM,IIP,D,DN} <: ShortRateParameters{FM,IIP,D,DN}
 
 Wraps the parameters of a [`Quadratic`](@ref) Term Structure (QTS) model in a unique object,
 for either [`OneFactor`](@ref) and [`MultiFactor`](@ref) models.

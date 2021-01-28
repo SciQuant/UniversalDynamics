@@ -24,7 +24,54 @@ UniversalDynamics.AffineModelDynamics
 
 ### One-Factor Affine Model
 
-ir al andersen y ver
+The spot rate dynamics is given by the following ``1``-dimensional Stochastic Differential Equation in a time span ``\mathbb{I} = \left[ t_0, T \right]``:
+
+```math
+dr(t) = \kappa(t) \cdot \left( \theta(t) - r(t) \right) \cdot dt + \Sigma(t) \cdot \sqrt{\alpha(t) + \beta(t) \cdot r(t)} \cdot dW(t),
+```
+
+with ``\kappa \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\theta \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\sigma \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\alpha \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\beta \colon \mathbb{I} \rightarrow \mathbb{R}`` and ``W`` a ``1``-dimensional driving Wiener process in the risk-neutral probability measure ``Q``.
+
+For practical applications of affine models it might be useful to rewrite the model in terms of a factor given by:
+
+```math
+r(t) = \xi_0(t) + \xi_1(t) \cdot x(t).
+```
+
+with ``\xi_0 \colon \mathbb{I} \rightarrow \mathbb{R}`` and ``\xi_1 \colon \mathbb{I} \rightarrow \mathbb{R}``.
+
+The previous setup yields to zero-coupon bonds of the form:
+
+```math
+P(t, T) = \frac{\exp \left( \int_{t_0}^T \xi_0(s) ds \right)}{\exp \left( \int_{t_0}^t \xi_0(s) ds \right)} \cdot \exp \left( A(t, T) - B(t, T) \cdot x(t) \right),
+```
+
+where ``A \colon \mathbb{I} × \mathbb{I} → \mathbb{R}`` and ``B \colon \mathbb{I} × \mathbb{I} → \mathbb{R}`` are deterministic functions obtained through the following Riccati System of Ordinary Differential Equations:
+
+```math
+\begin{aligned}
+  \frac{\partial A}{\partial t} &= \left( \kappa(t) \cdot \theta(t) - \kappa(t) \cdot \xi_0(t) - \xi'_0(t) \right) \cdot \frac{B}{\xi_1(t)} - \frac{1}{2} \cdot \left( \alpha(t) + \beta(t) \cdot \xi_0(t) \right) \cdot \left( \frac{\Sigma(t) \cdot B }{\xi_1(t)} \right)^2, \\
+  \frac{\partial B}{\partial t} &= \left( \kappa(t) + \frac{\xi'_1(t)}{\xi_1(t)} \right) \cdot B + \frac{\beta(t)}{2 \cdot \xi_1(t)} \cdot \left( \Sigma(t) \cdot B \right)^2 - \xi_1(t),
+\end{aligned}
+```
+
+subject to terminal conditions ``A(T, T) = B(T, T) = 0``. Also, notice that when there is no change of variable, i.e. ``\xi_0(t) = 0`` and ``\xi_1(t) = 1``, the discount bond reconstitution formula takes its conventional form:
+
+```math
+P(t, T) = \exp \left( A(t, T) - B(t, T) \cdot r(t) \right).
+```
+
+On the other hand, if ``\xi_0(t)`` equats to the Instantaneous Forward Rate ``f(t_0, t)`` and ``\xi_1 = 1``, the zero-coupon bond formula becomes:
+
+```math
+P(t, T) = \frac{P(t_0, T)}{P(t_0, t)} \cdot \exp \left( A(t, T) - B(t, T) \cdot x(t) \right).
+```
+
+Given that ``P(t_0, T)`` corresponds to the initial yield curve, the One-Factor Affine model accepts an additional parameter `P` wich represents ``P(t_0, T) = P_0(T)``. This way, the zero coupon bond evaluation does not need to integrate ``\xi_0``.
+
+```@docs
+UniversalDynamics.OneFactorAffineModelDynamics
+```
 
 ### Multi-Factor Affine Model
 
@@ -42,14 +89,15 @@ The affine short rate is given by:
 r(t) = \xi_0(t) + \xi_1(t)^\top \cdot \vec{x}(t).
 ```
 
-The previous setup yields to zero-coupon bonds:
+with ``\xi_0 \colon \mathbb{I} \rightarrow \mathbb{R}`` and ``\xi_1 \colon \mathbb{I} \rightarrow \mathbb{R}^D``.
+
+The previous setup yields to zero-coupon bonds of the form:
 
 ```math
 P(t, T) = \exp \left( A(t, T) - B(t, T)^\top \cdot x(t) \right),
 ```
 
-where ``A \colon \mathbb{I} × T → \mathbb{R}`` and ``B \colon \mathbb{I} × T → \mathbb{R}ᴰ``
-are deterministic functions obtained through the following Riccati System of Ordinary Differential Equations:
+where ``A \colon \mathbb{I} × \mathbb{I} → \mathbb{R}`` and ``B \colon \mathbb{I} × \mathbb{I} → \mathbb{R}ᴰ`` are deterministic functions obtained through the following Riccati System of Ordinary Differential Equations:
 
 ```math
 \begin{aligned}
@@ -58,8 +106,7 @@ are deterministic functions obtained through the following Riccati System of Ord
 \end{aligned}
 ```
 
-subject to terminal conditions ``A(T, T) = 0`` and ``B(T, T) = 0``.
-
+subject to terminal conditions ``A(T, T) = 0`` and ``B(T, T) = \vec{0}``.
 
 ```@docs
 UniversalDynamics.MultiFactorAffineModelDynamics

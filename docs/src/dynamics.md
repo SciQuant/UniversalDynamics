@@ -22,6 +22,12 @@ DiagonalNoise
 NonDiagonalNoise
 ```
 
+The library wraps [`AbstractDynamics`](@ref) attributes inside the following structure:
+
+```@docs
+UniversalDynamics.DynamicsAttributes
+```
+
 ## Representation
 
 *Dynamics* are represented by two main types, [`SystemDynamics`](@ref) and [`ModelDynamics`](@ref), described below.

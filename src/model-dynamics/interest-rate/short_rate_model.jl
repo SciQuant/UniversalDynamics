@@ -1,7 +1,8 @@
-"""
+@doc raw"""
     abstract type ShortRateModelDynamics{FM,IIP,D,DN,T} <: TermStructureModelDynamics{IIP,D,D,DN,T} end
 
-Supertype for all Short Rate Models.
+Supertype for all Short Rate Models. Notice that the diffusion coefficient for Short Rate
+Models is a square matrix ``∈ \mathbb{R}^{D × D}``, i.e. `M = D`.
 """
 abstract type ShortRateModelDynamics{FM,IIP,D,DN,T} <: TermStructureModelDynamics{IIP,D,D,DN,T} end
 
@@ -14,9 +15,9 @@ for zero coupon bond prices ``P(t, T)`` in a time span ``\mathbb{I} = \left[ t�
 ```math
 P(t, T) = \exp \left( A(t, T) - B(t, T)^\top \cdot x(t) \right).
 ```
-where ``A \colon \mathbb{I} × T → \mathbb{R}`` and ``B \colon \mathbb{I} × T → \mathbb{R}ᴰ``
-are deterministic functions obtained through a System of Ordinary Differential Equations
-called Riccati System.
+where ``A \colon \mathbb{I} × \mathbb{I} → \mathbb{R}`` and ``B \colon \mathbb{I} ×
+\mathbb{I} → \mathbb{R}ᴰ`` are deterministic functions obtained through a System of Ordinary
+Differential Equations called Riccati System.
 """
 abstract type AffineModelDynamics{FM,IIP,D,DN,T} <: ShortRateModelDynamics{FM,IIP,D,DN,T} end
 

@@ -30,6 +30,18 @@ gprototype_size(::AbstractDynamics{IIP,D,M,true}) where {IIP,D,M} = (D, ) # Diag
 gprototype_size(::AbstractDynamics{IIP,D,M,false}) where {IIP,D,M} = (D, M) # NonDiagonalNoise
 
 
+"""
+    DynamicsAttributes
+
+Holds parameters related to any [`AbstractDynamics`](@ref).
+
+## Fields:
+- `t0`: initial time,
+- `x0`: initial state,
+- `ρ`: correlation matrix,
+- `noise`: Wiener process, and
+- `noise_rate_prototype`: prototype or representation of the diffusion coefficient.
+"""
 struct DynamicsAttributes{T,S,R,N,P}
     t0::T
     x0::S
@@ -44,6 +56,7 @@ cor(attrs::DynamicsAttributes) = attrs.ρ
 noise(attrs::DynamicsAttributes) = attrs.noise
 noise_rate_prototype(attrs::DynamicsAttributes) = attrs.noise_rate_prototype
 
+
 """
     SystemDynamics{IIP,D,M,DN,T} <: AbstractDynamics{IIP,D,M,DN,T}
 
@@ -53,15 +66,13 @@ Represents dynamics with arbitrary coefficients.
 See [`AbstractDynamics`](@ref) for detailed information.
 
 ## Fields:
-- `t0`: initial time,
-- `x0`: initial state,
-- `ρ`: correlation matrix, and
-- `noise`: Wiener process.
+- `attributes`: see [`DynamicsAttributes`](@ref) for detailed information.
 
 ## Declaration
 
 ```julia
-SystemDynamics(x0::S;
+SystemDynamics(
+    x0::S;
     t0=zero(eltype(S)), ρ::R=I, noise::AbstractNoise=DiagonalNoise{length(x0)}(),
 ) -> SystemDynamics
 ```

@@ -2,7 +2,7 @@
 """
     abstract type InterestRateModelDynamics{IIP,D,M,DN,T} <: ModelDynamics{IIP,D,M,DN,T} end
 
-Supertype for all Interest Rate Models, such as:
+Supertype for all Interest Rate Models dynamics, such as:
 - [`ShortRateModelDynamics`](@ref),
 - [`LiborMarketModelDynamics`](@ref),
 - `ForwardMarketModelDynamics`,

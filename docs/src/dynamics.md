@@ -1,4 +1,4 @@
-## Dynamics
+## Introduction
 
 In **UniversalDynamics** a *Dynamics* represents continuous time, ``D``-dimensional Ito Systems of Stochastic Differential Equations (SDEs):
 
@@ -22,9 +22,9 @@ DiagonalNoise
 NonDiagonalNoise
 ```
 
-## Dynamics representation
+## Representation
 
-*Dynamics* are represented by two main types, [`SystemDynamics`](@ref) and [`ModelDynamics`](@ref) which are described below.
+*Dynamics* are represented by two main types, [`SystemDynamics`](@ref) and [`ModelDynamics`](@ref), described below.
 
 ### SystemDynamics
 
@@ -38,7 +38,9 @@ SystemDynamics
 UniversalDynamics.ModelDynamics
 ```
 
-`ModelDynamics` subtypes include:
+[`ModelDynamics`](@ref) subtypes include many common financial models dynamics. Even though they could always be declared as regular [`SystemDynamics`](@ref), it is somewhat useful to have them coded in the library. This enables traceable, reproducible and fast code. Also, for some models, there are many other features implemented in the library, such as Interest Rate Modeling features.
+
+The following is a list with implemented model dynamics:
 
 ```@docs
 UniversalDynamics.EquityModelDynamics
@@ -46,6 +48,15 @@ UniversalDynamics.InterestRateModelDynamics
 UniversalDynamics.VolatilityModelDynamics
 ```
 
-See each corresponding model dynamics for detailed information.
+See each corresponding model dynamics section for detailed information.
 
 ## Examples
+
+```@example
+using UniversalDynamics # hide
+using StaticArrays # hide
+Dₓ = 3
+Mₓ = 5
+x0 = @SVector ones(Dₓ)
+x = SystemDynamics(x0; noise=NonDiagonalNoise(Mₓ))
+```

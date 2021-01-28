@@ -38,11 +38,15 @@ DynamicalSystem(f, g, dynamics, params)
 ```
 
 with `f` and `g` either the in place or the out of place functions for the coefficients:
-- **Out of place**: coefficients must be in the form `f(u, p, t) -> SVector` and `g(u, p,
-  t) -> SVector` for [`DiagonalNoise`](@ref) cases and `g(u, p, t) -> SMatrix` for the
-  [`NonDiagonalNoise`](@ref) cases.
-- **In place**: coefficients must be in the form `f(du, u, p, t) -> nothing` and `g(du,
-  u, p, t) -> nothing`.
+- **Out of place**: coefficients must be in the form `f(u, p, t) -> SVector` and `g(u, p, t)
+  -> SVector` for [`DiagonalNoise`](@ref) cases or `g(u, p, t) -> SMatrix` for
+  [`NonDiagonalNoise`](@ref) cases. These functions return the drift or diffusion
+  coefficients as `SArrays` given a current state `u`, current time `t` and a set of
+  parameters.
+- **In place**: coefficients must be in the form `f(du, u, p, t) -> nothing` and `g(du, u,
+  p, t) -> nothing`. These functions modify in place `du::Array` and set it equal to either
+  the drift or the diffusion coefficients given a current state `u`, current time `t` and a
+  set of parameters.
 """
 struct DynamicalSystem{IIP,D,M,DN,T,F,G,A,P,DS,S} <: AbstractDynamics{IIP,D,M,DN,T}
     f::F
@@ -57,11 +61,6 @@ struct DynamicalSystem{IIP,D,M,DN,T,F,G,A,P,DS,S} <: AbstractDynamics{IIP,D,M,DN
     ) where {IIP,D,M,DN,T,F,G,A,P,DS,S}
         return new{IIP,D,M,DN,T,F,G,A,P,DS,S}(f, g, attrs, params, dynamics, securities)
     end
-end
-
-function DynamicalSystem(f, g, params)
-    dynamics = filter(d -> d isa AbstractDynamics, values(params))
-   return DynamicalSystem(f, g, dynamics, params)
 end
 
 function DynamicalSystem(f, g, dynamics_container, params)
@@ -164,38 +163,6 @@ parameters(ds::DynamicalSystem) = parameters(ds, ds.params)
 parameters(ds::DynamicalSystem, params) = merge(params, ds.dynamics, ds.securities)
 parameters(ds::DynamicalSystem, ::Nothing) = merge(ds.dynamics, ds.securities)
 
-Base.summary(ds::DynamicalSystem) = "$(dimension(ds))-dimensional dynamical system"
-
-function Base.show(io::IO, ds::DynamicalSystem)
-    ps = 18
-    text = summary(ds)
-    u0 = state(ds)'
-
-    ctx = IOContext(io, :limit => true, :compact => true, :displaysize => (10,50))
-
-    println(io, text)
-    prefix = rpad(" state: ", ps)
-    print(io, prefix); printlimited(io, u0, Δx = length(prefix)); print(io, "\n")
-    # println(io,  rpad(" e.o.m.: ", ps),     eomstring(ds.f))
-    println(io,  rpad(" in-place? ", ps),   isinplace(ds))
-    println(io,  rpad(" Dimension: ", ps),   dimension(ds))
-    println(io,  rpad(" Noise dimension: ", ps),   noise_dimension(ds))
-    println(io,  rpad(" diagonal noise? ", ps),   diagonalnoise(ds))
-    # println(io,  rpad(" jacobian: ", ps),   jacobianstring(ds)),
-    # print(io,    rpad(" parameters: ", ps), paramname(ds.p))
-end
-
-printlimited(io, x::Number; Δx = 0, Δy = 0) = print(io, x)
-
-function printlimited(io, x; Δx = 0, Δy = 0)
-    sz = displaysize(io)
-    io2 = IOBuffer(); ctx = IOContext(io2, :limit => true, :compact => true,
-    :displaysize => (sz[1]-Δy, sz[2]-Δx))
-    Base.print_array(ctx, x)
-    s = String(take!(io2))
-    s = replace(s[2:end], "  " => ", ")
-    Base.print(io, "["*s*"]")
-end
 
 # la llamo desde aca y no desde StochasticDiffEq? es mas liviano DiffEqBase
 function DiffEqBase.SDEProblem(ds::DynamicalSystem{IIP}, tspan; u0=state(ds)) where {IIP}

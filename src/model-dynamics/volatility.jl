@@ -1,7 +1,7 @@
 """
     abstract type VolatilityModelDynamics{IIP,D,M,DN,T} <: ModelDynamics{IIP,D,M,DN,T} end
 
-Supertype for all volatility models dynamics, such as:
+Supertype for all Volatility Models dynamics, such as:
 
 - [`LocalVolatilityModelDynamics`](@ref),
 - [`StochasticVolatilityModelDynamics`](@ref),

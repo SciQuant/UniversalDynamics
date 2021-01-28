@@ -1,7 +1,7 @@
 """
     abstract type EquityModelDynamics{IIP,D,M,DN,T} <: ModelDynamics{IIP,D,M,DN,T} end
 
-Supertype for all equity models dynamics, such as:
+Supertype for all Equity Models dynamics, such as:
 
 - [`BlackScholesMertonModelDynamics`](@ref),
 -

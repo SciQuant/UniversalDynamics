@@ -28,4 +28,6 @@ export remake
 include("dynamicalsystem.jl")
 export DynamicalSystem
 
+include("show.jl")
+
 end

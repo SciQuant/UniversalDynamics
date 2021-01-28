@@ -72,8 +72,8 @@ type parameters are obtained through:
 
 - `IIP`: `true` if `isa(x0, Vector)` or `false` if `isa(x0, Union{Real,SVector})`,
 - `D`: equals to `length(x0)`,
-- `M`: is determined by `noise` and its default value is equal to `D`,
-- `DN`: is determined by `noise`, which is [`DiagonalNoise{D}`](@ref) by default.
+- `M`: determined by `noise`, default value is `D`,
+- `DN`: determined by `noise`, default value is `true`.
 """
 struct SystemDynamics{IIP,D,M,DN,T,A} <: AbstractDynamics{IIP,D,M,DN,T}
     attributes::A

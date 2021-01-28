@@ -1,4 +1,4 @@
-## Dynamical System
+## Introduction
 
 Supose we would like to build a System of SDEs that comes from the union of a given collection of [`AbstractDynamics`](@ref), with either arbitrary (see [`SystemDynamics`](@ref)) or known (see [`ModelDynamics`](@ref)) coefficients. To be more precise, given a set of *Dynamics* for ``\{ x(t), y(t), z(t) \}``:
 
@@ -54,34 +54,102 @@ A [`DynamicalSystem`](@ref) provides a shorthand for constructing all the previo
 DynamicalSystem
 ```
 
-## Examples
+## Simple example
 
 ```@example
-using UniversalDynamics # hide
 using OrderedCollections # hide
+using UniversalDynamics # hide
+# declare dynamics
 x = SystemDynamics(rand(1); noise=ScalarNoise())
 y = SystemDynamics(rand(2); noise=DiagonalNoise(2), ρ=[1 0.3; 0.3 1])
 z = SystemDynamics(rand(3); noise=NonDiagonalNoise(2), ρ=[1 0.2; 0.2 1])
+
+# group dynamics in a container
 dynamics = OrderedDict(:x => x, :y => y, :z => z)
+
+# compute dynamical system
 ds = DynamicalSystem(dynamics)
 ```
 
-Supose we want to price a european option on a stock `S` with stochastic interest rates (sacar del cap 1 del Andersen). In this context we need to simulate, for example, a short rate described by any `ShortRateModelDynamics` and a stock price given by a `SystemDynamics`.
-
-TODO: equations
+## Out of place example
 
 ```@example
-# define dynamics
+using OrderedCollections # hide
+using UniversalDynamics # hide
+using StaticArrays # hide
+using UnPack # hide
+# load some parameters
+include("../../test/DaiSingletonParameters_A3_1.jl")
+
+# define short rate model dynamics parameters
+x0 = @SVector [υ₀, θ₀, r₀]
+
+ξ₀(t) = zero(t) # ξ₀ = zero
+
+ξ₁(t) = @SVector [0, 0, 1]
+
+ϰ(t) = @SMatrix([
+    μ     0 0
+    0     ν 0
+    κ_rυ -κ κ
+])
+
+θ(t) = @SVector [ῡ, θ̄, θ̄ ]
+
+Σ(t) = @SMatrix [
+    η           0    0
+    η * σ_θυ    1 σ_θr
+    η * σ_rυ σ_rθ    1
+]
+
+α(t) = @SVector [0, ζ^2, α_r]
+
+β(t) = @SMatrix [
+    1   0 0
+    β_θ 0 0
+    1   0 0
+]
+
+# declare short rate model dynamics
 x = MultiFactorAffineModelDynamics(x0, ϰ, θ, Σ, α, β, ξ₀, ξ₁)
-S = SystemDynamics(S0; noise=NonDiagonalNoise(Mₛ))
 
-# container
-dynamics = OrderedDict(:x => x, :S => S)
+# declare money market account dynamics
+B = SystemDynamics(one(eltype(x)))
 
-# define dynamical system formed by the given dynamics
-dynamical_system = DynamicalSystem(dynamics)
+# out of place drift coefficient
+function f(u, p, t)
+    @unpack x_dynamics, x_security, B_security = p
+
+    x = remake(x_security, u)
+    B = remake(B_security, u)
+
+    IR = FixedIncomeSecurities(x_dynamics, x, B)
+
+    dx = drift(x(t), parameters(x_dynamics), t)
+    dB = IR.r(t) * B(t)
+
+    return vcat(dx, dB)
+end
+
+# out of place diffusion coefficient
+function g(u, p, t)
+    @unpack x_dynamics, x_security, B_security = p
+
+    x = remake(x_security, u)
+    B = remake(B_security, u)
+
+    dx = diffusion(x(t), parameters(x_dynamics), t)
+    dB = zero(eltype(u))
+
+    return @SMatrix [dx[1,1] dx[1,2] dx[1,3]  0
+                     dx[2,1] dx[2,2] dx[2,3]  0
+                     dx[3,1] dx[3,2] dx[3,3]  0
+                           0       0       0 dB]
+end
+
+# group dynamics in a container
+dynamics = OrderedDict(:x => x, :B => B)
+
+# compute dynamical system
+ds = DynamicalSystem(f, g, dynamics, nothing)
 ```
-
-This will allow the user to check important attributes...
-
-However, in order to solve a `DynamicalSystem`, the drift `f` and the diffusion `g` functions must be provided.

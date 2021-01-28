@@ -34,8 +34,11 @@ makedocs(;
     ),
     pages=[
         "Introduction" => "index.md",
-        "Dynamics" => "dynamics.md",
-        "Dynamical system" => "dynamicalsystem.md"
+        "Abstract Dynamics" => [
+            "Dynamics" => "dynamics.md",
+            "Dynamical system" => "dynamicalsystem.md"
+        ],
+        "Simulation" => "simulation.md"
     ],
 )
 

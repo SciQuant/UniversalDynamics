@@ -1,5 +1,8 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DocumenterTools = "35a29f4d-8980-5a13-9543-d66fff28ecb8"
+NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
 OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 UniversalDynamics = "e34ebe0d-adf9-4359-84c2-dfdf884d416d"

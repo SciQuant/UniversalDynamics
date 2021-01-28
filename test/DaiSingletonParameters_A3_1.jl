@@ -60,9 +60,9 @@ const σ₃₂ = x.zero[14]
 
 # initial conditions (not defined in Dai Singleton paper, but needed for simulations)
 # given dummy initial conditions for the AY representation:
-const Y₁₀ = 0.1
-const Y₂₀ = 0.1
-const Y₃₀ = 0.1
+const Y₁₀ = 1.
+const Y₂₀ = 1.
+const Y₃₀ = 1.
 const Y₀ = [Y₁₀, Y₂₀, Y₃₀]
 
 const L = [β₃₁ * (1 + σ₂₃)^2 0 0; 0 q 0; δ₁ 1 1]

@@ -1,14 +1,14 @@
 ## Introduction
 
-In **UniversalDynamics** a *Dynamics* represents continuous time, ``D``-dimensional Ito Systems of Stochastic Differential Equations (SDEs):
+In **UniversalDynamics** a *Dynamics* represents continuous time, ``D``-dimensional Ito Systems of Stochastic Differential Equations (SDEs) in a time span ``\mathbb{I} = \left[ t_0, T \right]``:
 
 ```math
 d\vec{u}(t) = f(t, \vec{u}(t)) \cdot dt + g(t, \vec{u}(t)) \cdot d\vec{W}(t), \quad \vec{u}(t_0) = \vec{u}_0,\\
 ```
 
-with drift coefficient ``f \colon \left[t_0, T \right] \times \mathbb{R}^D \rightarrow \mathbb{R}^D``, diffusion coefficient ``g \colon \left[ t_0, T \right] \times \mathbb{R}^D \rightarrow \mathbb{R}^{D \times M}``, ``M``-dimensional driving Wiener correlated or uncorrelated process ``d\vec{W}(t)`` and initial condition ``\vec{u}_0``.
+with drift coefficient ``f \colon \mathbb{I} \times \mathbb{R}^D \rightarrow \mathbb{R}^D``, diffusion coefficient ``g \colon \mathbb{I} \times \mathbb{R}^D \rightarrow \mathbb{R}^{D \times M}``, ``M``-dimensional driving Wiener correlated or uncorrelated process ``\vec{W}(t)`` and initial condition ``\vec{u}_0``.
 
-The main abstract type for these kind of objects is given by:
+The main abstract type for all *Dynamics* is given by:
 
 ```@docs
 UniversalDynamics.AbstractDynamics

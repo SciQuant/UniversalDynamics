@@ -38,6 +38,7 @@ makedocs(;
             "Dynamics" => "dynamics.md",
             "Dynamical system" => "dynamicalsystem.md"
         ],
+        "Interest Rate Models" => ["Short Rate Models" => "short_rate_model.md"],
         "Simulation" => "simulation.md"
     ],
 )

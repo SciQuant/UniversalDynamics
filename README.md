@@ -6,7 +6,7 @@
 |**Build Status** |
 | [![Build Status](https://github.com/SciQuant/UniversalDynamics.jl/workflows/CI/badge.svg)](https://github.com/SciQuant/UniversalDynamics.jl/actions) |
 
-# Getting Started
+## Installation
 
 The package can be installed using the Julia package manager. From the Julia REPL, type `]` to enter the `Pkg` REPL mode and run:
 
@@ -22,5 +22,5 @@ julia> import Pkg; Pkg.add(PackageSpec(url = "https://github.com/SciQuant/Univer
 
 ## Documentation
 
-- [**STABLE**](https://SciQuant.github.io/UniversalDynamics.jl/stable) &mdash; **Documentation for the most recently tagged version of UniversalDynamics.jl.**
+- [**STABLE**](https://SciQuant.github.io/UniversalDynamics.jl/stable) &mdash; **Documentation for the most recently tagged version of UniversalDynamics.**
 - [**DEVEL**](https://SciQuant.github.io/UniversalDynamics.jl/dev) &mdash; *Documentation for the in-development version of UniversalDynamics.*

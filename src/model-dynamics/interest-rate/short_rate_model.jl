@@ -1,32 +1,34 @@
 """
-    ShortRateModelDynamics{FM,IIP,D,DN,T} <: TermStructureModelDynamics{IIP,D,D,DN,T}
+    abstract type ShortRateModelDynamics{FM,IIP,D,DN,T} <: TermStructureModelDynamics{IIP,D,D,DN,T} end
 
 Supertype for all Short Rate Models.
 """
 abstract type ShortRateModelDynamics{FM,IIP,D,DN,T} <: TermStructureModelDynamics{IIP,D,D,DN,T} end
 
 @doc raw"""
-    AffineModelDynamics{FM,IIP,D,DN,T} <: ShortRateModelDynamics{FM,IIP,D,DN,T}
+    abstract type AffineModelDynamics{FM,IIP,D,DN,T} <: ShortRateModelDynamics{FM,IIP,D,DN,T} end
 
 Supertype for Affine Term Structure (ATS) models. These models provide a closed-form formula
-for the zero coupon bond prices `P(t, T)`, given by:
+for zero coupon bond prices ``P(t, T)`` in a time span ``\mathbb{I} = \left[ t₀, T
+\right]``, given by:
 ```math
 P(t, T) = \exp \left( A(t, T) - B(t, T)^\top \cdot x(t) \right).
 ```
-where ``A(t, T)`` and ``B(t, T)`` are deterministic functions obtained through a System of
-Ordinary Differential Equations called Riccati System.
+where ``A \colon \mathbb{I} × T → \mathbb{R}`` and ``B \colon \mathbb{I} × T → \mathbb{R}ᴰ``
+are deterministic functions obtained through a System of Ordinary Differential Equations
+called Riccati System.
 """
 abstract type AffineModelDynamics{FM,IIP,D,DN,T} <: ShortRateModelDynamics{FM,IIP,D,DN,T} end
 
 @doc raw"""
-    QuadraticModelDynamics{FM,IIP,D,DN,T} <: ShortRateModelDynamics{FM,IIP,D,DN,T}
+    abstract type QuadraticModelDynamics{FM,IIP,D,DN,T} <: ShortRateModelDynamics{FM,IIP,D,DN,T} end
 
 Supertype for Quadratic Term Structure (QTS) models. These models provide a closed-form
-formula for the zero coupon bond prices `P(t, T)`, given by:
+formula for zero coupon bond prices ``P(t, T)``, given by:
 ```math
 P(t, T) = \exp \left( -A(t, T) - B(t, T)^\top \cdot x(t) - x(t)^\top \cdot C(t, T) \cdot x(t) \right).
 ```
-where ``A(t, T)``, ``B(t, T)`` and ``C(t, T)`` are deterministic functions obtained through
+where ``A(t, T) ``, ``B(t, T)`` and ``C(t, T)`` are deterministic functions obtained through
 a System of Ordinary Differential Equations called Riccati System.
 """
 abstract type QuadraticModelDynamics{FM,IIP,D,DN,T} <: ShortRateModelDynamics{FM,IIP,D,DN,T} end
@@ -41,16 +43,16 @@ abstract type FactorModel end
 @doc raw"""
     OneFactor <: FactorModel
 
-Encompasses all the [`ShortRateModel`](@ref)s where a single stochastic factor ``x(t)``
-determines the future evolution of all interest rates.
+Encompasses all the [`ShortRateModelDynamics`](@ref)s where a single stochastic factor
+``x(t)`` determines the future evolution of all interest rates.
 """
 abstract type OneFactor <: FactorModel end
 
 @doc raw"""
     MultiFactor <: FactorModel
 
-Encompasses all the [`ShortRateModel`](@ref)s where ``N`` stochastic factors ``x(t)``
-determine the future evolution of all interest rates.
+Encompasses all the [`ShortRateModelDynamics`](@ref)s where ``N`` stochastic factors
+``x(t)`` determine the future evolution of all interest rates.
 """
 abstract type MultiFactor <: FactorModel end
 

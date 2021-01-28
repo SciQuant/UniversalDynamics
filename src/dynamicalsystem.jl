@@ -96,40 +96,9 @@ function DynamicalSystem(f, g, dynamics_container, params)
     ρ = cat(cor.(dynamics)..., dims = (1, 2))
     ρ = IIP ? Array{T,2}(ρ) : SMatrix{size(ρ)...,T}(ρ)
 
-    if DN
-        # DiagonalNoise
-        noise_rate_prototype = nothing
+    noise_rate_prototype = diffeq_noise_rate_prototype(IIP, D, M, DN, dynamics)
 
-    elseif isone(M)
-        # ScalarNoise:
-        # El noise rate prototype sera una matrix de una columna y D filas (i.e. un vector
-        # de dimension D). Sin embargo, en este caso el noise_rate_prototype sale de la
-        # condicion inicial u0, por lo que no hace falta enviar noise_rate_prototype.
-        noise_rate_prototype = nothing
-
-    else
-        prototypes = []
-        for dynamic in dynamics
-            if diagonalnoise(dynamic)
-                # For DiagonalNoise, gprototype is a vector. But, when mixed with other
-                # dynamics, it should be casted to a diagonal matrix.
-                push!(prototypes, Diagonal(gprototype(dynamic)))
-            else
-                push!(prototypes, gprototype(dynamic))
-            end
-        end
-        noise_rate_prototype = cat(prototypes...; dims=(1, 2))
-
-        if IIP
-            noise_rate_prototype = noise_rate_prototype # sparse(noise_rate_prototype)
-        else
-            noise_rate_prototype = convert(SMatrix{D,M}, noise_rate_prototype)
-        end
-    end
-
-    #! Quizas la definicion del noise aqui no es tan necesaria y puede hacerse antes de
-    #! simular. El problema es que en esta instancia no conozco el solver y puedo estar
-    #! mandando que exista un second noise process en vano.
+    #! por ahi deberiamos definir el noise recien en la llamada a solve
     noise = diffeqnoise(t0, ρ, IIP, D, M, DN)
 
     attrs = DynamicsAttributes(t0, x0, ρ, noise, noise_rate_prototype)
@@ -151,7 +120,7 @@ function DynamicalSystem(f, g, dynamics_container, params)
     return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params, dynamics, securities)
 end
 
-DynamicalSystem(dynamics) = DynamicalSystem(nothing, nothing, dynamics, nothing) # ver si mando dynamics a params tmb
+DynamicalSystem(dynamics) = DynamicalSystem(nothing, nothing, dynamics, nothing)
 
 for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
     @eval begin
@@ -168,6 +137,7 @@ parameters(ds::DynamicalSystem, ::Nothing) = merge(ds.dynamics, ds.securities)
 function DiffEqBase.SDEProblem(ds::DynamicalSystem{IIP}, tspan; u0=state(ds)) where {IIP}
     return SDEProblem{IIP}(
         SDEFunction(ds.f, ds.g),
+        ds.g,
         u0,
         tspan,
         ds.params,

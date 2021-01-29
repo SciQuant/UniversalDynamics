@@ -30,7 +30,7 @@ The spot rate dynamics is given by the following ``1``-dimensional Stochastic Di
 dr(t) = \kappa(t) \cdot \left( \theta(t) - r(t) \right) \cdot dt + \Sigma(t) \cdot \sqrt{\alpha(t) + \beta(t) \cdot r(t)} \cdot dW(t),
 ```
 
-with ``\kappa \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\theta \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\sigma \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\alpha \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\beta \colon \mathbb{I} \rightarrow \mathbb{R}`` and ``W`` a ``1``-dimensional driving Wiener process in the risk-neutral probability measure ``Q``.
+with ``\kappa \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\theta \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\Sigma \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\alpha \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\beta \colon \mathbb{I} \rightarrow \mathbb{R}`` and ``W`` a ``1``-dimensional driving Wiener process in the risk-neutral probability measure ``Q``.
 
 For practical applications of affine models it might be useful to rewrite the model in terms of a factor given by:
 
@@ -68,6 +68,8 @@ P(t, T) = \frac{P(t_0, T)}{P(t_0, t)} \cdot \exp \left( A(t, T) - B(t, T) \cdot 
 ```
 
 Given that ``P(t_0, T)`` corresponds to the initial yield curve, the One-Factor Affine model accepts an additional parameter `P` wich represents ``P(t_0, T) = P_0(T)``. This way, the zero coupon bond evaluation does not need to integrate ``\xi_0``.
+
+Finally, it is worth mentioning that well known models, such as Vasicek, Cox-Ingersoll-Ross, Hull-White and Gaussian Short Rate Models can all be modelled as One-Facto Affine Short Rate Models.
 
 ```@docs
 UniversalDynamics.OneFactorAffineModelDynamics
@@ -116,4 +118,84 @@ UniversalDynamics.MultiFactorAffineModelDynamics
 
 ```@docs
 UniversalDynamics.QuadraticModelDynamics
+```
+
+### One-Factor Quadratic Model
+
+The factor dynamics is given by the following ``1``-dimensional Stochastic Differential Equation in a time span ``\mathbb{I} = \left[ t_0, T \right]``:
+
+```math
+dx(t) = \kappa(t) \cdot \left( \theta(t) - x(t) \right) \cdot dt + \sigma(t) \cdot dW(t),
+```
+
+with ``\kappa \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\theta \colon \mathbb{I} \rightarrow \mathbb{R}``, ``\sigma \colon \mathbb{I} \rightarrow \mathbb{R}`` and ``W`` a ``1``-dimensional driving Wiener process in the risk-neutral probability measure ``Q``.
+
+The quadratic short rate is given by:
+
+```math
+r(t) = ξ_0(t) + ξ_1(t) \cdot x(t) + ξ_2(t) \cdot x(t)^2
+```
+
+with ``ξ_0 \colon \mathbb{I} \rightarrow \mathbb{R}``, ``ξ_1 \colon \mathbb{I} \rightarrow \mathbb{R}`` and ``ξ_2 \colon \mathbb{I} \rightarrow \mathbb{R}``.
+
+The previous setup yields to zero-coupon bonds of the form:
+
+```math
+P(t, T) = \exp \left( -A(t, T) - B(t, T) \cdot x(t) - C(t, T) \cdot x(t)^2 \right),
+```
+
+where ``A \colon \mathbb{I} × \mathbb{I} → \mathbb{R}``, ``B \colon \mathbb{I} × \mathbb{I} → \mathbb{R}`` and ``C \colon \mathbb{I} × \mathbb{I} → \mathbb{R}`` are deterministic functions obtained through the following Riccati System of Ordinary Differential Equations:
+
+```math
+\begin{aligned}
+  \frac{\partial A}{\partial t} &= - \sigma(t)^2 \cdot C - \kappa(t) \cdot \theta(t) \cdot B + \frac{1}{2} \cdot \left( \sigma(t) \cdot B \right)^2 - \xi_0(t), \\
+  \frac{\partial B}{\partial t} &= \kappa(t) \cdot B + 2 \cdot \sigma(t)^2 \cdot B \cdot C - 2 \cdot \kappa(t) \cdot \theta(t) \cdot C - \xi_1(t), \\
+  \frac{\partial C}{\partial t} &= 2 \cdot \kappa(t) \cdot C + 2 \cdot \left( \sigma(t) \cdot C \right)^2 - \xi_2(t),
+\end{aligned}
+```
+
+subject to terminal conditions ``A(T, T) = B(T, T) = C(T, T) = 0``.
+
+```@docs
+UniversalDynamics.OneFactorQuadraticModelDynamics
+```
+
+### Multi-Factor Quadratic Model
+
+The factor dynamics are given by the following ``D``-dimensional System of Stochastic Differential Equations in a time span ``\mathbb{I} = \left[ t_0, T \right]``:
+
+```math
+d\vec{x}(t) = \kappa(t) \cdot \left( \theta(t) - \vec{x}(t) \right) \cdot dt + \sigma(t) \cdot d\vec{W}(t),
+```
+
+with ``\kappa \colon \mathbb{I} \rightarrow \mathbb{R}^{D \times D}``, ``\theta \colon \mathbb{I} \rightarrow \mathbb{R}^D``, ``\sigma \colon \mathbb{I} \rightarrow \mathbb{R}^{D \times D}`` and ``W`` a ``D``-dimensional uncorrelated driving Wiener process in the risk-neutral probability measure ``Q``.
+
+The quadratic short rate is given by:
+
+```math
+r(t) = ξ_0(t) + ξ_1(t)^\top \cdot \vec{x}(t) + \vec{x}(t)^\top \cdot ξ_2(t) \cdot \vec{x}(t)
+```
+
+with ``ξ_0 \colon \mathbb{I} \rightarrow \mathbb{R}``, ``ξ_1 \colon \mathbb{I} \rightarrow \mathbb{R}^D`` and ``ξ_2 \colon \mathbb{I} \rightarrow \mathrm{symmetric} \colon \mathbb{R}^{D \times D}``.
+
+The previous setup yields to zero-coupon bonds of the form:
+
+```math
+P(t, T) = \exp \left( -A(t, T) - B(t, T)^\top \cdot x(t) - x(t)^\top \cdot C(t, T) \cdot x(t) \right).
+```
+
+where ``A \colon \mathbb{I} × \mathbb{I} → \mathbb{R}``, ``B \colon \mathbb{I} × \mathbb{I} → \mathbb{R}^D`` and ``C \colon \mathbb{I} × \mathbb{I} → \mathbb{R}^{D \times D}`` are deterministic functions obtained through the following Riccati System of Ordinary Differential Equations:
+
+```math
+\begin{aligned}
+  \frac{\partial A}{\partial t} &= - \mathrm{Tr} \left( \sigma(t) \cdot \sigma(t)^\top \cdot C \right) - B^\top \cdot \kappa(t) \cdot \theta(t) + \frac{1}{2} \cdot B^\top \cdot \sigma(t) \cdot \sigma(t)^\top \cdot B - \xi_0(t), \\
+  \frac{\partial B}{\partial t} &= \kappa(t)^\top \cdot B + 2 \cdot C \cdot \sigma(t) \cdot \sigma(t)^\top \cdot B - 2 \cdot C \cdot \kappa(t) \cdot \theta(t) - \xi_1(t) \\
+  \frac{\partial C}{\partial t} &= \kappa(t)^\top \cdot C + C \cdot \kappa(t) + 2 \cdot C^\top  \cdot \sigma(t) \cdot \sigma(t)^\top \cdot C - \xi_2(t),
+\end{aligned}
+```
+
+subject to terminal conditions ``A(T, T) = 0``,  ``B(T, T) = \vec{0}`` and  ``C(T, T) = \mathbf{0}``.
+
+```@docs
+UniversalDynamics.MultiFactorQuadraticModelDynamics
 ```

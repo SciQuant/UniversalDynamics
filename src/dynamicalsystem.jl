@@ -10,11 +10,7 @@ See [`AbstractDynamics`](@ref) for detailed information.
 ## Fields:
 - `f`: drift coefficient represented as either an in place or out of place function,
 - `g`: diffusion coefficient represented as either an in place or out of place function,
-- `attributes`:
-  - `t0`: initial time,
-  - `x0`: initial state,
-  - `ρ`: correlation matrix, and
-  - `noise`: Wiener process.
+- `attributes`: see [`DynamicsAttributes`](@ref) for detailed information,
 - `params`: container with parameters values (preferably a `NamedTuple`),
 - `dynamics`: collection of [`AbstractDynamics`](@ref) (preferably in a `OrderedDict`),
 - `securities`: useful handlers for both dynamics simulation and derivatives pricing.

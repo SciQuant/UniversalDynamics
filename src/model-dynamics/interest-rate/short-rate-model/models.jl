@@ -1,4 +1,4 @@
-@doc raw"""
+"""
     OneFactorAffineModelDynamics{IIP,T} <: AffineModelDynamics{OneFactor,IIP,1,true,T}
 
 Represents a [`OneFactor`](@ref) [`AffineModelDynamics`](@ref) type.
@@ -65,7 +65,7 @@ function OneFactorAffineModelDynamics(r0::S, κ, θ, Σ, α, β; ξ₀=zero, ξ�
     return OneFactorAffineModelDynamics{IIP,T,A,P,O}(attrs, params, prob)
 end
 
-@doc raw"""
+"""
     MultiFactorAffineModelDynamics{IIP,D,DN,T} <: AffineModelDynamics{MultiFactor,IIP,D,DN,T}
 
 Defines a [`MultiFactor`](@ref) [`AffineModelDynamics`](@ref).
@@ -134,10 +134,33 @@ function MultiFactorAffineModelDynamics(x0::S, κ, θ, Σ, α, β, ξ₀, ξ₁;
     return MultiFactorAffineModelDynamics{IIP,D,DN,T,A,P,O}(attrs, params, prob)
 end
 
-@doc raw"""
-    OneFactorQuadraticModelDynamics{IIP,DN,T,P,O} <: QuadraticModelDynamics{OneFactor,IIP,1,DN,T}
+"""
+    OneFactorQuadraticModelDynamics{IIP,T} <: QuadraticModelDynamics{OneFactor,IIP,1,true,T}
 
-Defines a [`OneFactor`](@ref) [`ShortRateModel`](@ref) of [`Quadratic`](@ref) type.
+Represents a [`OneFactor`](@ref) [`QuadraticModelDynamics`](@ref) type.
+
+## Type parameters:
+See [`AbstractDynamics`](@ref) for detailed information.
+
+## Fields:
+- `attributes`: see [`DynamicsAttributes`](@ref) for detailed information,
+- `params`: model parameters, see [`AffineParameters`](@ref) for detailed information,
+- `prob`: Riccati ODEs.
+
+## Declaration:
+
+```julia
+OneFactorQuadraticModelDynamics(
+    r0::S, κ, θ, σ, ξ₀, ξ₁, ξ₂;
+    t0=zero(eltype(S))
+) -> OneFactorQuadraticModelDynamics
+```
+
+returns a `OneFactorQuadraticModelDynamics` with the given fields, such as state or initial
+condition of the factor `x0`, parameters `κ`, `θ`, `σ`, `ξ₀`, `ξ₁` and `ξ₁` as time dependent
+functions and intial time `t0`. `IIP` is the only remaining type parameter left:
+
+- `IIP`: `true` if `isa(x0, Vector)` or `false` if `isa(x0, Union{Real,SVector})`,
 """
 struct OneFactorQuadraticModelDynamics{IIP,T,A,P,O} <: QuadraticModelDynamics{OneFactor,IIP,1,true,T}
     attributes::A

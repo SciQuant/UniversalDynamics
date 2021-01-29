@@ -15,3 +15,5 @@ Or, equivalently, via the `Pkg` API:
 ```julia
 julia> import Pkg; Pkg.add(PackageSpec(url = "https://github.com/SciQuant/UniversalDynamics.jl.git"))
 ```
+
+# Contents

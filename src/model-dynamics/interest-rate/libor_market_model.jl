@@ -1,7 +1,7 @@
 """
-    LiborMarketModelDynamics <: TermStructureModelDynamics
+    LiborMarketModelDynamics{IIP,D,M,DN,T} <: TermStructureModelDynamicsTermStructureModelDynamics{IIP,D,M,DN,T}
 
-Also known as BGM model, describes... (describir bastante del modelo)
+Also known as BGM model, describes...
 """
 struct LiborMarketModelDynamics{IIP,D,M,DN,T,A,P} <: TermStructureModelDynamics{IIP,D,M,DN,T}
     attributes::A

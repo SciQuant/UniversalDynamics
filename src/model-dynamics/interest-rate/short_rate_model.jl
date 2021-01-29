@@ -29,19 +29,21 @@ formula for zero coupon bond prices ``P(t, T)``, given by:
 ```math
 P(t, T) = \exp \left( -A(t, T) - B(t, T)^\top \cdot x(t) - x(t)^\top \cdot C(t, T) \cdot x(t) \right).
 ```
-where ``A(t, T) ``, ``B(t, T)`` and ``C(t, T)`` are deterministic functions obtained through
-a System of Ordinary Differential Equations called Riccati System.
+``A \colon \mathbb{I} × \mathbb{I} → \mathbb{R}``, ``B \colon \mathbb{I} × \mathbb{I} →
+\mathbb{R}^D`` and ``C \colon \mathbb{I} × \mathbb{I} → \mathbb{R}^{D \times D}`` are
+deterministic functions obtained through a System of Ordinary Differential Equations called
+Riccati System.
 """
 abstract type QuadraticModelDynamics{FM,IIP,D,DN,T} <: ShortRateModelDynamics{FM,IIP,D,DN,T} end
 
-@doc raw"""
+"""
     FactorModel
 
 Supertype for factor model types.
 """
 abstract type FactorModel end
 
-@doc raw"""
+"""
     OneFactor <: FactorModel
 
 Encompasses all the [`ShortRateModelDynamics`](@ref)s where a single stochastic factor
@@ -49,7 +51,7 @@ Encompasses all the [`ShortRateModelDynamics`](@ref)s where a single stochastic 
 """
 abstract type OneFactor <: FactorModel end
 
-@doc raw"""
+"""
     MultiFactor <: FactorModel
 
 Encompasses all the [`ShortRateModelDynamics`](@ref)s where ``N`` stochastic factors

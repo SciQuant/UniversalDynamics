@@ -45,6 +45,8 @@ function AffineParameters(
     # eso lo que hago es... evaluo Σ mandandole un `u` diagonal y si me tira error es porque
     # no espera una matrix de ese tipo, si no que espera una matrix comun, por lo que no es
     # diagonal noise
+    #! deberia hacer como en DifferentialEquations.jl: si devuelve un AbstractVector, tengo
+    #! DiagonalNoise mientras que si devuelve una AbstractMatrix, tengo NonDiagonalNoise.
     DN = isa(Σ(t0), Diagonal)
     cache = IIP ? AffineCache(MultiFactorAffineModelDynamics{IIP,D}, x0) : nothing
     C = typeof(cache)

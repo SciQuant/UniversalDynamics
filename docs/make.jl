@@ -35,10 +35,20 @@ makedocs(;
     pages=[
         "Introduction" => "index.md",
         "Abstract Dynamics" => [
-            "Dynamics" => "dynamics.md",
-            "Dynamical system" => "dynamicalsystem.md"
+            "Dynamics" => "ad/dynamics.md",
+            "Dynamical system" => "ad/dynamicalsystem.md"
         ],
-        "Interest Rate Models" => ["Short Rate Models" => "short_rate_model.md"],
+        "Equity Models" => [
+            "Introduction" => "eq/equity.md",
+        ],
+        "Interest Rate Models" => [
+            "Introduction" => "ir/interest_rate.md",
+            "Short Rate Models" => "ir/short_rate_model.md",
+            "Libor Market Model" => "ir/libor_market_model.md"
+        ],
+        "Volatility Models" => [
+            "Introduction" => "vol/volatility.md",
+        ],
         "Simulation" => "simulation.md"
     ],
 )

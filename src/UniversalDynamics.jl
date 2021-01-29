@@ -5,8 +5,10 @@ using Memoize
 using StaticArrays
 using LinearAlgebra
 using OrdinaryDiffEq
-# using StochasticDiffEq
+using StochasticDiffEq
 using DiffEqNoiseProcess
+
+export SVector, SMatrix, @SVector, @SMatrix, Size
 
 include("auxiliary.jl")
 
@@ -23,7 +25,7 @@ export initialtime, state, cor
 
 include("securities.jl")
 export SystemSecurity
-export remake
+export remake # tendria que expandir el ramake de StochasticDiffEq
 
 include("dynamicalsystem.jl")
 export DynamicalSystem

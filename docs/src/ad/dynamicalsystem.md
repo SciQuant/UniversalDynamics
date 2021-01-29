@@ -81,7 +81,7 @@ using UniversalDynamics # hide
 using StaticArrays # hide
 using UnPack # hide
 # load some parameters
-include("../../test/DaiSingletonParameters_A3_1.jl")
+include("../../../test/DaiSingletonParameters_A3_1.jl")
 
 # define short rate model dynamics parameters
 x0 = @SVector [υ₀, θ₀, r₀]
@@ -164,7 +164,7 @@ using UniversalDynamics # hide
 using StaticArrays # hide
 using UnPack # hide
 # load some parameters
-include("../../test/DaiSingletonParameters_A3_1.jl")
+include("../../../test/DaiSingletonParameters_A3_1.jl")
 
 # define short rate model dynamics parameters
 x0 = [υ₀, θ₀, r₀]
@@ -240,8 +240,8 @@ function f(du, u, p, t)
     return nothing
 end
 
-# out of place diffusion coefficient
-function g(u, p, t)
+# in place diffusion coefficient
+function g(du, u, p, t)
     @unpack x_dynamics, x_security, B_security = p
 
     x = remake(x_security, u, du)

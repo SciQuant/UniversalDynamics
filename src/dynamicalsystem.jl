@@ -113,6 +113,8 @@ function DynamicalSystem(f, g, dynamics_container, params)
     dynamics = Dict(Symbol(key, :_dynamics) => value for (key, value) in dynamics_container)
     dynamics = (; dynamics...)
 
+    params = merge(dynamics, securities)
+
     return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params, dynamics, securities)
 end
 

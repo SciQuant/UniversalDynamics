@@ -151,7 +151,7 @@ See [`AbstractDynamics`](@ref) for detailed information.
 
 ```julia
 OneFactorQuadraticModelDynamics(
-    r0::S, κ, θ, σ, ξ₀, ξ₁, ξ₂;
+    x0::S, κ, θ, σ, ξ₀, ξ₁, ξ₂;
     t0=zero(eltype(S))
 ) -> OneFactorQuadraticModelDynamics
 ```
@@ -201,10 +201,36 @@ function OneFactorQuadraticModelDynamics(x0::S, κ, θ, σ, ξ₀, ξ₁, ξ₂;
     return OneFactorQuadraticModelDynamics{IIP,T,A,P,O}(attrs, params, prob)
 end
 
-@doc raw"""
-    MultiFactorQuadraticModelDynamics{IIP,D,DN,T,S,P,O} <: QuadraticModelDynamics{MultiFactor,IIP,D,DN,T}
+"""
+    MultiFactorQuadraticModelDynamics{IIP,D,DN,T} <: QuadraticModelDynamics{MultiFactor,IIP,D,DN,T}
 
-Defines a [`MultiFactor`](@ref) [`ShortRateModel`](@ref) of [`Quadratic`](@ref) type.
+Defines a [`MultiFactor`](@ref) [`QuadraticModelDynamics`](@ref).
+
+## Type parameters:
+See [`AbstractDynamics`](@ref) for detailed information.
+
+## Fields:
+- `attributes`: see [`DynamicsAttributes`](@ref) for detailed information,
+- `params`: model parameters, see [`AffineParameters`](@ref) for detailed information,
+- `prob`: Riccati ODEs.
+
+## Declaration:
+
+```julia
+MultiFactorQuadraticModelDynamics(
+    x0::S, κ, θ, σ, ξ₀, ξ₁, ξ₂;
+    t0=zero(eltype(S))
+) -> MultiFactorQuadraticModelDynamics
+```
+
+returns a `MultiFactorQuadraticModelDynamics` with the given fields, such as state or
+initial condition of the factors `x0`, parameters parameters `κ`, `θ`, `σ`, `ξ₀`, `ξ₁` and
+`ξ₁` as time dependent functions and intial time `t0`. Remaining type parameters are
+obtained through:
+
+- `IIP`: `true` if `isa(x0, Vector)` or `false` if `isa(x0, Union{Real,SVector})`,
+- `D`: equals to `length(x0)`,
+- `DN`: `true` id `isa(σ(t0), Diagonal)`.
 """
 struct MultiFactorQuadraticModelDynamics{IIP,D,DN,T,A,P,O,} <: QuadraticModelDynamics{MultiFactor,IIP,D,DN,T}
     attributes::A

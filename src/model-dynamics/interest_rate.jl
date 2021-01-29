@@ -11,7 +11,7 @@ Supertype for all Interest Rate Models dynamics, such as:
 abstract type InterestRateModelDynamics{IIP,D,M,DN,T} <: ModelDynamics{IIP,D,M,DN,T} end
 
 """
-    TermStructureModelDynamics <: InterestRateModelDynamics
+    abstract type TermStructureModelDynamics{IIP,D,M,DN,T} <: InterestRateModelDynamics{IIP,D,M,DN,T} end
 
 Supertype for all Term Structure Interest Rate models.
 """

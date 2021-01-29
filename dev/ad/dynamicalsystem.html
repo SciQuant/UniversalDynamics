@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Dynamical system · UniversalDynamics.jl</title><link rel="canonical" href="https://SciQuant.github.io/UniversalDynamics.jl/dev/ad/dynamicalsystem.html"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/logo.ico" rel="icon" type="image/x-icon"/><link href="https://fonts.googleapis.com/css?family=Montserrat|Source+Code+Pro&amp;display=swap" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">UniversalDynamics.jl</span></div><form class="docs-search" action="../search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../index.html">Introduction</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox" checked/><label class="tocitem" for="menuitem-2"><span class="docs-label">Abstract Dynamics</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="dynamics.html">Dynamics</a></li><li class="is-active"><a class="tocitem" href="dynamicalsystem.html">Dynamical system</a><ul class="internal"><li><a class="tocitem" href="#Introduction"><span>Introduction</span></a></li><li><a class="tocitem" href="#Simple-example"><span>Simple example</span></a></li><li><a class="tocitem" href="#Out-of-place-example"><span>Out of place example</span></a></li><li><a class="tocitem" href="#In-place-example"><span>In place example</span></a></li></ul></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Equity Models</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../eq/equity.html">Introduction</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Interest Rate Models</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../ir/interest_rate.html">Introduction</a></li><li><a class="tocitem" href="../ir/short_rate_model.html">Short Rate Models</a></li><li><a class="tocitem" href="../ir/libor_market_model.html">Libor Market Model</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-5" type="checkbox"/><label class="tocitem" for="menuitem-5"><span class="docs-label">Volatility Models</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../vol/volatility.html">Introduction</a></li></ul></li><li><a class="tocitem" href="../simulation.html">Simulation</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Abstract Dynamics</a></li><li class="is-active"><a href="dynamicalsystem.html">Dynamical system</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="dynamicalsystem.html">Dynamical system</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/SciQuant/UniversalDynamics.jl/blob/master/docs/src/ad/dynamicalsystem.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h2 id="Introduction"><a class="docs-heading-anchor" href="#Introduction">Introduction</a><a id="Introduction-1"></a><a class="docs-heading-anchor-permalink" href="#Introduction" title="Permalink"></a></h2><p>Supose we would like to build a System of SDEs that comes from the union of a given collection of <a href="ad/@ref"><code>AbstractDynamics</code></a>, with either arbitrary (see <a href="dynamics.html#UniversalDynamics.SystemDynamics"><code>SystemDynamics</code></a>) or known (see <a href="ad/@ref"><code>ModelDynamics</code></a>) coefficients. To be more precise, given a set of <em>Dynamics</em> for <span>$\{ x(t), y(t), z(t) \}$</span>:</p><p class="math-container">\[\begin{aligned}
+d\vec{x}(t) &amp;= f_x(t, \vec{x}(t)) \cdot dt + g_x(t, \vec{x}(t)) \cdot d\vec{W}_x(t), \quad \vec{x}(t_0) = \vec{x}_0,\\
+d\vec{y}(t) &amp;= f_y(t, \vec{y}(t)) \cdot dt + g_y(t, \vec{y}(t)) \cdot d\vec{W}_y(t), \quad \vec{y}(t_0) = \vec{y}_0,\\
+d\vec{z}(t) &amp;= f_z(t, \vec{z}(t)) \cdot dt + g_z(t, \vec{z}(t)) \cdot d\vec{W}_z(t), \quad \vec{z}(t_0) = \vec{z}_0,\\
+\end{aligned}\]</p><p>we wish to obtain the resulting general <em>Dynamics</em> for <span>$u(t)$</span>:</p><p class="math-container">\[d\vec{u}(t) = f(t, \vec{u}(t)) \cdot dt + g(t, \vec{u}(t)) \cdot d\vec{W}(t), \quad \vec{u}(t_0) = \vec{u}_0,\\\]</p><p>with:</p><p class="math-container">\[\vec{u}(t) =
+    \begin{bmatrix}
+        \vec{x}(t) \\
+        \vec{y}(t) \\
+        \vec{z}(t)
+    \end{bmatrix}
+\quad
+f(t, \vec{u}(t)) =
+    \begin{bmatrix}
+        f_x(t, \vec{x}(t)) \\
+        f_y(t, \vec{y}(t)) \\
+        f_z(t, \vec{z}(t))
+    \end{bmatrix}
+\quad
+g(t, \vec{u}(t)) =
+    \begin{bmatrix}
+        g_x(t, \vec{x}(t)) &amp; 0 &amp; 0 \\
+        0 &amp; g_y(t, \vec{y}(t)) &amp; 0 \\
+        0 &amp; 0 &amp; g_z(t, \vec{z}(t))
+    \end{bmatrix}
+\quad
+d\vec{W}(t) =
+    \begin{bmatrix}
+        \vec{W}_x(t) \\
+        \vec{W}_y(t) \\
+        \vec{W}_z(t)
+    \end{bmatrix}\]</p><p>A <a href="dynamicalsystem.html#UniversalDynamics.DynamicalSystem"><code>DynamicalSystem</code></a> provides a shorthand for constructing all the previous prototypes which are needed in the Stochastic Differential Equation solvers. However, it does not construct the general functions <span>$f$</span> and <span>$g$</span>. This task is left to the user. It does provide many useful handlers that come in handy when coding <span>$f$</span> and <span>$g$</span>.</p><article class="docstring"><header><a class="docstring-binding" id="UniversalDynamics.DynamicalSystem" href="#UniversalDynamics.DynamicalSystem"><code>UniversalDynamics.DynamicalSystem</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">DynamicalSystem{IIP,D,M,DN,T} &lt;: AbstractDynamics{IIP,D,M,DN,T}</code></pre><p>The central structure of <strong>UniversalDynamics</strong>. Its main purpose is to construct an <a href="dynamics.html#UniversalDynamics.AbstractDynamics"><code>AbstractDynamics</code></a> given a collection of <a href="dynamics.html#UniversalDynamics.AbstractDynamics"><code>AbstractDynamics</code></a>.</p><p><strong>Type parameters:</strong></p><p>See <a href="dynamics.html#UniversalDynamics.AbstractDynamics"><code>AbstractDynamics</code></a> for detailed information.</p><p><strong>Fields:</strong></p><ul><li><code>f</code>: drift coefficient represented as either an in place or out of place function,</li><li><code>g</code>: diffusion coefficient represented as either an in place or out of place function,</li><li><code>attributes</code>: see <a href="dynamics.html#UniversalDynamics.DynamicsAttributes"><code>DynamicsAttributes</code></a> for detailed information,</li><li><code>params</code>: container with parameters values (preferably a <code>NamedTuple</code>),</li><li><code>dynamics</code>: collection of <a href="dynamics.html#UniversalDynamics.AbstractDynamics"><code>AbstractDynamics</code></a> (preferably in a <code>OrderedDict</code>),</li><li><code>securities</code>: useful handlers for both dynamics simulation and derivatives pricing.</li></ul><p><strong>Declaration:</strong></p><p>Given a collection of dynamics, group them together in a container such as an <code>OrderedDict</code> and define a <code>DynamicalSystem</code> using:</p><pre><code class="language-julia">DynamicalSystem(dynamics)</code></pre><p>The resulting object will have information that can be inspected and is useful for coding the coefficients (drift and difussion) functions.</p><p>The complete declaration of a <code>DynamicalSystem</code> requires:</p><pre><code class="language-julia">DynamicalSystem(f, g, dynamics, params)</code></pre><p>with <code>f</code> and <code>g</code> either the in place or the out of place functions for the coefficients:</p><ul><li><strong>Out of place</strong>: coefficients must be in the form <code>f(u, p, t) -&gt; SVector</code> and <code>g(u, p, t) -&gt; SVector</code> for <a href="dynamics.html#UniversalDynamics.DiagonalNoise"><code>DiagonalNoise</code></a> cases or <code>g(u, p, t) -&gt; SMatrix</code> for <a href="dynamics.html#UniversalDynamics.NonDiagonalNoise"><code>NonDiagonalNoise</code></a> cases. These functions return the drift or diffusion coefficients as <code>SArrays</code> given a current state <code>u</code>, current time <code>t</code> and a set of parameters.</li><li><strong>In place</strong>: coefficients must be in the form <code>f(du, u, p, t) -&gt; nothing</code> and <code>g(du, u, p, t) -&gt; nothing</code>. These functions modify in place <code>du::Array</code> and set it equal to either the drift or the diffusion coefficients given a current state <code>u</code>, current time <code>t</code> and a set of parameters.</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/SciQuant/UniversalDynamics.jl/blob/0da66f4a5e78285bc9c7bdfb1f539d8d4edd3167/src/dynamicalsystem.jl#LL1-L46">source</a></section></article><h2 id="Simple-example"><a class="docs-heading-anchor" href="#Simple-example">Simple example</a><a id="Simple-example-1"></a><a class="docs-heading-anchor-permalink" href="#Simple-example" title="Permalink"></a></h2><pre><code class="language-julia"># declare dynamics
+x = SystemDynamics(rand(1); noise=ScalarNoise())
+y = SystemDynamics(rand(2); noise=DiagonalNoise(2), ρ=[1 0.3; 0.3 1])
+z = SystemDynamics(rand(3); noise=NonDiagonalNoise(2), ρ=[1 0.2; 0.2 1])
+
+# group dynamics in a container
+dynamics = OrderedDict(:x =&gt; x, :y =&gt; y, :z =&gt; z)
+
+# compute dynamical system
+ds = DynamicalSystem(dynamics)</code></pre><pre class="documenter-example-output">6-dimensional dynamical system with 5-dimensional NonDiagonalNoise
+ state:           [0.160108, 0.442414, 0.684116, …, 0.0640621, 0.923639]
+ in-place?        true
+ Dimension:       6
+ Noise dimension: 5
+ diagonal noise?  false</pre><h2 id="Out-of-place-example"><a class="docs-heading-anchor" href="#Out-of-place-example">Out of place example</a><a id="Out-of-place-example-1"></a><a class="docs-heading-anchor-permalink" href="#Out-of-place-example" title="Permalink"></a></h2><p>A <a href="../ir/short_rate_model.html#UniversalDynamics.MultiFactorAffineModelDynamics"><code>MultiFactorAffineModelDynamics</code></a> with its money market account. Checkout <a href="../ir/short_rate_model.html#Multi-Factor-Affine-Model">Multi-Factor Affine Model</a> for detailed information about this kind of Short Rate Model.</p><pre><code class="language-julia"># load some parameters
+include(&quot;../../../test/DaiSingletonParameters_A3_1.jl&quot;)
+
+# define short rate model dynamics parameters
+x0 = @SVector [υ₀, θ₀, r₀]
+
+ξ₀(t) = zero(t) # ξ₀ = zero
+
+ξ₁(t) = @SVector [0, 0, 1]
+
+ϰ(t) = @SMatrix([
+    μ     0 0
+    0     ν 0
+    κ_rυ -κ κ
+])
+
+θ(t) = @SVector [ῡ, θ̄, θ̄ ]
+
+Σ(t) = @SMatrix [
+    η           0    0
+    η * σ_θυ    1 σ_θr
+    η * σ_rυ σ_rθ    1
+]
+
+α(t) = @SVector [0, ζ^2, α_r]
+
+β(t) = @SMatrix [
+    1   0 0
+    β_θ 0 0
+    1   0 0
+]
+
+# declare short rate model dynamics
+x = MultiFactorAffineModelDynamics(x0, ϰ, θ, Σ, α, β, ξ₀, ξ₁)
+
+# declare money market account dynamics
+B = SystemDynamics(one(eltype(x)))
+
+# out of place drift coefficient
+function f(u, p, t)
+    @unpack x_dynamics, x_security, B_security = p
+
+    x = remake(x_security, u)
+    B = remake(B_security, u)
+
+    IR = FixedIncomeSecurities(x_dynamics, x, B)
+
+    dx = drift(x(t), parameters(x_dynamics), t)
+    dB = IR.r(t) * B(t)
+
+    return vcat(dx, dB)
+end
+
+# out of place diffusion coefficient
+function g(u, p, t)
+    @unpack x_dynamics, x_security, B_security = p
+
+    x = remake(x_security, u)
+    B = remake(B_security, u)
+
+    dx = diffusion(x(t), parameters(x_dynamics), t)
+    dB = zero(eltype(u))
+
+    return @SMatrix [dx[1,1] dx[1,2] dx[1,3]  0
+                     dx[2,1] dx[2,2] dx[2,3]  0
+                     dx[3,1] dx[3,2] dx[3,3]  0
+                           0       0       0 dB]
+end
+
+# group dynamics in a container
+dynamics = OrderedDict(:x =&gt; x, :B =&gt; B)
+
+# compute dynamical system
+ds = DynamicalSystem(f, g, dynamics, nothing)</code></pre><pre class="documenter-example-output">4-dimensional dynamical system with 4-dimensional NonDiagonalNoise
+ state:           [0.00839, 1.06997, 2.08265, 1.0]
+ in-place?        false
+ Dimension:       4
+ Noise dimension: 4
+ diagonal noise?  false</pre><h2 id="In-place-example"><a class="docs-heading-anchor" href="#In-place-example">In place example</a><a id="In-place-example-1"></a><a class="docs-heading-anchor-permalink" href="#In-place-example" title="Permalink"></a></h2><pre><code class="language-">using OrderedCollections # hide
+using UniversalDynamics # hide
+using StaticArrays # hide
+using UnPack # hide
+# load some parameters
+include(&quot;../../../test/DaiSingletonParameters_A3_1.jl&quot;)
+
+# define short rate model dynamics parameters
+x0 = [υ₀, θ₀, r₀]
+
+ξ₀!(t) = zero(t) # ξ₀ = zero
+
+function ξ₁!(u, t)
+    u[1] = 0
+    u[2] = 0
+    u[3] = 1
+    return nothing
+end
+
+function ϰ!(u, t)
+    u[1,1] = μ
+    u[2,2] = ν
+    u[3,1] = κ_rυ
+    u[3,2] = -κ
+    u[3,3] = κ
+    return nothing
+end
+
+function θ!(u, t)
+    u[1] = ῡ
+    u[2] = θ̄
+    u[3] = θ̄
+    return nothing
+end
+
+function Σ!(u, t)
+    u[1,1] = η
+    u[2,1] = η * σ_θυ
+    u[2,2] = 1
+    u[2,3] = σ_θr
+    u[3,1] = η * σ_rυ
+    u[3,2] = σ_rθ
+    u[3,3] = 1
+    return nothing
+end
+
+function α!(u, t)
+    u[1] = 0
+    u[2] = θζ^2
+    u[3] = α_r
+    return nothing
+end
+
+function β!(u, t)
+    u[1,1] = 1
+    u[2,1] = β_θ
+    u[3,1] = 1
+    return nothing
+end
+
+# declare short rate model dynamics
+x = MultiFactorAffineModelDynamics(x0, ϰ!, θ!, Σ!, α!, β!, ξ₀!, ξ₁!)
+
+# declare money market account dynamics
+B = SystemDynamics(one(eltype(x)))
+
+# in place drift coefficient
+function f(du, u, p, t)
+    @unpack x_dynamics, x_security, B_security = p
+
+    x = remake(x_security, u, du)
+    B = remake(B_security, u, du)
+
+    IR = FixedIncomeSecurities(x_dynamics, x, B)
+
+    drift!(x.dx, x(t), parameters(x_dynamics), t)
+    B.dx[] = IR.r(t) * B(t)
+
+    return nothing
+end
+
+# in place diffusion coefficient
+function g(du, u, p, t)
+    @unpack x_dynamics, x_security, B_security = p
+
+    x = remake(x_security, u, du)
+    B = remake(B_security, u, du)
+
+    diffusion!(x.dx, x(t), parameters(x_dynamics), t)
+    B.dx[] = zero(eltype(u))
+
+    return nothing
+end
+
+# group dynamics in a container
+dynamics = OrderedDict(:x =&gt; x, :B =&gt; B)
+
+# compute dynamical system
+ds = DynamicalSystem(f, g, dynamics, nothing)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="dynamics.html">« Dynamics</a><a class="docs-footer-nextpage" href="../eq/equity.html">Introduction »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 29 January 2021 20:29">Friday 29 January 2021</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

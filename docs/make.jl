@@ -3,9 +3,9 @@ using Documenter
 using DocumenterTools: Themes
 
 # download themes
-# for file in ("sciquant-lightdefs.scss", "sciquant-darkdefs.scss", "sciquant-style.scss")
-#     download("https://raw.githubusercontent.com/SciQuant/doctheme/master/$file", joinpath(@__DIR__, file))
-# end
+for file in ("sciquant-lightdefs.scss", "sciquant-darkdefs.scss", "sciquant-style.scss")
+    download("https://raw.githubusercontent.com/SciQuant/doctheme/master/$file", joinpath(@__DIR__, file))
+end
 
 # create themes
 for w in ("light", "dark")

@@ -1,6 +1,7 @@
 ## [Introduction](@id ShortRateModelIntroduction)
 
 Under a short rate model, the stochastic state variable is taken to be the instantaneous spot rate. The short rate ``r(t)`` is the (continuously compounded, annualized) interest rate at which an entity can borrow money for an infinitesimally small period of time ``dt`` from time ``t``. Specifying the current short rate does not specify the entire yield curve. However, no-arbitrage arguments show that, under some fairly relaxed technical conditions, if we model the evolution of ``r(t)`` as a stochastic process under the risk-neutral measure ``Q``, then the price at time ``t`` of a zero-coupon or discount bond maturing at time ``T`` with a payoff of 1 is given by:
+
 ```math
 P(t, T) = E_t^Q \left[ \exp \left( - \int_t^T r(s) ds \right) \right].
 ```

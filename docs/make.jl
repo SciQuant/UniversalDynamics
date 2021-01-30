@@ -3,20 +3,20 @@ using Documenter
 using DocumenterTools: Themes
 
 # download themes
-for file in ("juliadynamics-lightdefs.scss", "juliadynamics-darkdefs.scss", "juliadynamics-style.scss")
-    download("https://raw.githubusercontent.com/JuliaDynamics/doctheme/master/$file", joinpath(@__DIR__, file))
-end
+# for file in ("sciquant-lightdefs.scss", "sciquant-darkdefs.scss", "sciquant-style.scss")
+#     download("https://raw.githubusercontent.com/SciQuant/doctheme/master/$file", joinpath(@__DIR__, file))
+# end
 
 # create themes
 for w in ("light", "dark")
-    header = read(joinpath(@__DIR__, "juliadynamics-style.scss"), String)
-    theme = read(joinpath(@__DIR__, "juliadynamics-$(w)defs.scss"), String)
-    write(joinpath(@__DIR__, "juliadynamics-$(w).scss"), header*"\n"*theme)
+    header = read(joinpath(@__DIR__, "sciquant-style.scss"), String)
+    theme = read(joinpath(@__DIR__, "sciquant-$(w)defs.scss"), String)
+    write(joinpath(@__DIR__, "sciquant-$(w).scss"), header*"\n"*theme)
 end
 
 # compile themes
-Themes.compile(joinpath(@__DIR__, "juliadynamics-light.scss"), joinpath(@__DIR__, "src/assets/themes/documenter-light.css"))
-Themes.compile(joinpath(@__DIR__, "juliadynamics-dark.scss"), joinpath(@__DIR__, "src/assets/themes/documenter-dark.css"))
+Themes.compile(joinpath(@__DIR__, "sciquant-light.scss"), joinpath(@__DIR__, "src/assets/themes/documenter-light.css"))
+Themes.compile(joinpath(@__DIR__, "sciquant-dark.scss"), joinpath(@__DIR__, "src/assets/themes/documenter-dark.css"))
 
 makedocs(;
     modules=[UniversalDynamics],
@@ -28,7 +28,7 @@ makedocs(;
         canonical="https://SciQuant.github.io/UniversalDynamics.jl/dev",
         assets = [
         "assets/logo.ico",
-        asset("https://fonts.googleapis.com/css?family=Montserrat|Source+Code+Pro&display=swap", class=:css),
+        asset("https://fonts.googleapis.com/css?family=Lato|Source+Code+Pro&display=swap", class=:css),
         ],
         collapselevel = 1,
     ),

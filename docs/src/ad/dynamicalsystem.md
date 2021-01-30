@@ -40,7 +40,7 @@ g(t, \vec{u}(t)) =
         0 & 0 & g_z(t, \vec{z}(t))
     \end{bmatrix}
 \quad
-d\vec{W}(t) =
+\vec{W}(t) =
     \begin{bmatrix}
         \vec{W}_x(t) \\
         \vec{W}_y(t) \\
@@ -54,7 +54,7 @@ A [`DynamicalSystem`](@ref) provides a shorthand for constructing all the previo
 DynamicalSystem
 ```
 
-## Simple example
+## Basic example
 
 ```@example
 using OrderedCollections # hide

@@ -10,7 +10,7 @@ end
 
 function LiborMarketModelDynamics(
     L0::S, τ, σ, ρ;
-    noise=DiagonalNoise(length(L0)),
+    noise=DiagonalNoise{length(L0)}(),
     measure=Spot(),
     imethod=LiborMarketModelDoNotInterpolate(),
     t0=zero(eltype(S))

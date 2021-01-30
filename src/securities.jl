@@ -1,14 +1,6 @@
 
 abstract type AbstractSecurity end
 
-# IDEA:
-# me parece que llamarla SystemSecurity no esta mal pero me puede jugar en contra con el
-# hecho que en los modelos tambien tengo que definir Security. Por otro lado, lo que podria
-# hacer es que dentro de ModelSecurity se definan los SystemSecurities necesarios (pero por
-# algo esto no lo hice antes...)
-# El otro temita esta en el nombre, que es Security en singular pero puede representar
-# objetos que son multidimensionales (aunque eso esta en System incluido). Por ahi habria
-# que llamarlo SystemSecurities. Pero eso pronto lo veremos.
 struct Security{Di,Df,Mi,Mf,U,X,DU,DX} <: AbstractSecurity
     u::U
     x::X

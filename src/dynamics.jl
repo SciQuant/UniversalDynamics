@@ -120,7 +120,7 @@ function SystemDynamics(
 
     DN = isa(noise, DiagonalNoise) || (isa(noise, ScalarNoise) && isequal(D, 1))
 
-    if isnothing(ρ) || isequal(ρ, I)
+    if isequal(ρ, I)
         # should we set or keep ρ to I insted of the following?
         ρ = IIP ? one(T)*I(M) : Diagonal(SVector{M,T}(ones(M)))
     else

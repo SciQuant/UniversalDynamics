@@ -1,4 +1,8 @@
 
+# IDEA: implementar mejores dispatchs
+#! SOLVE: es un temita el hecho de tener un dynamical system que resulte no ser DN pero que
+#! tenga un modelo de short rate que es DN. Hay que solucionar eso
+
 function drift!(
     μr::AbstractVector{<:Real}, r::Real, p::AffineParameters{OneFactor,true}, t::Real
 )
@@ -26,11 +30,14 @@ function drift!(
     p::AffineParameters{MultiFactor,true},
     t::Real
 )
-    @unpack κ, θ = p
-    @unpack v1 = p.cache
+    @unpack cache = p
+    @unpack κ, θ, v1 = cache
 
-    v1 .= θ(t) .- x
-    mul!(μx, κ(t), v1)
+    p.κ(κ, t)
+    p.θ(θ, t)
+
+    v1 .= θ .- x
+    mul!(μx, κ, v1)
 
     return nothing
 end
@@ -45,14 +52,18 @@ function diffusion!(
     p::AffineParameters{MultiFactor,true,D,true},
     t::Real
 ) where {D}
-    @unpack Σ, α, β = p
-    @unpack v1 = p.cache
+    @unpack cache = p
+    @unpack Σ, α, β, v1 = cache
 
-    # mul!(v1, β(t), x) .+= α(t)
-    copyto!(v1, α(t))
-    mul!(v1, β(t), x, true, true)
+    p.Σ(Σ, t)
+    p.α(α, t)
+    p.β(β, t)
+
+    # mul!(v1, β, x) .+= α(t)
+    copyto!(v1, α)
+    mul!(v1, β, x, true, true)
     map!(sqrt, v1, v1)
-    σx .= Σ(t).diag .* v1
+    σx .= Σ .* v1
 
     return nothing
 end
@@ -64,14 +75,19 @@ function diffusion!(
     p::AffineParameters{MultiFactor,true,D,false},
     t::Real
 ) where {D}
-    @unpack Σ, α, β = p
-    @unpack v1 = p.cache
 
-    # mul!(v1, β(t), x) .+= α(t)
-    copyto!(v1, α(t))
-    mul!(v1, β(t), x, true, true)
+    @unpack cache = p
+    @unpack Σ, α, β, v1 = cache
+
+    p.Σ(Σ, t)
+    p.α(α, t)
+    p.β(β, t)
+
+    # mul!(v1, β, x) .+= α(t)
+    copyto!(v1, α)
+    mul!(v1, β, x, true, true)
     map!(sqrt, v1, v1)
-    mul!(σx, Σ(t), Diagonal(v1)) # permutedims is called and it allocates
+    mul!(σx, Σ, Diagonal(v1)) # permutedims is called and it allocates
 
     return nothing
 end

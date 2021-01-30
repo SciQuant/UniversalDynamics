@@ -59,66 +59,69 @@ struct DynamicalSystem{IIP,D,M,DN,T,F,G,A,P,DS,S} <: AbstractDynamics{IIP,D,M,DN
     end
 end
 
-function DynamicalSystem(f, g, dynamics_container, params)
+function DynamicalSystem(f, g, dynamics, params=nothing)
 
-    if isempty(dynamics_container)
+    if isempty(dynamics)
         throw(ArgumentError("provide at least one `AbstractDynamics`."))
     end
 
-    dynamics = values(dynamics_container)
+    _dynamics = values(dynamics)
 
-    IIP = all(isinplace.(dynamics))
-    OOP = all((!isinplace).(dynamics))
+    IIP = all(isinplace.(_dynamics))
+    OOP = all((!isinplace).(_dynamics))
 
-    if isequal(IIP, OOP)
+    if IIP == false && OOP == false
         error("all dynamics *must* be either In-Place or Out-Of-Place.")
     end
 
-    D = sum(dimension.(dynamics))
-    M = sum(noise_dimension.(dynamics))
+    D = sum(dimension.(_dynamics))
+    M = sum(noise_dimension.(_dynamics))
 
-    DN = !any((!diagonalnoise).(dynamics))
+    DN = !any((!diagonalnoise).(_dynamics))
 
-    t0s = [initialtime(d) for d in dynamics]
-    if !all(t -> t == first(t0s), t0s)
+    t0 = initialtime(first(_dynamics))
+    if !all(t -> isequal(t, t0), initialtime.(_dynamics))
         error("all dynamics *must* have the same initial time.")
     end
-    t0 = initialtime(first(dynamics))
 
-    T = typeof(t0)
+    x0 = IIP ? vcat(state.(_dynamics)...) : vcat(SVector.(state.(_dynamics))...)
 
-    x0 = IIP ? vcat(state.(dynamics)...) : vcat(SVector.(state.(dynamics))...)
+    T = eltype(x0)
+    t0 = convert(T, t0)
 
-    ρ = cat(cor.(dynamics)..., dims = (1, 2))
+    ρ = cat(cor.(_dynamics)..., dims = (1, 2))
     ρ = IIP ? Array{T,2}(ρ) : SMatrix{size(ρ)...,T}(ρ)
 
-    noise_rate_prototype = diffeq_noise_rate_prototype(IIP, D, M, DN, dynamics)
+    noise_rate_prototype = diffeq_noise_rate_prototype(IIP, D, M, DN, _dynamics)
 
     #! por ahi deberiamos definir el noise recien en la llamada a solve
     noise = diffeqnoise(t0, ρ, IIP, D, M, DN)
 
     attrs = DynamicsAttributes(t0, x0, ρ, noise, noise_rate_prototype)
 
-    securities = Dict()
     d = m = 1
-    for (name, abstract_dynamics) in dynamics_container
+    securities = Dict()
+    for (name, abstract_dynamics) in dynamics
         x = Security(abstract_dynamics, d, m)
         push!(securities, Symbol(name, :_security) => x)
         d += dimension(abstract_dynamics)
         m += noise_dimension(abstract_dynamics)
     end
-
     securities = (; securities...)
 
-    dynamics = Dict(Symbol(key, :_dynamics) => value for (key, value) in dynamics_container)
-    dynamics = (; dynamics...)
+    _dynamics = Dict(Symbol(key, :_dynamics) => value for (key, value) in dynamics)
+    _dynamics = (; _dynamics...)
 
-    params = merge(dynamics, securities)
+    if isnothing(params)
+        params = merge(_dynamics, securities)
+    else
+        params =  merge(params, _dynamics, securities)
+    end
 
-    return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params, dynamics, securities)
+    return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params, _dynamics, securities)
 end
 
-DynamicalSystem(dynamics) = DynamicalSystem(nothing, nothing, dynamics, nothing)
+DynamicalSystem(dynamics) = DynamicalSystem(nothing, nothing, dynamics)
 
 for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
     @eval begin
@@ -126,13 +129,8 @@ for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
     end
 end
 
-parameters(ds::DynamicalSystem) = parameters(ds, ds.params)
-parameters(ds::DynamicalSystem, params) = merge(params, ds.dynamics, ds.securities)
-parameters(ds::DynamicalSystem, ::Nothing) = merge(ds.dynamics, ds.securities)
 
-
-# la llamo desde aca y no desde StochasticDiffEq? es mas liviano DiffEqBase
-function DiffEqBase.SDEProblem(ds::DynamicalSystem{IIP}, tspan; u0=state(ds)) where {IIP}
+function StochasticDiffEq.SDEProblem(ds::DynamicalSystem{IIP}, tspan; u0=state(ds)) where {IIP}
     return SDEProblem{IIP}(
         SDEFunction(ds.f, ds.g),
         ds.g,

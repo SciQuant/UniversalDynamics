@@ -34,27 +34,41 @@ function AffineParameters(
     return AffineParameters{OneFactor,IIP,1,DN,K,T,S,A,B,X0,X1,C}(κ, θ, Σ, α, β, ξ₀, ξ₁, cache)
 end
 
-function AffineParameters(
-    ::Type{MultiFactor}, t0::Real, x0::AbstractVector, κ::K, θ::T, Σ::S, α::A, β::B, ξ₀::X0, ξ₁::X1
-) where {K,T,S,A,B,X0,X1}
+function AffineParameters{MultiFactor,IIP,D,DN}(
+    t0::Real, x0::AbstractVector, κ::K, θ::T, Σ::S, α::A, β::B, ξ₀::X0, ξ₁::X1
+) where {IIP,D,DN,K,T,S,A,B,X0,X1}
 
-    IIP = isinplace(x0)
-    D = length(x0)
-    # pedimos que el usuario explicitamente introduzca un objeto diagonal y no isdiag(Σ(t0))
-    # para IIP me fijo si el cache que tengo que crear para Σ isa Diagonal y para fijarme
-    # eso lo que hago es... evaluo Σ mandandole un `u` diagonal y si me tira error es porque
-    # no espera una matrix de ese tipo, si no que espera una matrix comun, por lo que no es
-    # diagonal noise
-    #! deberia hacer como en DifferentialEquations.jl: si devuelve un AbstractVector, tengo
-    #! DiagonalNoise mientras que si devuelve una AbstractMatrix, tengo NonDiagonalNoise.
-    DN = isa(Σ(t0), Diagonal)
-    cache = IIP ? AffineCache(MultiFactorAffineModelDynamics{IIP,D}, x0) : nothing
+    if IIP
+        cache = AffineCache(MultiFactorAffineModelDynamics{IIP,D,DN}, x0)
+    else
+        cache = nothing
+    end
     C = typeof(cache)
 
     return AffineParameters{MultiFactor,IIP,D,DN,K,T,S,A,B,X0,X1,C}(κ, θ, Σ, α, β, ξ₀, ξ₁, cache)
 end
 
-(p::AffineParameters)(t::Real) = (p.κ(t), p.θ(t), p.Σ(t), p.α(t), p.β(t), p.ξ₀(t), p.ξ₁(t))
+function (p::AffineParameters{FM,true})(t::Real) where {FM}
+    @unpack cache = p
+    @unpack κ, θ, Σ, α, β, ξ₁ = cache
+
+    # in place
+    p.κ(κ, t)
+    p.θ(θ, t)
+    p.Σ(Σ, t)
+    p.α(α, t)
+    p.β(β, t)
+    p.ξ₁(ξ₁, t)
+
+    # returns a <: Real
+    ξ₀ = p.ξ₀(t)
+
+    return (κ, θ, Σ, α, β, ξ₀, ξ₁)
+end
+
+function (p::AffineParameters{FM,false})(t::Real) where {FM}
+    return (p.κ(t), p.θ(t), p.Σ(t), p.α(t), p.β(t), p.ξ₀(t), p.ξ₁(t))
+end
 
 @doc raw"""
     QuadraticParameters{FM,IIP,D,DN} <: ShortRateParameters{FM,IIP,D,DN}
@@ -99,19 +113,48 @@ end
 
 (p::QuadraticParameters)(t::Real) = (p.κ(t), p.θ(t), p.σ(t), p.ξ₀(t), p.ξ₁(t), p.ξ₂(t))
 
-struct AffineCache{V1,V2,V3,R}
-    v1::V1
-    v2::V2
-    v3::V3
-    rout::R
+struct AffineCache{V,M,VM}
+    κ::M
+    θ::V
+    Σ::VM
+    α::V
+    β::M
+    # ξ₀
+    ξ₁::V
+
+    v1::V
+    v2::V
+    v3::V
+
+    rout::V # riccati out
 end
 
-function AffineCache(T::Type{<:AffineModelDynamics}, x::AbstractVector)
-    return AffineCache(
-        ntuple(_ -> similar(x), 3)...,
-        similar(x, riccati_dimension(T))
+function AffineCache(
+    T::Type{<:AffineModelDynamics{FM,IIP,D,DN}}, x::AbstractVector
+) where {FM,IIP,D,DN}
+
+    κ = similar(x, D, D)
+    θ = similar(x)
+    Σ = DN ? similar(x) : similar(x, D, D)
+    α = similar(x)
+    β = similar(x, D, D)
+    ξ₁ = similar(x)
+
+    M = typeof(κ)
+    V = typeof(θ)
+    VM = typeof(Σ)
+
+    return AffineCache{V,M,VM}(
+        κ, θ, Σ, α, β, ξ₁, ntuple(_ -> similar(x), 3)..., similar(x, riccati_dimension(T))
     )
 end
+
+# function AffineCache(T::Type{<:AffineModelDynamics}, x::AbstractVector)
+#     return AffineCache(
+#         ntuple(_ -> similar(x), 3)...,
+#         similar(x, riccati_dimension(T))
+#     )
+# end
 
 struct QuadraticCache{V1,V2,M1,M2,R}
     v1::V1

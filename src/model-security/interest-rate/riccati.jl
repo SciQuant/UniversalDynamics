@@ -9,24 +9,9 @@ function riccati_problem(
 ) where {FM,IIP,S}
     N = riccati_dimension(T)
     uT = IIP ? zeros(S, N) : SVector{N}(zeros(S, N))
-    f = IIP ? riccati! : riccati
-    prob =  ODEProblem{IIP}(f, uT, (one(S), zero(S)), p)
+    prob =  ODEProblem{IIP}(riccati, uT, (one(S), zero(S)), p)
     return prob
 end
-
-"""
-    riccati!(du, u, p::ShortRateParameters, t) -> Nothing
-
-In place computation of a [`ShortRateModel`](@ref) Riccati's System.
-"""
-function riccati!(du, u, p::ShortRateParameters, t) end
-
-"""
-    riccati(u, p::ShortRateParameters, t) -> SVector
-
-Out of place computation of a [`ShortRateModel`](@ref) Riccati's System.
-"""
-function riccati(u, p::ShortRateParameters, t) end
 
 function riccati(du, u, p::AffineParameters{OneFactor,true}, t)
     κ, θ, Σ, α, β, ξ₀, ξ₁ = p(t)

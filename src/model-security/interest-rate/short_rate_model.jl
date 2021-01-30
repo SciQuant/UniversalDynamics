@@ -13,14 +13,25 @@ function ShortRateModelSpotRate(srm::OneFactorAffineModelDynamics, r::Security)
     return ShortRateModelSpotRate(srm, x, r)
 end
 
-function ShortRateModelSpotRate(srm::MultiFactorAffineModelDynamics, x::Security)
+function ShortRateModelSpotRate(srm::MultiFactorAffineModelDynamics{false}, x::Security)
     @unpack ξ₀, ξ₁ = parameters(srm)
     r(t::Real) = ξ₀(t) + dot(ξ₁(t), x(t))
     return ShortRateModelSpotRate(srm, x, r)
 end
 
+function ShortRateModelSpotRate(srm::MultiFactorAffineModelDynamics{true}, x::Security)
+    p = parameters(srm)
+    @unpack cache = p
+    @unpack ξ₁ = cache
+    function r(t::Real)
+        ξ₀ = p.ξ₀(t)
+        p.ξ₁(ξ₁, t)
+        return ξ₀ + dot(ξ₁, x(t))
+    end
+    return ShortRateModelSpotRate(srm, x, r)
+end
+
 function ShortRateModelSpotRate(srm::OneFactorQuadraticModelDynamics, x::Security)
-    @unpack ξ₀, ξ₁ = parameters(srm)
     @unpack ξ₀, ξ₁, ξ₂ = parameters(srm)
 
     r = function (t::Real)

@@ -83,17 +83,18 @@ See [`AbstractDynamics`](@ref) for detailed information.
 ```julia
 MultiFactorAffineModelDynamics(
     x0::S, κ, θ, Σ, α, β, ξ₀, ξ₁;
-    t0=zero(eltype(S))
+    t0=zero(eltype(S)), noise::AbstractNoise=DiagonalNoise{length(x0)}()
 ) -> MultiFactorAffineModelDynamics
 ```
 
 returns a `MultiFactorAffineModelDynamics` with the given fields, such as state or initial
 condition of the factors `x0`, parameters `κ`, `θ`, `Σ`, `α`, `β`, `ξ₀` and `ξ₁` as time
-dependent functions and intial time `t0`. Remaining type parameters are obtained through:
+dependent functions, intial time `t0` and a driving Wiener process `noise`. Remaining type
+parameters are obtained through:
 
 - `IIP`: `true` if `isa(x0, Vector)` or `false` if `isa(x0, Union{Real,SVector})`,
 - `D`: equals to `length(x0)`,
-- `DN`: `true` id `isa(Σ(t0), Diagonal)`.
+- `DN`: determined by `noise`, default value is `true`.
 """
 struct MultiFactorAffineModelDynamics{IIP,D,DN,T,A,P,O} <: AffineModelDynamics{MultiFactor,IIP,D,DN,T}
     attributes::A
@@ -101,7 +102,10 @@ struct MultiFactorAffineModelDynamics{IIP,D,DN,T,A,P,O} <: AffineModelDynamics{M
     prob::O
 end
 
-function MultiFactorAffineModelDynamics(x0::S, κ, θ, Σ, α, β, ξ₀, ξ₁; t0=zero(eltype(S))) where {S}
+function MultiFactorAffineModelDynamics(
+    x0::S, κ, θ, Σ, α, β, ξ₀, ξ₁;
+    noise::AbstractNoise=DiagonalNoise{length(x0)}(), t0=zero(eltype(S))
+) where {S}
 
     if !(S <: AbstractVector)
         throw(ArgumentError("state *must* be <: AbstractVector."))
@@ -110,13 +114,20 @@ function MultiFactorAffineModelDynamics(x0::S, κ, θ, Σ, α, β, ξ₀, ξ₁;
     T = eltype(S)
     t0 = convert(T, t0)
 
-    IIP = isinplace(x0)
     D = length(x0)
+    M = dimension(noise)
 
-    params = AffineParameters(MultiFactor, t0, x0, κ, θ, Σ, α, β, ξ₀, ξ₁)
+    # M must match D for all short rate models of affine type
+    if !isequal(D, M)
+        throw(DimensionMismatch("expected noise dimension $D, got $M."))
+    end
+
+    IIP = isinplace(x0)
+
+    DN = isa(noise, DiagonalNoise) || (isa(noise, ScalarNoise) && isequal(D, 1))
+
+    params = AffineParameters{MultiFactor,IIP,D,DN}(t0, x0, κ, θ, Σ, α, β, ξ₀, ξ₁)
     prob = riccati_problem(MultiFactorAffineModelDynamics{IIP,D}, T, params)
-
-    DN = diagonalnoise(params)
 
     ρ = IIP ? one(T)*I(D) : Diagonal(SVector{D,T}(ones(D)))
 

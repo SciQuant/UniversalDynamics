@@ -113,7 +113,7 @@ x0 = @SVector [υ₀, θ₀, r₀]
 ]
 
 # declare short rate model dynamics
-x = MultiFactorAffineModelDynamics(x0, ϰ, θ, Σ, α, β, ξ₀, ξ₁)
+x = MultiFactorAffineModelDynamics(x0, ϰ, θ, Σ, α, β, ξ₀, ξ₁; noise=NonDiagonalNoise(3))
 
 # declare money market account dynamics
 B = SystemDynamics(one(eltype(x)))
@@ -207,7 +207,7 @@ end
 
 function α!(u, t)
     u[1] = 0
-    u[2] = θζ^2
+    u[2] = ζ^2
     u[3] = α_r
     return nothing
 end
@@ -220,10 +220,10 @@ function β!(u, t)
 end
 
 # declare short rate model dynamics
-x = MultiFactorAffineModelDynamics(x0, ϰ!, θ!, Σ!, α!, β!, ξ₀!, ξ₁!)
+x = MultiFactorAffineModelDynamics(x0, ϰ!, θ!, Σ!, α!, β!, ξ₀!, ξ₁!; noise=NonDiagonalNoise(3))
 
 # declare money market account dynamics
-B = SystemDynamics(one(eltype(x)))
+B = SystemDynamics(ones(eltype(x), 1)) # force `IIP = true` with `x0` as `Array`
 
 # in place drift coefficient
 function f(du, u, p, t)

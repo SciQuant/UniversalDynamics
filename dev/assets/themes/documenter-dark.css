@@ -753,13 +753,13 @@ a.has-text-danger:hover, a.has-text-danger:focus {
   font-weight: 700 !important; }
 
 .is-family-primary {
-  font-family: "Montserrat", sans-serif !important; }
+  font-family: "Lato", sans-serif !important; }
 
 .is-family-secondary {
-  font-family: "Montserrat", sans-serif !important; }
+  font-family: "Lato", sans-serif !important; }
 
 .is-family-sans-serif {
-  font-family: "Montserrat", sans-serif !important; }
+  font-family: "Lato", sans-serif !important; }
 
 .is-family-monospace {
   font-family: "Source Code Pro", monospace !important; }
@@ -1103,7 +1103,7 @@ html.theme--documenter-dark {
   html.theme--documenter-dark input,
   html.theme--documenter-dark select,
   html.theme--documenter-dark textarea {
-    font-family: "Montserrat", sans-serif; }
+    font-family: "Lato", sans-serif; }
   html.theme--documenter-dark code,
   html.theme--documenter-dark pre {
     -moz-osx-font-smoothing: auto;
@@ -1123,7 +1123,7 @@ html.theme--documenter-dark {
     html.theme--documenter-dark a:hover {
       color: #84e8eb; }
   html.theme--documenter-dark code {
-    background-color: #2e2447;
+    background-color: #691f1a;
     color: #fff;
     font-size: 0.875em;
     font-weight: normal;
@@ -1146,13 +1146,13 @@ html.theme--documenter-dark {
     font-style: inherit;
     font-weight: inherit; }
   html.theme--documenter-dark strong {
-    color: #c8bfde;
+    color: #f0c8c5;
     font-weight: 700; }
   html.theme--documenter-dark fieldset {
     border: none; }
   html.theme--documenter-dark pre {
     -webkit-overflow-scrolling: touch;
-    background-color: #2e2447;
+    background-color: #691f1a;
     color: #fbfbfb;
     font-size: 0.875em;
     overflow-x: auto;
@@ -1171,7 +1171,7 @@ html.theme--documenter-dark {
     html.theme--documenter-dark table th:not([align]) {
       text-align: left; }
   html.theme--documenter-dark table th {
-    color: #c8bfde; }
+    color: #f0c8c5; }
   html.theme--documenter-dark .box {
     background-color: white;
     border-radius: 6px;
@@ -1228,10 +1228,10 @@ html.theme--documenter-dark {
       text-decoration: underline; }
       html.theme--documenter-dark .button.is-text:hover, html.theme--documenter-dark .button.is-text.is-hovered, html.theme--documenter-dark .button.is-text:focus, html.theme--documenter-dark .button.is-text.is-focused {
         background-color: whitesmoke;
-        color: #c8bfde; }
+        color: #f0c8c5; }
       html.theme--documenter-dark .button.is-text:active, html.theme--documenter-dark .button.is-text.is-active {
         background-color: #e8e8e8;
-        color: #c8bfde; }
+        color: #f0c8c5; }
       html.theme--documenter-dark .button.is-text[disabled],
       fieldset[disabled] html.theme--documenter-dark .button.is-text {
         background-color: transparent;
@@ -2049,7 +2049,7 @@ html.theme--documenter-dark {
   html.theme--documenter-dark .content h4,
   html.theme--documenter-dark .content h5,
   html.theme--documenter-dark .content h6 {
-    color: #c8bfde;
+    color: #f0c8c5;
     font-weight: 600;
     line-height: 1.125; }
   html.theme--documenter-dark .content h1 {
@@ -2135,17 +2135,17 @@ html.theme--documenter-dark {
       padding: 0.5em 0.75em;
       vertical-align: top; }
     html.theme--documenter-dark .content table th {
-      color: #c8bfde; }
+      color: #f0c8c5; }
       html.theme--documenter-dark .content table th:not([align]) {
         text-align: left; }
     html.theme--documenter-dark .content table thead td,
     html.theme--documenter-dark .content table thead th {
       border-width: 0 0 2px;
-      color: #c8bfde; }
+      color: #f0c8c5; }
     html.theme--documenter-dark .content table tfoot td,
     html.theme--documenter-dark .content table tfoot th {
       border-width: 2px 0 0;
-      color: #c8bfde; }
+      color: #f0c8c5; }
     html.theme--documenter-dark .content table tbody tr:last-child td,
     html.theme--documenter-dark .content table tbody tr:last-child th {
       border-bottom-width: 0; }
@@ -2518,7 +2518,7 @@ html.theme--documenter-dark {
         html.theme--documenter-dark .table th.is-selected strong {
           color: currentColor; }
     html.theme--documenter-dark .table th {
-      color: #c8bfde; }
+      color: #f0c8c5; }
       html.theme--documenter-dark .table th:not([align]) {
         text-align: left; }
     html.theme--documenter-dark .table tr.is-selected {
@@ -2536,13 +2536,13 @@ html.theme--documenter-dark {
       html.theme--documenter-dark .table thead td,
       html.theme--documenter-dark .table thead th {
         border-width: 0 0 2px;
-        color: #c8bfde; }
+        color: #f0c8c5; }
     html.theme--documenter-dark .table tfoot {
       background-color: transparent; }
       html.theme--documenter-dark .table tfoot td,
       html.theme--documenter-dark .table tfoot th {
         border-width: 2px 0 0;
-        color: #c8bfde; }
+        color: #f0c8c5; }
     html.theme--documenter-dark .table tbody {
       background-color: transparent; }
       html.theme--documenter-dark .table tbody tr:last-child td,
@@ -3618,7 +3618,7 @@ html.theme--documenter-dark {
       html.theme--documenter-dark .breadcrumb li:first-child a {
         padding-left: 0; }
       html.theme--documenter-dark .breadcrumb li.is-active a {
-        color: #c8bfde;
+        color: #f0c8c5;
         cursor: default;
         pointer-events: none; }
       html.theme--documenter-dark .breadcrumb li + li::before {
@@ -3667,7 +3667,7 @@ html.theme--documenter-dark {
     display: flex; }
   html.theme--documenter-dark .card-header-title {
     align-items: center;
-    color: #c8bfde;
+    color: #f0c8c5;
     display: flex;
     flex-grow: 1;
     font-weight: 700;
@@ -3904,7 +3904,7 @@ html.theme--documenter-dark {
       padding: 0.5em 0.75em; }
       html.theme--documenter-dark .menu-list a:hover {
         background-color: whitesmoke;
-        color: #c8bfde; }
+        color: #f0c8c5; }
       html.theme--documenter-dark .menu-list a.is-active {
         background-color: #22cdd3;
         color: #fff; }
@@ -4099,7 +4099,7 @@ html.theme--documenter-dark {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px; }
   html.theme--documenter-dark .modal-card-title {
-    color: #c8bfde;
+    color: #f0c8c5;
     flex-grow: 1;
     flex-shrink: 0;
     font-size: 1.5rem;
@@ -5056,7 +5056,7 @@ html.theme--documenter-dark {
   html.theme--documenter-dark .panel-heading {
     background-color: whitesmoke;
     border-radius: 4px 4px 0 0;
-    color: #c8bfde;
+    color: #f0c8c5;
     font-size: 1.25em;
     font-weight: 300;
     line-height: 1.25;
@@ -5079,7 +5079,7 @@ html.theme--documenter-dark {
       color: #22cdd3; }
   html.theme--documenter-dark .panel-block {
     align-items: center;
-    color: #c8bfde;
+    color: #f0c8c5;
     display: flex;
     justify-content: flex-start;
     padding: 0.5em 0.75em; }
@@ -5136,8 +5136,8 @@ html.theme--documenter-dark {
       padding: 0.5em 1em;
       vertical-align: top; }
       html.theme--documenter-dark .tabs a:hover {
-        border-bottom-color: #c8bfde;
-        color: #c8bfde; }
+        border-bottom-color: #f0c8c5;
+        color: #f0c8c5; }
     html.theme--documenter-dark .tabs li {
       display: block; }
       html.theme--documenter-dark .tabs li.is-active a {
@@ -6926,7 +6926,7 @@ html.theme--documenter-dark {
     background-color: #fafafa;
     padding: 3rem 1.5rem 6rem; }
   html.theme--documenter-dark h1 .docs-heading-anchor, html.theme--documenter-dark h1 .docs-heading-anchor:hover, html.theme--documenter-dark h1 .docs-heading-anchor:visited, html.theme--documenter-dark h2 .docs-heading-anchor, html.theme--documenter-dark h2 .docs-heading-anchor:hover, html.theme--documenter-dark h2 .docs-heading-anchor:visited, html.theme--documenter-dark h3 .docs-heading-anchor, html.theme--documenter-dark h3 .docs-heading-anchor:hover, html.theme--documenter-dark h3 .docs-heading-anchor:visited, html.theme--documenter-dark h4 .docs-heading-anchor, html.theme--documenter-dark h4 .docs-heading-anchor:hover, html.theme--documenter-dark h4 .docs-heading-anchor:visited, html.theme--documenter-dark h5 .docs-heading-anchor, html.theme--documenter-dark h5 .docs-heading-anchor:hover, html.theme--documenter-dark h5 .docs-heading-anchor:visited, html.theme--documenter-dark h6 .docs-heading-anchor, html.theme--documenter-dark h6 .docs-heading-anchor:hover, html.theme--documenter-dark h6 .docs-heading-anchor:visited {
-    color: #c8bfde; }
+    color: #f0c8c5; }
   html.theme--documenter-dark h1 .docs-heading-anchor-permalink, html.theme--documenter-dark h2 .docs-heading-anchor-permalink, html.theme--documenter-dark h3 .docs-heading-anchor-permalink, html.theme--documenter-dark h4 .docs-heading-anchor-permalink, html.theme--documenter-dark h5 .docs-heading-anchor-permalink, html.theme--documenter-dark h6 .docs-heading-anchor-permalink {
     visibility: hidden;
     vertical-align: middle;
@@ -7002,9 +7002,9 @@ html.theme--documenter-dark {
     color: #fbfbfb;
     padding: 1em 1.25em; }
     html.theme--documenter-dark .admonition-body pre {
-      background-color: #2e2447; }
+      background-color: #691f1a; }
     html.theme--documenter-dark .admonition-body code {
-      background-color: #2e2447; }
+      background-color: #691f1a; }
   html.theme--documenter-dark .docstring {
     margin-bottom: 1em;
     background-color: transparent;
@@ -7051,7 +7051,7 @@ html.theme--documenter-dark {
   html.theme--documenter-dark .content a code {
     color: #22cdd3; }
   html.theme--documenter-dark .content h1 code, html.theme--documenter-dark .content h2 code, html.theme--documenter-dark .content h3 code, html.theme--documenter-dark .content h4 code, html.theme--documenter-dark .content h5 code, html.theme--documenter-dark .content h6 code {
-    color: #c8bfde; }
+    color: #f0c8c5; }
   html.theme--documenter-dark .content table {
     display: block;
     width: initial;
@@ -7063,7 +7063,7 @@ html.theme--documenter-dark {
     cursor: default;
     pointer-events: none; }
     html.theme--documenter-dark .breadcrumb a.is-disabled, html.theme--documenter-dark .breadcrumb a.is-disabled:hover {
-      color: #c8bfde; }
+      color: #f0c8c5; }
   html.theme--documenter-dark .hljs {
     background: initial !important;
     padding: initial !important; }
@@ -7175,7 +7175,7 @@ html.theme--documenter-dark {
     display: flex;
     flex-direction: column;
     color: #fbfbfb;
-    background-color: #4e3d77;
+    background-color: #a43029;
     border-right: 1px solid #dbdbdb;
     padding: 0;
     flex: 0 0 18rem;
@@ -7262,10 +7262,10 @@ html.theme--documenter-dark {
         padding: 0.5rem 0.5rem; }
         html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu .tocitem, html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu .tocitem:hover {
           color: #fbfbfb;
-          background: #4e3d77; }
+          background: #a43029; }
       html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu a.tocitem:hover, html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu label.tocitem:hover {
         color: #fbfbfb;
-        background-color: #392d57; }
+        background-color: #7d251f; }
       html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active {
         border-top: 1px solid #dbdbdb;
         border-bottom: 1px solid #dbdbdb;
@@ -7274,7 +7274,7 @@ html.theme--documenter-dark {
           background-color: #1e1e20;
           color: #fff; }
         html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active ul.internal .tocitem:hover {
-          background-color: #3c305c;
+          background-color: #832721;
           color: #fff; }
       html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu > li.is-active:first-child {
         border-top: none; }
@@ -7307,9 +7307,9 @@ html.theme--documenter-dark {
           background: none; }
         html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu::-webkit-scrollbar-thumb {
           border-radius: 5px 0px 0px 5px;
-          background: #3c305c; }
+          background: #832721; }
         html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu::-webkit-scrollbar-thumb:hover {
-          background: #2b2241; } }
+          background: #631d19; } }
     @media screen and (max-width: 1055px) {
       html.theme--documenter-dark #documenter .docs-sidebar {
         overflow-y: auto;
@@ -7319,9 +7319,9 @@ html.theme--documenter-dark {
           background: none; }
         html.theme--documenter-dark #documenter .docs-sidebar::-webkit-scrollbar-thumb {
           border-radius: 5px 0px 0px 5px;
-          background: #3c305c; }
+          background: #832721; }
         html.theme--documenter-dark #documenter .docs-sidebar::-webkit-scrollbar-thumb:hover {
-          background: #2b2241; } }
+          background: #631d19; } }
   html.theme--documenter-dark #documenter .docs-main #documenter-search-info {
     margin-bottom: 1rem; }
   html.theme--documenter-dark #documenter .docs-main #documenter-search-results {
@@ -7344,8 +7344,8 @@ html.theme--documenter-dark {
     box-shadow: 0.24rem 0rem 0.4rem #444444; }
     html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input {
       color: #fff;
-      background-color: #3c305c;
-      border-color: #2b2241;
+      background-color: #832721;
+      border-color: #631d19;
       margin-top: 1.0rem;
       margin-bottom: 1.0rem; }
       html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input::placeholder {

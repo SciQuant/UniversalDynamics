@@ -1,12 +1,13 @@
 ## Introduction
 
-Supose we would like to build a System of SDEs that comes from the union of a given collection of [`AbstractDynamics`](@ref), with either arbitrary (see [`SystemDynamics`](@ref)) or known (see [`ModelDynamics`](@ref)) coefficients. To be more precise, given a set of *Dynamics* for ``\{ x(t), y(t), z(t) \}``:
+Supose we need to build a System of SDEs that comes from the union of a given collection of [`AbstractDynamics`](@ref), with either arbitrary (see [`SystemDynamics`](@ref)) or known (see [`ModelDynamics`](@ref)) coefficients. To be more precise, given a set of ``N`` *Dynamics* for ``\{ \vec{x}_1(t), \vec{x}_2(t), \dots, \vec{x}_N(t) \}``:
 
 ```math
 \begin{aligned}
-d\vec{x}(t) &= f_x(t, \vec{x}(t)) \cdot dt + g_x(t, \vec{x}(t)) \cdot d\vec{W}_x(t), \quad \vec{x}(t_0) = \vec{x}_0,\\
-d\vec{y}(t) &= f_y(t, \vec{y}(t)) \cdot dt + g_y(t, \vec{y}(t)) \cdot d\vec{W}_y(t), \quad \vec{y}(t_0) = \vec{y}_0,\\
-d\vec{z}(t) &= f_z(t, \vec{z}(t)) \cdot dt + g_z(t, \vec{z}(t)) \cdot d\vec{W}_z(t), \quad \vec{z}(t_0) = \vec{z}_0,\\
+d\vec{x}_1(t) &= f_{1}(t, \vec{x}_1(t)) \cdot dt + g_{1}(t, \vec{x}_1(t)) \cdot d\vec{W}_{1}(t), \quad \vec{x}_1(t_0) = \vec{x}_1^0,\\
+d\vec{x}_2(t) &= f_{2}(t, \vec{x}_2(t)) \cdot dt + g_{2}(t, \vec{x}_2(t)) \cdot d\vec{W}_{2}(t), \quad \vec{x}_2(t_0) = \vec{x}_2^0,\\
+\vdots & \\
+d\vec{x}_N(t) &= f_{N}(t, \vec{x}_N(t)) \cdot dt + g_{N}(t, \vec{x}_N(t)) \cdot d\vec{W}_{N}(t), \quad \vec{x}_N(t_0) = \vec{x}_N^0,\\
 \end{aligned}
 ```
 
@@ -21,30 +22,34 @@ with:
 ```math
 \vec{u}(t) =
     \begin{bmatrix}
-        \vec{x}(t) \\
-        \vec{y}(t) \\
-        \vec{z}(t)
+        \vec{x}_1(t) \\
+        \vec{x}_2(t) \\
+        \vdots       \\
+        \vec{x}_N(t)
     \end{bmatrix}
 \quad
 f(t, \vec{u}(t)) =
     \begin{bmatrix}
-        f_x(t, \vec{x}(t)) \\
-        f_y(t, \vec{y}(t)) \\
-        f_z(t, \vec{z}(t))
+        f_{1}(t, \vec{x}_1(t)) \\
+        f_{2}(t, \vec{x}_2(t)) \\
+        \vdots                   \\
+        f_{N}(t, \vec{x}_N(t))
     \end{bmatrix}
 \quad
 g(t, \vec{u}(t)) =
     \begin{bmatrix}
-        g_x(t, \vec{x}(t)) & 0 & 0 \\
-        0 & g_y(t, \vec{y}(t)) & 0 \\
-        0 & 0 & g_z(t, \vec{z}(t))
+        g_{1}(t, \vec{x}_2(t)) & 0 & \dots & 0 \\
+        0 & g_{2}(t, \vec{x}_1(t)) & \dots & 0 \\
+        \vdots & \vdots & \ddots & \vdots \\
+        0 & 0 & \dots & g_{N}(t, \vec{x}_N(t))
     \end{bmatrix}
 \quad
 \vec{W}(t) =
     \begin{bmatrix}
-        \vec{W}_x(t) \\
-        \vec{W}_y(t) \\
-        \vec{W}_z(t)
+        \vec{W}_{1}(t) \\
+        \vec{W}_{2}(t) \\
+        \vdots           \\
+        \vec{W}_{N}(t)
     \end{bmatrix}
 ```
 

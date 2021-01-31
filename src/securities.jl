@@ -48,6 +48,7 @@ end
 # (s::Security{false,false,...})(du::AbstractMatrix) = view(du, Di:Df, Mi:Mf)
 # (s::Security{true,false,...})(du::AbstractMatrix) = @view (@view du[:])[diagind(du)]
 # donde en diagind(du) en realidad tengo que usar los indices que corresponden a esta AbstractDynamics
+# Por ahi baste con hacer un remake del ShortRateModelDynamics (del AbstractDynamics en cuestion)
 
 
 

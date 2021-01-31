@@ -21,7 +21,7 @@ export Spot, RiskNeutral, Terminal, ForwardTn
 include("dynamics.jl")
 export SystemDynamics
 export isinplace, dimension, noise_dimension, diagonalnoise
-export initialtime, state, cor
+export initialtime, state, cor # get_t0, get_state, get_cor
 
 include("securities.jl")
 export SystemSecurity

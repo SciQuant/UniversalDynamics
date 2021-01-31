@@ -1,35 +1,70 @@
 
-# IDEA: implementar mejores dispatchs
-#! SOLVE: es un temita el hecho de tener un dynamical system que resulte no ser DN pero que
-#! tenga un modelo de short rate que es DN. Hay que solucionar eso
+for method in (:drift, :diffusion)
+    method! = Symbol(method, !)
+    @eval begin
+        $method(x, srmd::ShortRateModelDynamics, t) = $method(x, parameters(srmd), t)
+        $method!(dx, x, srmd::ShortRateModelDynamics, t) = $method!(dx, x, parameters(srmd), t)
+    end
+end
 
-function drift!(
-    μr::AbstractVector{<:Real}, r::Real, p::AffineParameters{OneFactor,true}, t::Real
-)
+############################# One Factor Affine + Out of Place ##############################
+
+function drift(r, p::AffineParameters{OneFactor,false,D,DN}, t) where {D,DN}
     @unpack κ, θ = p
-    μr[1] = κ(t) * (θ(t) - r)
-    return nothing
+    return κ(t) * (θ(t) - r)
 end
 
-drift(r::Real, p::AffineParameters{OneFactor,false}, t::Real) = p.κ(t) * (p.θ(t) - r)
-
-function diffusion!(
-  σr::AbstractVector{<:Real}, r::Real, p::AffineParameters{OneFactor,true}, t::Real
-)
+function diffusion(r, p::AffineParameters{OneFactor,false,D,DN}, t) where {D,DN}
     @unpack Σ, α, β = p
-    σr[1] = Σ(t) * sqrt(α(t) + β(t) * r)
+    return Σ(t) * sqrt(α(t) + β(t) * r)
+end
+
+############################### One Factor Affine + In Place ################################
+#! en las funciones OneFactor con IIP = true, uso o no uso cache? Pido funciones f(u, t) o
+#! f(t)? Por ahora me quedo con la segunda opcion, es mas facil!
+
+function drift!(dr, r, p::AffineParameters{OneFactor,true,D,DN}, t) where {D,DN}
+    @unpack κ, θ = p
+    dr[1] = κ(t) * (θ(t) - r)
     return nothing
 end
 
-diffusion(r::Real, p::AffineParameters{OneFactor,false}, t::Real) =
-    p.Σ(t) * sqrt(p.α(t) + p.β(t) * r)
+function diffusion!(dr, r, p::AffineParameters{OneFactor,true,D,DN}, t) where {D,DN}
+    @unpack Σ, α, β = p
+    dr[1] = Σ(t) * sqrt(α(t) + β(t) * r)
+    return nothing
+end
 
-function drift!(
-    μx::AbstractVector{<:Real},
-    x::AbstractVector{<:Real},
-    p::AffineParameters{MultiFactor,true},
-    t::Real
-)
+############################ Multi Factor Affine + Out of Place #############################
+
+function drift(x, p::AffineParameters{MultiFactor,false,D,DN}, t::Real) where {D,DN}
+    @unpack κ, θ = p
+    return κ(t) * (θ(t) - x)
+end
+
+# diagonal noise
+function diffusion(x, p::AffineParameters{MultiFactor,false,D,true}, t) where {D}
+    @unpack Σ, α, β = p
+
+    S = α(t) + β(t) * x
+    σ = Σ(t) .* sqrt(S) # Σ is a vector
+
+    return σ
+end
+
+# non-diagonal noise
+function diffusion(x, p::AffineParameters{MultiFactor,false,D,false}, t) where {D}
+    @unpack Σ, α, β = p
+
+    S = Diagonal(α(t) + β(t) * x)
+    σ = Σ(t) * sqrt(S) # Σ is a matrix
+
+    return σ
+end
+
+############################## Multi Factor Affine + In Place ###############################
+
+function drift!(dx, x, p::AffineParameters{MultiFactor,true,D,DN}, t) where {D,DN}
     @unpack cache = p
     @unpack κ, θ, v1 = cache
 
@@ -37,163 +72,118 @@ function drift!(
     p.θ(θ, t)
 
     v1 .= θ .- x
-    mul!(μx, κ, v1)
+    mul!(dx, κ, v1)
 
     return nothing
 end
 
-drift(x::AbstractVector{<:Real}, p::AffineParameters{MultiFactor,false}, t::Real) =
-    p.κ(t) * (p.θ(t) - x)
-
 # diagonal noise
-function diffusion!(
-    σx::AbstractVector{<:Real},
-    x::AbstractVector{<:Real},
-    p::AffineParameters{MultiFactor,true,D,true},
-    t::Real
-) where {D}
+function diffusion!(dx, x, p::AffineParameters{MultiFactor,true,D,true}, t) where {D}
     @unpack cache = p
     @unpack Σ, α, β, v1 = cache
 
-    p.Σ(Σ, t)
+    p.Σ(Σ, t) # Σ is a vector
     p.α(α, t)
     p.β(β, t)
 
-    # mul!(v1, β, x) .+= α(t)
+    # mul!(v1, β, x) .+= α
     copyto!(v1, α)
     mul!(v1, β, x, true, true)
     map!(sqrt, v1, v1)
-    σx .= Σ .* v1
+    dx .= Σ .* v1
 
     return nothing
 end
 
 # non-diagonal noise
-function diffusion!(
-    σx::AbstractMatrix{<:Real},
-    x::AbstractVector{<:Real},
-    p::AffineParameters{MultiFactor,true,D,false},
-    t::Real
-) where {D}
-
+function diffusion!(dx, x, p::AffineParameters{MultiFactor,true,D,false}, t) where {D}
     @unpack cache = p
     @unpack Σ, α, β, v1 = cache
 
-    p.Σ(Σ, t)
+    p.Σ(Σ, t) # Σ is a matrix
     p.α(α, t)
     p.β(β, t)
 
-    # mul!(v1, β, x) .+= α(t)
+    # mul!(v1, β, x) .+= α
     copyto!(v1, α)
     mul!(v1, β, x, true, true)
     map!(sqrt, v1, v1)
-    mul!(σx, Σ, Diagonal(v1)) # permutedims is called and it allocates
+    mul!(dx, Σ, Diagonal(v1)) # permutedims is called and it allocates
 
     return nothing
 end
 
-# diagonal noise
-function diffusion(
-    x::AbstractVector{<:Real}, p::AffineParameters{MultiFactor,false,D,true}, t::Real
-) where {D}
-    @unpack Σ, α, β = p
+########################### One Factor Quadratic + Out of Place ############################
 
-    S = Diagonal(α(t) + β(t) * x)
-    σ = Σ(t) * sqrt(S)
-
-    # diag(::SMatrix) does not copy, otherwise we should use σ.diag
-    return diag(σ)
-end
-
-# non-diagonal noise
-function diffusion(
-    x::AbstractVector{<:Real}, p::AffineParameters{MultiFactor,false,D,false}, t::Real
-) where {D}
-    @unpack Σ, α, β = p
-
-    S = Diagonal(α(t) + β(t) * x)
-    σ = Σ(t) * sqrt(S)
-
-    # returns SMatrix since σ is non-diagonal (because Σ is not of Diagonal type)
-    return σ
-end
-
-function drift!(
-     μx::AbstractVector{<:Real}, x::Real, p::QuadraticParameters{OneFactor,true}, t::Real
-)
+function drift(x, p::QuadraticParameters{OneFactor,false,D,DN}, t) where {D,DN}
     @unpack κ, θ = p
-    μx[1] = κ(t) * (θ(t) - x)
-    return nothing
+    return κ(t) * (θ(t) - x)
 end
 
-drift(x::Real, p::QuadraticParameters{OneFactor,false}, t::Real) = p.κ(t) * (p.θ(t) - x)
-
-function diffusion!(
-    σx::AbstractVector{<:Real}, ::Real, p::QuadraticParameters{OneFactor,true}, t::Real
-)
-    @unpack σ = p
-    σx[1] = σ(t)
-    return nothing
+function diffusion(x, p::QuadraticParameters{OneFactor,false,D,DN}, t) where {D,DN}
+    return p.σ(t)
 end
 
-diffusion(::Real, p::QuadraticParameters{OneFactor,false}, t::Real) = p.σ(t)
+############################# One Factor Quadratic + In Place ##############################
+#! en las funciones OneFactor con IIP = true, uso o no uso cache? Pido funciones f(u, t) o
+#! f(t)? Por ahora me quedo con la segunda opcion, es mas facil!
 
-function drift!(
-    μx::AbstractVector{<:Real},
-    x::AbstractVector{<:Real},
-    p::QuadraticParameters{MultiFactor,true},
-    t::Real
-)
+function drift!(dx, x, p::QuadraticParameters{OneFactor,true,D,DN}, t) where {D,DN}
     @unpack κ, θ = p
-    @unpack v1 = p.cache
+    dx[1] = κ(t) * (θ(t) - x)
+    return nothing
+end
 
-    v1 .= θ(t) .- x
-    mul!(μx, κ(t), v1)
+function diffusion!(dx, x, p::QuadraticParameters{OneFactor,true,D,DN}, t) where {D,DN}
+    @unpack σ = p
+    dx[1] = σ(t)
+    return nothing
+end
+
+########################### Multi Factor Quadratic + Out of Place ##########################
+
+function drift(x, p::QuadraticParameters{MultiFactor,false,D,DN}, t) where {D,DN}
+    @unpack κ, θ = p
+    return κ(t) * (θ(t) - x)
+end
+
+# diagonal noise
+function diffusion(x, p::QuadraticParameters{MultiFactor,false,D,true}, t) where {D}
+    @unpack σ = p
+    return σ(t) # σ is a vector
+end
+
+# non-diagonal noise
+function diffusion(x, p::QuadraticParameters{MultiFactor,false,D,false}, t) where {D}
+    @unpack σ = p
+    return σ(t) # σ is a matrix
+end
+
+############################# Multi Factor Quadratic + In Place ############################
+
+function drift!(dx, x, p::QuadraticParameters{MultiFactor,true,D,DN}, t) where {D,DN}
+    @unpack cache = p
+    @unpack κ, θ, v1 = cache
+
+    p.κ(κ, t)
+    p.θ(θ, t)
+
+    v1 .= θ .- x
+    mul!(dx, κ, v1)
 
     return nothing
 end
 
-drift(x::AbstractVector{<:Real}, p::QuadraticParameters{MultiFactor,false}, t::Real) =
-    p.κ(t) * (p.θ(t) - x)
-
 # diagonal noise
-function diffusion!(
-    σx::AbstractVector{<:Real},
-    ::AbstractVector{<:Real},
-    p::QuadraticParameters{MultiFactor,true,D,true},
-    t::Real
-) where {D}
+function diffusion!(dx, x, p::QuadraticParameters{MultiFactor,true,D,true}, t) where {D}
     @unpack σ = p
-    copyto!(σx, σ(t).diag)
+    copyto!(dx, σ(t)) # σ is a vector
     return nothing
 end
 
 # non-diagonal noise
-function diffusion!(
-    σx::AbstractMatrix{<:Real},
-    ::AbstractVector{<:Real},
-    p::QuadraticParameters{MultiFactor,true,D,false},
-    t::Real
-) where {D}
+function diffusion!(dx, x, p::QuadraticParameters{MultiFactor,true,D,false}, t) where {D}
     @unpack σ = p
-    copyto!(σx, σ(t))
+    copyto!(σx, σ(t)) # σ is a matrix
     return nothing
-end
-
-# diagonal noise
-function diffusion(
-    ::AbstractVector{<:Real}, p::QuadraticParameters{MultiFactor,false,D,true}, t::Real
-) where {D}
-    @unpack σ = p
-    σt = σ(t) # es una matrix diagonal (de tipo Diagonal)
-    return diag(σt) # diag(::SMatrix) does not copy, otherwise we should use σ.diag
-end
-
-# non-diagonal noise
-function diffusion(
-    ::AbstractVector{<:Real}, p::QuadraticParameters{MultiFactor,false,D,false}, t::Real
-) where {D}
-    @unpack σ = p
-    σt = σ(t)
-    return σt
 end

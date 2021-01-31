@@ -149,13 +149,6 @@ function AffineCache(
     )
 end
 
-# function AffineCache(T::Type{<:AffineModelDynamics}, x::AbstractVector)
-#     return AffineCache(
-#         ntuple(_ -> similar(x), 3)...,
-#         similar(x, riccati_dimension(T))
-#     )
-# end
-
 struct QuadraticCache{V1,V2,M1,M2,R}
     v1::V1
     v2::V2

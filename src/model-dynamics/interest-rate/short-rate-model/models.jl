@@ -1,7 +1,7 @@
 """
     OneFactorAffineModelDynamics{IIP,T} <: AffineModelDynamics{OneFactor,IIP,1,true,T}
 
-Represents a [`OneFactor`](@ref) [`AffineModelDynamics`](@ref) type.
+Represents a spot rate ``r(t)`` as a One-Factor Affine Short Rate Model.
 
 ## Type parameters:
 See [`AbstractDynamics`](@ref) for detailed information.
@@ -68,7 +68,7 @@ end
 """
     MultiFactorAffineModelDynamics{IIP,D,DN,T} <: AffineModelDynamics{MultiFactor,IIP,D,DN,T}
 
-Defines a [`MultiFactor`](@ref) [`AffineModelDynamics`](@ref).
+Represents factors ``x⃗(t)`` as a Multi-Factor Affine Short Rate Model.
 
 ## Type parameters:
 See [`AbstractDynamics`](@ref) for detailed information.
@@ -148,7 +148,7 @@ end
 """
     OneFactorQuadraticModelDynamics{IIP,T} <: QuadraticModelDynamics{OneFactor,IIP,1,true,T}
 
-Represents a [`OneFactor`](@ref) [`QuadraticModelDynamics`](@ref) type.
+Represents a factor ``x(t)`` as a One-Factor Quadractic Short Rate Model.
 
 ## Type parameters:
 See [`AbstractDynamics`](@ref) for detailed information.
@@ -215,7 +215,7 @@ end
 """
     MultiFactorQuadraticModelDynamics{IIP,D,DN,T} <: QuadraticModelDynamics{MultiFactor,IIP,D,DN,T}
 
-Defines a [`MultiFactor`](@ref) [`QuadraticModelDynamics`](@ref).
+Represents factors ``x⃗(t)`` as a Multi-Factor Quadratic Short Rate Model.
 
 ## Type parameters:
 See [`AbstractDynamics`](@ref) for detailed information.

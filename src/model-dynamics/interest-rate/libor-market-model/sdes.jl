@@ -8,12 +8,12 @@
 # IDEA: Las funciones de _searchsortedfirst o _searchsortedlast de DifferentialEquations.jl
 # son mas rapidas que las de base y podrian ser de utilidad en esta funcion.
 """
-    q(Tenors::Vector{<:Real}, t::Real)
+    q(Tenors, t)
 
 Returns the index in the tenor structure `Tenors` such that `Tenors[q(t)-1] ≤ t <
 Tenors[q(t)]`, which corresponds to a left continuous interpretation.
 """
-function q(Tenors::AbstractVector{<:Real}, t::Real)
+function q(Tenors, t)
 
     if t > Tenors[end] || t < Tenors[begin]
         throw(DomainError("`t` must lie in `Tenors`."))
@@ -31,44 +31,20 @@ function q(Tenors::AbstractVector{<:Real}, t::Real)
     end
 end
 
-#! IMPORTARNTE
-# TODO: los dispatchs podrian ser mas prolijos, por ejemplo:
-# function drift!(du, u, p, t)
-#     IIP = isinplace(p)
-#     D = dimension(p)
-#     M = noise_dimension(p)
-#     DN = diagonalnoise(p)
-#     M = measure(p)
-#     # S = # sigma type
-#     return drift!(Val{IIP}, ...)
-# end
-#! Los dispatchs como estan ahora estan deprecarted porque cambie el orden de las cosas, asi
-#! que no van a funcionar (o si funcionan estan mal). Hay que hacerlo con lo de arriba si o
-#! si.
-
-@inline function drift!(
-    du::AbstractVector{<:Real},
-    u::AbstractVector{<:Real},
-    p::LMMP{true,true,Terminal,<:AbstractVector{<:Real}},
-    t::Real
-)
-    @unpack Tenors, τ, σ, ρ, N = p
-
-    z = zero(eltype(du))
+@inline function drift!(du, u, p::LMMP{true,D,D,true,Terminal}, t) where {D}
+    @unpack Tenors, τ, ρ, cache = p
+    @unpack σ = cache
+    p.σ(σ, t)
 
     @inbounds begin
-        # 'i' ranges from 2 to N-1 because L₁ and LN have μ = 0
-        for i = 2:N-1
-            res = z
-
-            if t > Tenors[i]
-                du[i] = res
-            else
-                # TODO: investigate if we can avoid allocations in sum()
-                for j in i+1:N
-                    res += (ρ[i, j] * τ[j] * σ[j] * u[j]) / (1 + τ[j] * u[j])
+        # 'i' ranges from 2 to D-1 because L₁ and LN have μ = 0
+        for i in 2:D-1
+            du[i] = zero(eltype(du))
+            if t ≤ Tenors[i]
+                for j in i+1:D
+                    du[i] += (ρ[i,j] * τ[j] * σ[j] * u[j]) / (1 + τ[j] * u[j])
                 end
-                du[i] = -σ[i] * u[i] * res
+                du[i] *= (-σ[i] * u[i])
             end
         end
     end
@@ -76,61 +52,44 @@ end
     return nothing
 end
 
-@inline function drift!(
-    du::AbstractVector{<:Real},
-    u::AbstractVector{<:Real},
-    p::LMMP{true,true,Terminal,F},
-    t::Real
-) where {F<:Function}
-    @unpack Tenors, τ, σ, ρ, N = p
+@inline function drift(u, p::LMMP{false,D,D,true,Terminal}, t) where {D}
+    @unpack Tenors, τ, ρ = p
+    σ = p.σ(t)
 
-    z = zero(eltype(du))
+    du = @MVector zeros(eltype(u), D)
 
     @inbounds begin
-        # 'i' ranges from 2 to N-1 because L₁ and LN have μ = 0
-        for i in 2:N-1
-            res = z
-
-            if t > Tenors[i]
-                du[i] = res
-            else
-                # TODO: investigate if we can avoid allocations in sum()
-                for j in i+1:N
-                    res += (ρ[i, j] * τ[j] * σ(j, t) * u[j]) / (1 + τ[j] * u[j])
+        # 'i' ranges from 2 to D-1 because L₁ and LN have μ = 0
+        for i in 2:D-1
+            if t ≤ Tenors[i]
+                for j in i+1:D
+                    du[i] += (ρ[i,j] * τ[j] * σ[j] * u[j]) / (1 + τ[j] * u[j])
                 end
-                du[i] = -σ(i, t) * u[i] * res
+                du[i] *= (-σ[i] * u[i])
             end
         end
     end
 
-    return nothing
+    return convert(SVector, m)
 end
 
-@inline function drift!(
-    du::AbstractVector{<:Real},
-    u::AbstractVector{<:Real},
-    p::LMMP{true,true,Spot,<:AbstractVector{<:Real}},
-    t::Real
-)
-    @unpack Tenors, τ, σ, ρ, N = p
-
-    z = zero(eltype(du))
+@inline function drift!(du, u, p::LMMP{true,D,D,true,Spot}, t) where {D}
+    @unpack Tenors, τ, ρ, cache = p
+    @unpack σ = cache
+    p.σ(σ, t)
 
     # get left continuous index
     qt = q(Tenors, t)
 
     @inbounds begin
-        # 'i' ranges from 2 because L₁ have μ = 0
-        for i in 2:N
-            res = z
-            if isempty(qt:i)
-                du[i] = res
-            else
-                # TODO: investigate if we can avoid allocations in sum()
+        # 'i' ranges from 2 to D-1 because L₁ and LD have μ = 0
+        for i in 2:D-1
+            du[i] = zero(eltype(du))
+            if !isempty(qt:i)
                 for j in qt:i
-                    res += (ρ[i, j] * τ[j] * σ[j] * u[j]) / (1 + τ[j] * u[j])
+                    du[i] += (ρ[i,j] * τ[j] * σ[j] * u[j]) / (1 + τ[j] * u[j])
                 end
-                du[i] = σ[i] * u[i] * res
+                du[i] *= (σ[i] * u[i])
             end
         end
     end
@@ -138,65 +97,55 @@ end
     return nothing
 end
 
-@inline function drift!(
-    du::AbstractVector{<:Real}, u::AbstractVector{<:Real}, p::LMMP{true,true,Spot,F}, t::Real
-) where {F<:Function}
-    @unpack Tenors, τ, σ, ρ, N = p
+@inline function drift(u, p::LMMP{false,D,D,true,Spot}, t) where {D}
+    @unpack Tenors, τ, ρ = p
+    σ = p.σ(t)
 
-    z = zero(eltype(du))
+    du = @MVector zeros(eltype(u), D)
 
+    # get left continuous index
     qt = q(Tenors, t)
 
     @inbounds begin
-        # 'i' ranges from 2 because L₁ have μ = 0
-        for i in 2:N
-            res = z
-            if isempty(qt:i)
-                du[i] = res
-            else
-                # TODO: investigate if we can avoid allocations in sum()
+        # 'i' ranges from 2 to D-1 because L₁ and LD have μ = 0
+        for i in 2:D-1
+            if !isempty(qt:i)
                 for j in qt:i
-                    res += (ρ[i, j] * τ[j] * σ(j, t) * u[j]) / (1 + τ[j] * u[j])
+                    du[i] += (ρ[i,j] * τ[j] * σ[j] * u[j]) / (1 + τ[j] * u[j])
                 end
-                du[i] = σ(i, t) * u[i] * res
+                du[i] *= (σ[i] * u[i])
             end
         end
     end
 
-    return nothing
+    return convert(SVector, du)
 end
 
-@inline function diffusion!(
-    du::AbstractVector{<:Real},
-    u::AbstractVector{<:Real},
-    p::LMMP{true,true,M,<:AbstractVector{<:Real}},
-    t::Real
-) where {M}
-    @unpack Tenors, σ, N = p
-
-    z = zero(eltype(du))
+@inline function diffusion!(du, u, p::LMMP{true,D,D,true}, t) where {D}
+    @unpack Tenors, cache = p
+    @unpack σ = cache
+    p.σ(σ, t)
 
     @inbounds begin
-        for i in 2:N
-            du[i] = t > Tenors[i] ? z : σ[i] * u[i]
+        for i in 2:D
+            du[i] = t > Tenors[i] ? zero(eltype(du)) : σ[i] * u[i]
         end
     end
 
     return nothing
 end
 
-@inline function diffusion!(
-    du::AbstractVector{<:Real}, u::AbstractVector{<:Real}, p::LMMP{true,true,M,F}, t::Real
-) where {M,F<:Function}
-    @unpack Tenors, σ, N = p
+@inline function diffusion(u, p::LMMP{false,D,D,true}, t) where {D}
+    @unpack Tenors, τ, ρ = p
+    σ = p.σ(t)
 
-    z = zero(eltype(du))
+    du = @MVector zeros(eltype(u), D)
 
     @inbounds begin
-        for i in 2:N
-            du[i] = t > Tenors[i] ? z : σ(i, t) * u[i]
+        for i in 2:D
+            du[i] = t > Tenors[i] ? zero(eltype(du)) : σ[i] * u[i]
         end
     end
 
-    return nothing
+    return convert(SVector, du)
 end

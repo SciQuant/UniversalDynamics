@@ -2,7 +2,7 @@
     abstract type ShortRateModelDynamics{FM,IIP,D,DN,T} <: TermStructureModelDynamics{IIP,D,D,DN,T} end
 
 Supertype for all Short Rate Models. Notice that the diffusion coefficient for Short Rate
-Models is a square matrix ``∈ \mathbb{R}^{D × D}``, i.e. `M = D`.
+Models is a square matrix ``\mathbb{R}^{D × D}``, i.e. `M = D`.
 """
 abstract type ShortRateModelDynamics{FM,IIP,D,DN,T} <: TermStructureModelDynamics{IIP,D,D,DN,T} end
 

@@ -115,7 +115,7 @@ function DynamicalSystem(f, g, dynamics, params=nothing)
     if isnothing(params)
         params = merge(_dynamics, securities)
     else
-        params =  merge(params, _dynamics, securities)
+        params = merge(params, _dynamics, securities)
     end
 
     return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params, _dynamics, securities)

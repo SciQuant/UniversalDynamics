@@ -1,7 +1,28 @@
 """
     LiborMarketModelDynamics{IIP,D,M,DN,T} <: TermStructureModelDynamicsTermStructureModelDynamics{IIP,D,M,DN,T}
 
-Also known as BGM model, describes...
+Represents the simply-compounded forward interest rates or simple forward rates ``L(t, T, T
++ τ)`` under the Libor Market Model.
+
+## Type parameters:
+See [`AbstractDynamics`](@ref) for detailed information.
+
+## Fields:
+- `attributes`: see [`DynamicsAttributes`](@ref) for detailed information,
+- `params`: model parameters, see [`LiborMarketModelParameters`](@ref) for detailed
+  information,
+
+## Declaration:
+
+```julia
+LiborMarketModelDynamics(
+    L0::S, τ, σ, ρ;
+    t0=zero(eltype(S)),
+    noise::AbstractNoise=DiagonalNoise{length(x0)}(),
+    imethod=LiborMarketModelDoNotInterpolate()
+    measure::AbstractMeasure=Spot()
+) -> LiborMarketModelDynamics
+```
 """
 struct LiborMarketModelDynamics{IIP,D,M,DN,T,A,P} <: TermStructureModelDynamics{IIP,D,M,DN,T}
     attributes::A
@@ -10,8 +31,8 @@ end
 
 function LiborMarketModelDynamics(
     L0::S, τ, σ, ρ;
-    noise=DiagonalNoise{length(L0)}(),
-    measure=Spot(),
+    noise::AbstractNoise=DiagonalNoise{length(L0)}(),
+    measure::AbstractMeasure=Spot(),
     imethod=LiborMarketModelDoNotInterpolate(),
     t0=zero(eltype(S))
 ) where {S}

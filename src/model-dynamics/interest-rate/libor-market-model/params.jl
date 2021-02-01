@@ -37,4 +37,4 @@ function LiborMarketModelParameters{IIP,D,M,DN,T}(
 end
 
 tenor_structure(τ) = prepend!(cumsum(τ), zero(eltype(τ)))
-tenor_structure(τ::SVector) = vcat(SVector((zero(eltype(τ))), cumsum(τ))) # vcat(similar_type(τ, Size(1))(zero(eltype(τ))), cumsum(τ))
+tenor_structure(τ::SVector) = vcat(zero(eltype(τ)), cumsum(τ)) # vcat(similar_type(τ, Size(1))(zero(eltype(τ))), cumsum(τ))

@@ -66,18 +66,18 @@ NonDiagonalNoise{1}() = ScalarNoise()
 NonDiagonalNoise(M::Integer) = NonDiagonalNoise{M}()
 
 
-function diffeqnoise(t0, ρ, IIP, D, M, DN)
+function diffeqnoise(t0, ρ, IIP, D, M, DN, ep=true)
     if DN
         if isequal(ρ, I)
             noise = nothing
         else
             if IIP
                 W0 = zeros(M)
-                Z0 = zeros(M)
+                Z0 = ep ? zeros(M) : nothing
                 noise = CorrelatedWienerProcess!(ρ, t0, W0, Z0)
             else
-                W0 = @SVector zeros(M)
-                Z0 = @SVector zeros(M)
+                W0 = @SVector(zeros(M))
+                Z0 = ep ? @SVector(zeros(M)) : nothing
                 noise = CorrelatedWienerProcess(ρ, t0, W0, Z0)
             end
         end
@@ -89,11 +89,11 @@ function diffeqnoise(t0, ρ, IIP, D, M, DN)
             else
                 if IIP
                     W0 = zeros(M)
-                    Z0 = zeros(M)
+                    Z0 = ep ? zeros(M) : nothing
                     noise = CorrelatedWienerProcess!(ρ, t0, W0, Z0)
                 else
-                    W0 = @SVector zeros(M)
-                    Z0 = @SVector zeros(M)
+                    W0 = @SVector(zeros(M))
+                    Z0 = ep ? @SVector(zeros(M)) : nothing
                     noise = CorrelatedWienerProcess(ρ, t0, W0, Z0)
                 end
             end
@@ -102,21 +102,21 @@ function diffeqnoise(t0, ρ, IIP, D, M, DN)
                 # NonDiagonalNoise with non-square matrix and no correlations
                 if IIP
                     W0 = zeros(M)
-                    Z0 = zeros(M)
+                    Z0 = ep ? zeros(M) : nothing
                     noise = WienerProcess!(t0, W0, Z0)
                 else
-                    W0 = @SVector zeros(M)
-                    Z0 = @SVector zeros(M)
+                    W0 = @SVector(zeros(M))
+                    Z0 = ep ? @SVector(zeros(M)) : nothing
                     noise = WienerProcess(t0, W0, Z0)
                 end
             else
                 if IIP
                     W0 = zeros(M)
-                    Z0 = zeros(M)
+                    Z0 = ep ? zeros(M) : nothing
                     noise = CorrelatedWienerProcess!(ρ, t0, W0, Z0)
                 else
-                    W0 = @SVector zeros(M)
-                    Z0 = @SVector zeros(M)
+                    W0 = @SVector(zeros(M))
+                    Z0 = ep ? @SVector(zeros(M)) : nothing
                     noise = CorrelatedWienerProcess(ρ, t0, W0, Z0)
                 end
             end

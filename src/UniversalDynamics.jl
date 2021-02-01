@@ -7,6 +7,7 @@ using LinearAlgebra
 using OrdinaryDiffEq
 using StochasticDiffEq
 using DiffEqNoiseProcess
+using RandomNumbers: Xorshifts
 
 export SVector, SMatrix, @SVector, @SMatrix, Size
 
@@ -29,6 +30,9 @@ export remake # tendria que expandir el ramake de StochasticDiffEq
 
 include("dynamicalsystem.jl")
 export DynamicalSystem
+
+include("simulation.jl")
+export solve, montecarlo
 
 include("show.jl")
 

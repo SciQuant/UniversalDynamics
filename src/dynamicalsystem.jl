@@ -129,15 +129,15 @@ for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
     end
 end
 
+parameters(ds::DynamicalSystem) = ds.params
 
-function StochasticDiffEq.SDEProblem(ds::DynamicalSystem{IIP}, tspan; u0=state(ds)) where {IIP}
-    return SDEProblem{IIP}(
-        SDEFunction(ds.f, ds.g),
-        ds.g,
-        u0,
-        tspan,
-        ds.params,
-        noise=noise(ds),
-        noise_rate_prototype=noise_rate_prototype(ds)
-    )
+function diffeqnoise(ds::DynamicalSystem, alg)
+    t0 = initialtime(ds)
+    ρ = cor(ds)
+    IIP = isinplace(ds)
+    D = dimension(ds)
+    M = noise_dimension(ds)
+    DN = diagonalnoise(ds)
+    ep = StochasticDiffEq.alg_needs_extra_process(alg)
+    return diffeqnoise(t0, ρ, IIP, D, M, DN, ep)
 end

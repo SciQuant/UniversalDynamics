@@ -59,7 +59,7 @@ end
     du = @MVector zeros(eltype(u), D)
 
     @inbounds begin
-        # 'i' ranges from 2 to D-1 because L₁ and LN have μ = 0
+        # 'i' ranges from 2 to D-1 because L₁ and LD have μ = 0
         for i in 2:D-1
             if t ≤ Tenors[i]
                 for j in i+1:D

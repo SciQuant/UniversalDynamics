@@ -22,6 +22,7 @@ struct AffineParameters{FM,IIP,D,DN,K,T,S,A,B,X0,X1,C} <: ShortRateParameters{FM
     cache::C
 end
 
+# TODO: update function (see MultiFactor case)
 function AffineParameters(
     ::Type{OneFactor}, t0::Real, r0, κ::K, θ::T, Σ::S, α::A, β::B, ξ₀::X0, ξ₁::X1
 ) where {K,T,S,A,B,X0,X1}

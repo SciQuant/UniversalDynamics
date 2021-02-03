@@ -45,6 +45,10 @@ function Base.summary(srmd::ShortRateModelDynamics)
     return "$(dimension(srmd))-dimensional $(short_rate_summary(srmd)) Short Rate model dynamics"
 end
 
+function Base.summary(lmmd::LiborMarketModelDynamics)
+    return "$(dimension(lmmd))-dimensional Libor Market Model with $(noise_dimension(lmmd))-dimensional $(noise_summary(lmmd))"
+end
+
 function Base.summary(ds::DynamicalSystem)
     return "$(dimension(ds))-dimensional dynamical system with $(noise_dimension(ds))-dimensional $(noise_summary(ds))"
 end

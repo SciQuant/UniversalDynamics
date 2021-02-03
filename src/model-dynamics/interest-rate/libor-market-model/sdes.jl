@@ -31,7 +31,7 @@ function q(Tenors, t)
     end
 end
 
-@inline function drift!(du, u, p::LMMP{true,D,D,true,Terminal}, t) where {D}
+@inline function drift!(du, u, p::LMMP{true,D,D,true,T,Terminal}, t) where {D,T}
     @unpack Tenors, τ, ρ, cache = p
     @unpack σ = cache
     p.σ(σ, t)
@@ -52,7 +52,7 @@ end
     return nothing
 end
 
-@inline function drift(u, p::LMMP{false,D,D,true,Terminal}, t) where {D}
+@inline function drift(u, p::LMMP{false,D,D,true,T,Terminal}, t) where {D,T}
     @unpack Tenors, τ, ρ = p
     σ = p.σ(t)
 
@@ -70,10 +70,10 @@ end
         end
     end
 
-    return convert(SVector, m)
+    return convert(SVector, du)
 end
 
-@inline function drift!(du, u, p::LMMP{true,D,D,true,Spot}, t) where {D}
+@inline function drift!(du, u, p::LMMP{true,D,D,true,T,Spot}, t) where {D,T}
     @unpack Tenors, τ, ρ, cache = p
     @unpack σ = cache
     p.σ(σ, t)
@@ -97,7 +97,7 @@ end
     return nothing
 end
 
-@inline function drift(u, p::LMMP{false,D,D,true,Spot}, t) where {D}
+@inline function drift(u, p::LMMP{false,D,D,true,T,Spot}, t) where {D,T}
     @unpack Tenors, τ, ρ = p
     σ = p.σ(t)
 

@@ -32,8 +32,8 @@ end
 
 (s::Security)() = s.x
 (s::Security{D,D,M,M})() where {D,M} = s.x[]
-(s::Security)(::Real) = s.x
-(s::Security{D,D,M,M})(::Real) where {D,M} = s.x[]
+(s::Security)(::Real) = s.x # s()
+(s::Security{D,D,M,M})(::Real) where {D,M} = s.x[] # s()
 
 
 #! IMPORTANTE:

@@ -1,5 +1,8 @@
 using NLsolve
 
+# Dai, Q. and Singleton, K.J. (2000), Specification Analysis of Affine Term Structure
+# Models. The Journal of Finance, 55: 1943-1978. doi:10.1111/0022-1082.00278
+
 function DaiSingletonParameters()
 
     # calibrated parameters from Dai-Singleton (2000) for the 𝔸₁(3)ₘₐₓ Ar representation:

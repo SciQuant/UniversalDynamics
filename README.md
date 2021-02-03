@@ -6,7 +6,7 @@
 |**Build Status** |
 | [![Build Status](https://github.com/SciQuant/UniversalDynamics.jl/workflows/CI/badge.svg)](https://github.com/SciQuant/UniversalDynamics.jl/actions) |
 
-**UniversalDynamics** is a high-performance library designed to achieve fast and advanced quantitative finance calculations. In few words, it provides useful functionalities for solving Stochastic Differential Equations (SDEs) that are common in quantitative finance. Then, the simulations can be used for pricing financial derivatives with **UniversalPricing** solvers.
+**UniversalDynamics** is a high-performance library designed to achieve fast and advanced quantitative finance calculations. In few words, it provides useful functionalities for solving Stochastic Differential Equations (SDEs) that are common in quantitative finance. Then, the simulations can be used for pricing financial derivatives with [UniversalPricing.jl](https://github.com/SciQuant/UniversalPricing.jl) solvers.
 
 ## Installation
 

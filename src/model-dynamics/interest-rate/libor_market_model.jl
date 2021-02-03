@@ -1,8 +1,8 @@
 """
     LiborMarketModelDynamics{IIP,D,M,DN,T} <: TermStructureModelDynamicsTermStructureModelDynamics{IIP,D,M,DN,T}
 
-Represents the simply-compounded forward interest rates or simple forward rates ``L(t, T, T
-+ τ)`` under the Libor Market Model.
+Represents the simply-compounded forward interest rates or simple forward rates ``L(t, T,
+T+τ)`` under the Libor Market Model.
 
 ## Type parameters:
 See [`AbstractDynamics`](@ref) for detailed information.
@@ -78,6 +78,14 @@ function LiborMarketModelDynamics(
     params = LiborMarketModelParameters{IIP,D,M,DN,T}(t0, L0, τ, σ, ρ, measure, imethod)
 
     return LiborMarketModelDynamics{IIP,D,M,DN,T,typeof(attrs),typeof(params)}(attrs, params)
+end
+
+# IDEA: aca me parece que es conveniente usar traits, ya que tenemos DynamicalSystem,
+# ShortRateModelDynamics y SystemDynamics metidos y son todos hijos de AbstractDynamics
+for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
+    @eval begin
+        $method(lmmd::LiborMarketModelDynamics) = $method(lmmd.attributes)
+    end
 end
 
 # IDEA: usar Traits?

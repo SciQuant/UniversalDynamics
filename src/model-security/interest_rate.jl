@@ -91,4 +91,4 @@ FixedIncomeSecurities{MD}(r::T1, B::T2, D::T3, P::T4, L::T5, f::T6) where {MD,T1
     FixedIncomeSecurities{MD,T1,T2,T3,T4,T5,T6}(r, B, D, P, L, f)
 
 include("interest-rate/short_rate_model.jl")
-# include("interest-rate/libor_market_model.jl")
+include("interest-rate/libor_market_model.jl")

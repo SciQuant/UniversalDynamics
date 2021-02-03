@@ -48,7 +48,7 @@ include("DaiSingletonParameters_A3_1.jl")
         return vcat(dx, dB)
     end
 
-    g = function (u, p, t)
+    function g(u, p, t)
         @unpack x_dynamics, x_security, B_security = p
 
         x = UniversalDynamics.remake(x_security, u)
@@ -58,9 +58,9 @@ include("DaiSingletonParameters_A3_1.jl")
         dB = zero(eltype(u)) # @SMatrix zeros(eltype(u), 1, 1)
 
         return @SMatrix [dx[1,1] dx[1,2] dx[1,3]  0
-                        dx[2,1] dx[2,2] dx[2,3]  0
-                        dx[3,1] dx[3,2] dx[3,3]  0
-                            0       0       0 dB]
+                         dx[2,1] dx[2,2] dx[2,3]  0
+                         dx[3,1] dx[3,2] dx[3,3]  0
+                               0       0       0 dB]
     end
 
     dynamics = OrderedDict(:x => x, :B => B)

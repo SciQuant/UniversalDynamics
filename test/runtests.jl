@@ -7,26 +7,12 @@ using LinearAlgebra
 using StaticArrays
 
 @testset "Out of Place" begin include("oop.jl") end
-
 @testset "Short Rate Model" begin include("short_rate_model.jl") end
+@testset "Libor Market Model" begin include("libor_market_model.jl") end
 
 
 
-# function payoff(u, p)
-
-#     x = remake(x_security, u)
-#     B = remake(B_security, u)
-
-#     IR = FixedIncomeSecurities(x_dynamics, x, B)
-
-#     return IR.D(0, T) * max(x(T) - K, zero(eltype(x)))
-# end
-
-
-
-
-
-
+# see https://discourse.julialang.org/t/hi-suppose-i-want-to-code-a-function-that-returns-a-svector-but-each-component/54372
 # using BenchmarkTools
 # using StaticArrays
 # using UnPack

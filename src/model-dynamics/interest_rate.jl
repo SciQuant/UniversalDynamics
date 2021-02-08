@@ -30,3 +30,6 @@ export OneFactorAffineModelDynamics, OneFactorQuadraticModelDynamics,
 
 include("interest-rate/libor_market_model.jl")
 export LiborMarketModelDynamics
+
+include("interest-rate/heath_jarrow_morton_model.jl")
+export HeathJarrowMortonModelDynamics

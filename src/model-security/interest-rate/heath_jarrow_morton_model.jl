@@ -187,8 +187,8 @@ function FixedIncomeSecurities(hjm::HJM, f::Security) where {HJM<:HeathJarrowMor
     return FixedIncomeSecurities{HJM}(r, B, D, P, F, f)
 end
 
-parameters(L::HeathJarrowMortonModelForwardRate) = parameters(L.hjmm)
-parameters(P::HeathJarrowMortonModelZeroCouponBond) = parameters(P.L.hjmm)
-parameters(B::HeathJarrowMortonModelMoneyMarketAccount) = parameters(B.L.hjmm)
+parameters(f::HeathJarrowMortonModelInstantaneousForwardRate) = parameters(f.hjm)
+parameters(P::HeathJarrowMortonModelZeroCouponBond) = parameters(P.f.hjm)
+parameters(B::HeathJarrowMortonModelMoneyMarketAccount) = parameters(B.f.hjm)
 
   

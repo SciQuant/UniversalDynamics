@@ -68,7 +68,14 @@ function interpolate(P::LiborMarketModelZeroCouponBond, ::Schlogl{true}, t::Real
 
     # correction factor
     LqTt = L(qT, t)
+
+    #! now it should be (σ(s)[qt])^2 and use cache for IIP, ademas esto es para DN porque es
+    #! 1 componente no nula. Cuando σ retorna un vector, ver la integral de Proposition 2.2
+    #! paper copado. Ahi se ve que λ(t, Tᵢ) retorna un vector fila y tenemos λ ρ λᵀ. Habria
+    #! que ver que es ρ, si la matrix o una componente. Pero casi seguro es la matrix. Si,
+    #! es la matrix.
     int = integral(s -> σ(qT, s)^2, t, T)
+
     Δ = 1 + ((Tenors[qT + 1] - Tenors[qT]) * LqTt * (exp(int) - 1)) / (1 + (Tenors[qT + 1] - Tenors[qT]) * LqTt)
 
     E_1_PTTq = 1 + (Tenors[qT] - T) * (αT * L(qT - 1, t) + (1 - αT) * LqTt * Δ)

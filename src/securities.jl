@@ -1,4 +1,6 @@
 
+import DiffEqBase: remake
+
 abstract type AbstractSecurity end
 
 struct Security{Di,Df,Mi,Mf,U,X,DU,DX} <: AbstractSecurity
@@ -14,7 +16,6 @@ end
 function Security(::AbstractDynamics{IIP,D,M}, d::Integer, m::Integer) where {IIP,D,M}
     Di, Df = d, d + D - 1
     Mi, Mf = m, m + M - 1
-
     return Security{Di,Df,Mi,Mf}(ntuple(_ -> nothing, 4)...)
 end
 

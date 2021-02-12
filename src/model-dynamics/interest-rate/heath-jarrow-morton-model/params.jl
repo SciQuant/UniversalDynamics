@@ -35,9 +35,6 @@ function HeathJarrowMortonModelParameters{IIP,D,M,DN,T}(
     end
     C = typeof(cache)
 
-    
+
     return HeathJarrowMortonModelParameters{IIP,D,M,DN,T,Q,Te,U,S,R,C}(Tenors, τ, σ, ρ, cache)
 end
-
-tenor_structure(τ) = prepend!(cumsum(τ), zero(eltype(τ)))
-tenor_structure(τ::SVector) = vcat(zero(eltype(τ)), cumsum(τ)) # vcat(similar_type(τ, Size(1))(zero(eltype(τ))), cumsum(τ))

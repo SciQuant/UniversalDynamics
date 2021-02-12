@@ -27,7 +27,7 @@ export initialtime, state, cor # get_t0, get_state, get_cor
 
 include("securities.jl")
 export SystemSecurity
-export remake # tendria que expandir el ramake de StochasticDiffEq
+export remake
 
 include("dynamicalsystem.jl")
 export DynamicalSystem

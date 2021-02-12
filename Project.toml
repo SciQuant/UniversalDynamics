@@ -4,10 +4,12 @@ authors = ["SciQuant"]
 version = "0.1.0"
 
 [deps]
+DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
 DiffEqNoiseProcess = "77a26b50-5914-5dd7-bc55-306e6241c503"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Memoize = "c03570c3-d221-55d1-a50c-7939bbd78826"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 RandomNumbers = "e6cf234a-135c-5ec9-84dd-332b85af5143"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 StochasticDiffEq = "789caeaf-c7a9-5a7d-9973-96adeb23e2a0"

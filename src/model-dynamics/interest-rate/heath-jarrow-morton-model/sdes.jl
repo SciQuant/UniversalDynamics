@@ -2,7 +2,22 @@
 @inline function drift!(du, u, p::HJMP{true,D,D,true,T,Terminal}, t) where {D,T}
     @unpack Tenors, τ, ρ, cache = p
     @unpack σ = cache
-    # p.σ(σ, t, ?)
+
+    σc = zeros(eltype(1/t), D)
+    @inbounds begin
+        # 'i' ranges from 2 to D because f₁ has μ = 0
+        for i in 2:D
+            du[i] = zero(eltype(1/t))
+            if t ≤ Tenors[i]
+
+                p.σ(σ, t, Tenors[i])
+                du[i] += - σ[i - 1] 
+
+                quadgk!((z, w) -> p.σ(z, t, w), σc, t, Tenors[i])
+                du[i] *= σc[i - 1]
+            end
+        end
+    end
     
     return nothing
 end
@@ -28,7 +43,22 @@ end
 @inline function drift!(du, u, p::HJMP{true,D,D,true,T,Spot}, t) where {D,T}
     @unpack Tenors, τ, ρ, cache = p
     @unpack σ = cache
-    # p.σ(σ, t, ?)
+
+    σc = zeros(eltype(1/t), D)
+    @inbounds begin
+        # 'i' ranges from 2 to D because f₁ has μ = 0
+        for i in 2:D
+            du[i] = zero(eltype(1/t))
+            if t ≤ Tenors[i]
+
+                p.σ(σ, t, Tenors[i])
+                du[i] += σ[i - 1] 
+
+                quadgk!((z, w) -> p.σ(z, t, w), σc, t, Tenors[i])
+                du[i] *= σc[i - 1]
+            end
+        end
+    end
     
     return nothing
 end
@@ -54,8 +84,13 @@ end
 @inline function diffusion!(du, u, p::HJMP{true,D,D,true}, t) where {D}
     @unpack Tenors, cache = p
     @unpack σ = cache
-    # p.σ(σ, t, ?)
-   
+    
+    @inbounds begin
+        for i in 2:D
+            p.σ(σ, t, Tenors[i])
+            du[i] = t > Tenors[i] ? zero(eltype(du)) : σ[i - 1]
+        end
+    end
     return nothing
 end
 
@@ -67,7 +102,7 @@ end
 
     @inbounds begin
         for i in 2:D
-            du[i] = t > Tenors[i] ? zero(eltype(du)) : σ(t, Tenors[i])[i-1]
+            du[i] = t > Tenors[i] ? zero(eltype(du)) : σ(t, Tenors[i])[i - 1]
         end
     end
 

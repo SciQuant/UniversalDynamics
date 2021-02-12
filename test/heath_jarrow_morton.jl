@@ -1,14 +1,14 @@
 using UnPack
 using StochasticDiffEq
 
-@testset "Terminal measure" begin
+@testset "Spot measure" begin
 
     Δ = 0.25
     τ = @SVector [Δ for i in 1:4]
     Tenors = vcat(zero(eltype(τ)), cumsum(τ))
 
     α₁ = 0.10
-    α₂ = 0.13
+    α₂ = 0.13   
 
     σ₁₁ = 0.11
     σ₂₁ = 0.12
@@ -32,7 +32,7 @@ using StochasticDiffEq
 
 
     F0 = @SVector [0.0112, 0.0118, 0.0123, 0.0127]
-    F = HeathJarrowMortonModelDynamics(F0, τ, σ, measure=Terminal())
+    F = HeathJarrowMortonModelDynamics(F0, τ, σ, measure=Spot())
 
     function f(u, p, t)
         @unpack F_dynamics, F_security = p
@@ -63,7 +63,7 @@ using StochasticDiffEq
     sol_oop = solve(ds_oop, 1., seed=1)
 
     function σ!(u, t, T)
-        for i in 1:2
+        for i in 1:4
             u[i] = zero(eltype(u))
             if t ≤ T
                 u[i] = σt(t, T)[i]
@@ -74,7 +74,7 @@ using StochasticDiffEq
     end
 
     F0 = [0.0112, 0.0118, 0.0123, 0.0127]
-    F = HeathJarrowMortonModelDynamics(F0, τ, σ!, measure=Terminal())
+    F1 = HeathJarrowMortonModelDynamics(F0, τ, σ!, measure=Spot())
 
     function f!(du, u, p, t)
         @unpack F_dynamics, F_security = p
@@ -100,9 +100,9 @@ using StochasticDiffEq
         return nothing
     end
 
-    dynamics = OrderedDict(:F => F)
+    dynamics = OrderedDict(:F => F1)
     ds_iip = DynamicalSystem(f!, g!, dynamics, nothing)
-    #! Not working yet
-    # sol_iip = solve(ds_iip, 1., seed=1)
-end
+    sol_iip = solve(ds_iip, 1., seed=1)
 
+    # @test sol_oop.u ≈ sol_iip.u
+end

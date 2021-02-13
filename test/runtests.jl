@@ -4,7 +4,6 @@ using Test
 using OrderedCollections
 using DiffEqNoiseProcess
 using LinearAlgebra
-using StaticArrays
 
 @testset "Out of Place" begin include("oop.jl") end
 @testset "Short Rate Model" begin include("short_rate_model.jl") end

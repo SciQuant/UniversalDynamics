@@ -1,7 +1,9 @@
 using UnPack
 using StochasticDiffEq
 
-@testset "Terminal measure" begin
+@testset "Terminal and Spot measures (IIP and OOP cases)" begin
+
+for measure in (Terminal(), Spot())
 
     Δ = 0.25
     τ = @SVector [Δ for i in 1:4]
@@ -9,7 +11,7 @@ using StochasticDiffEq
 
     # esto es de prueba viendo ej. pg 32 paper copado, aunque ahi es non-diagonal noise
     function σt(i, t)
-        return 0.6 * exp(0.1 * (Tenors[i] - t))
+        return 0.6 * exp(-0.1 * (Tenors[i] - t))
     end
 
     function σ(t)
@@ -35,12 +37,12 @@ using StochasticDiffEq
                   0.2 0.2 1.0 0.2
                   0.2 0.2 0.2 1.0]
     L0 = @SVector [0.0112, 0.0118, 0.0123, 0.0127]
-    L = LiborMarketModelDynamics(L0, τ, σ, ρ, measure=Terminal(), imethod=Schlogl(true))
+    L = LiborMarketModelDynamics(L0, τ, σ, ρ, measure=measure, imethod=Schlogl(true))
 
     function f(u, p, t)
         @unpack L_dynamics, L_security = p
 
-        L = UniversalDynamics.remake(L_security, u)
+        L = remake(L_security, u)
 
         IR = FixedIncomeSecurities(L_dynamics, L)
 
@@ -52,7 +54,7 @@ using StochasticDiffEq
     function g(u, p, t)
         @unpack L_dynamics, L_security = p
 
-        L = UniversalDynamics.remake(L_security, u)
+        L = remake(L_security, u)
 
         IR = FixedIncomeSecurities(L_dynamics, L)
 
@@ -63,10 +65,7 @@ using StochasticDiffEq
 
     dynamics = OrderedDict(:L => L)
     ds_oop = DynamicalSystem(f, g, dynamics, nothing)
-
-    #! once the issue in DiffEqNoiseProcess is fixed, solve the problem. See:
-    # https://github.com/SciML/DiffEqNoiseProcess.jl/issues/83
-    # sol_oop = solve(ds_oop, 1., seed=1)
+    sol_oop = solve(ds_oop, 1., seed=1)
 
 
     Δ = 0.25
@@ -75,7 +74,7 @@ using StochasticDiffEq
 
     # esto es de prueba viendo ej. pg 32 paper copado, aunque ahi es non-diagonal noise
     function σt(i, t)
-        return 0.6 * exp(0.1 * (Tenors[i] - t))
+        return 0.6 * exp(-0.1 * (Tenors[i] - t))
     end
 
     function σ!(u, t)
@@ -96,12 +95,12 @@ using StochasticDiffEq
         0.2 0.2 1.0 0.2
         0.2 0.2 0.2 1.0]
     L0 = [0.0112, 0.0118, 0.0123, 0.0127]
-    L = LiborMarketModelDynamics(L0, τ, σ!, ρ, measure=Terminal(), imethod=Schlogl(true))
+    L = LiborMarketModelDynamics(L0, τ, σ!, ρ, measure=measure, imethod=Schlogl(true))
 
     function f!(du, u, p, t)
         @unpack L_dynamics, L_security = p
 
-        L = UniversalDynamics.remake(L_security, u, du)
+        L = remake(L_security, u, du)
 
         IR = FixedIncomeSecurities(L_dynamics, L)
 
@@ -113,7 +112,7 @@ using StochasticDiffEq
     function g!(du, u, p, t)
         @unpack L_dynamics, L_security = p
 
-        L = UniversalDynamics.remake(L_security, u, du)
+        L = remake(L_security, u, du)
 
         IR = FixedIncomeSecurities(L_dynamics, L)
 
@@ -126,6 +125,6 @@ using StochasticDiffEq
     ds_iip = DynamicalSystem(f!, g!, dynamics, nothing)
     sol_iip = solve(ds_iip, 1., seed=1)
 
-    #! once the issue in DiffEqNoiseProcess is fixed, uncomment this line
-    # @test sol_oop.u ≈ sol_iip.u
+    @test sol_oop.u ≈ sol_iip.u atol = 1e-5
+end
 end

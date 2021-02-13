@@ -29,6 +29,7 @@ struct LiborMarketModelDynamics{IIP,D,M,DN,T,A,P} <: TermStructureModelDynamics{
     params::P
 end
 
+# see UniversalPricing for τ treatment and implement it here.
 function LiborMarketModelDynamics(
     L0::S, τ, σ, ρ;
     noise::AbstractNoise=DiagonalNoise{length(L0)}(),

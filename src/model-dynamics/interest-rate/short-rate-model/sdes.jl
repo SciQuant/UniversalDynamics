@@ -47,7 +47,7 @@ function diffusion(x, p::AffineParameters{MultiFactor,false,D,true}, t) where {D
     @unpack Σ, α, β = p
 
     S = α(t) + β(t) * x
-    σ = Σ(t) .* sqrt(S) # Σ is a vector
+    σ = Σ(t) .* sqrt.(S) # Σ is a vector
 
     return σ
 end

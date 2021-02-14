@@ -125,6 +125,6 @@ for measure in (Terminal(), Spot())
     ds_iip = DynamicalSystem(f!, g!, dynamics, nothing)
     sol_iip = solve(ds_iip, 1., seed=1)
 
-    @test sol_oop.u ≈ sol_iip.u atol = 1e-5
+    @test sol_oop.u ≈ sol_iip.u atol=1e-5
 end
 end

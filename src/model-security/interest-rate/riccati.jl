@@ -66,6 +66,8 @@ function riccati(du, u, p::AffineParameters{MultiFactor,true}, t)
     return nothing
 end
 
+# TODO: in place version with `DN = true`, i.e. Σ returns a vector instead of a matrix.
+
 function riccati(u, p::AffineParameters{MultiFactor,false}, t)
     κ, θ, Σ, α, β, ξ₀, ξ₁ = p(t)
 
@@ -74,6 +76,21 @@ function riccati(u, p::AffineParameters{MultiFactor,false}, t)
     κᵀB = transpose(κ) * B
     ΣᵀB = transpose(Σ) * B
     diagΣᵀB_ΣᵀB = Diagonal(ΣᵀB) * ΣᵀB
+
+    dA = dot(θ, κᵀB) - dot(α, diagΣᵀB_ΣᵀB) / 2 + ξ₀
+    dB = κᵀB + transpose(β) * diagΣᵀB_ΣᵀB / 2 - ξ₁
+
+    return vcat(SVector(dA), dB)
+end
+
+function riccati(u, p::AffineParameters{MultiFactor,false,D,true}, t) where {D}
+    κ, θ, Σ, α, β, ξ₀, ξ₁ = p(t)
+
+    B = @view u[2:end]
+
+    κᵀB = transpose(κ) * B
+    ΣᵀB = Σ .* B
+    diagΣᵀB_ΣᵀB = ΣᵀB .* ΣᵀB
 
     dA = dot(θ, κᵀB) - dot(α, diagΣᵀB_ΣᵀB) / 2 + ξ₀
     dB = κᵀB + transpose(β) * diagΣᵀB_ΣᵀB / 2 - ξ₁

@@ -29,7 +29,7 @@ function HeathJarrowMortonModelParameters{IIP,D,M,DN,T}(
     isconcretetype(Q) || error("measure specification error.")
 
     if IIP
-        cache = LiborMarketModelCache(L0)
+        cache = HeathJarrowMortonModelCache(L0)
     else
         cache = nothing
     end
@@ -38,3 +38,11 @@ function HeathJarrowMortonModelParameters{IIP,D,M,DN,T}(
 
     return HeathJarrowMortonModelParameters{IIP,D,M,DN,T,Q,Te,U,S,R,C}(Tenors, τ, σ, ρ, cache)
 end
+
+
+struct HeathJarrowMortonModelCache{V}
+    σ::V
+    σI::V
+    HeathJarrowMortonModelCache(x::T) where {T} = new{T}(similar(x), similar(x))
+end
+

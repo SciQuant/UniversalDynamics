@@ -1,8 +1,8 @@
 using UnPack
-using StochasticDiffEq
 
-@testset "Spot measure" begin
 
+@testset "Terminal and Spot measures (IIP and OOP cases)" begin
+for measure in (Terminal(), Spot())
     Δ = 0.25
     τ = @SVector [Δ for i in 1:4]
     Tenors = vcat(zero(eltype(τ)), cumsum(τ))
@@ -32,12 +32,12 @@ using StochasticDiffEq
 
 
     F0 = @SVector [0.0112, 0.0118, 0.0123, 0.0127]
-    F = HeathJarrowMortonModelDynamics(F0, τ, σ, measure=Spot())
+    F = HeathJarrowMortonModelDynamics(F0, τ, σ, measure=measure)
 
     function f(u, p, t)
         @unpack F_dynamics, F_security = p
 
-        F = UniversalDynamics.remake(F_security, u)
+        F = remake(F_security, u)
 
         IR = FixedIncomeSecurities(F_dynamics, F)
 
@@ -49,7 +49,7 @@ using StochasticDiffEq
     function g(u, p, t)
         @unpack F_dynamics, F_security = p
 
-        F = UniversalDynamics.remake(F_security, u)
+        F = remake(F_security, u)
 
         IR = FixedIncomeSecurities(F_dynamics, F)
 
@@ -74,12 +74,12 @@ using StochasticDiffEq
     end
 
     F0 = [0.0112, 0.0118, 0.0123, 0.0127]
-    F1 = HeathJarrowMortonModelDynamics(F0, τ, σ!, measure=Spot())
+    F1 = HeathJarrowMortonModelDynamics(F0, τ, σ!, measure=measure)
 
     function f!(du, u, p, t)
         @unpack F_dynamics, F_security = p
 
-        F = UniversalDynamics.remake(F_security, u, du)
+        F = remake(F_security, u, du)
 
         IR = FixedIncomeSecurities(F_dynamics, F)
 
@@ -91,7 +91,7 @@ using StochasticDiffEq
     function g!(du, u, p, t)
         @unpack F_dynamics, F_security = p
 
-        F = UniversalDynamics.remake(F_security, u, du)
+        F = remake(F_security, u, du)
 
         IR = FixedIncomeSecurities(F_dynamics, F)
 
@@ -104,5 +104,7 @@ using StochasticDiffEq
     ds_iip = DynamicalSystem(f!, g!, dynamics, nothing)
     sol_iip = solve(ds_iip, 1., seed=1)
 
-    # @test sol_oop.u ≈ sol_iip.u
+    @test sol_oop.u ≈ sol_iip.u atol=1e-4
+
+end
 end

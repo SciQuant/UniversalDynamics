@@ -8,7 +8,7 @@ using LinearAlgebra
 @testset "Out of Place" begin include("oop.jl") end
 @testset "Short Rate Model" begin include("short_rate_model.jl") end
 @testset "Libor Market Model" begin include("libor_market_model.jl") end
-
+@testset "Heath Jarrow Morton Model" begin include("heath_jarrow_morton_model.jl") end
 
 
 # see https://discourse.julialang.org/t/hi-suppose-i-want-to-code-a-function-that-returns-a-svector-but-each-component/54372

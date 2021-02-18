@@ -1,20 +1,19 @@
 
 @inline function drift!(du, u, p::HJMP{true,D,D,true,T,Terminal}, t) where {D,T}
     @unpack Tenors, τ, ρ, cache = p
-    @unpack σ = cache
+    @unpack σ, σI = cache
 
-    σc = zeros(eltype(1/t), D)
     @inbounds begin
         # 'i' ranges from 2 to D because f₁ has μ = 0
         for i in 2:D
-            du[i] = zero(eltype(1/t))
+            du[i] = zero(eltype(u))
             if t ≤ Tenors[i]
 
                 p.σ(σ, t, Tenors[i])
                 du[i] += - σ[i - 1] 
 
-                quadgk!((z, w) -> p.σ(z, t, w), σc, t, Tenors[i])
-                du[i] *= σc[i - 1]
+                quadgk!((z, w) -> p.σ(z, t, w), σI, t, Tenors[i])
+                du[i] *= σI[i - 1]
             end
         end
     end
@@ -32,7 +31,7 @@ end
         # 'i' ranges from 2 to D because f₁ has μ = 0
         for i in 2:D
             if t ≤ Tenors[i]
-                du[i] = - σ(t, Tenors[i])[i-1] * quadgk(u -> σ(t, u)[i-1], t, Tenors[i])[1]
+                du[i] = - σ(t, Tenors[i])[i - 1] * quadgk(u -> σ(t, u)[i - 1], t, Tenors[i])[1]
             end
         end
     end
@@ -42,20 +41,19 @@ end
 
 @inline function drift!(du, u, p::HJMP{true,D,D,true,T,Spot}, t) where {D,T}
     @unpack Tenors, τ, ρ, cache = p
-    @unpack σ = cache
+    @unpack σ, σI = cache
 
-    σc = zeros(eltype(1/t), D)
     @inbounds begin
         # 'i' ranges from 2 to D because f₁ has μ = 0
         for i in 2:D
-            du[i] = zero(eltype(1/t))
+            du[i] = zero(eltype(u))
             if t ≤ Tenors[i]
 
                 p.σ(σ, t, Tenors[i])
                 du[i] += σ[i - 1] 
 
-                quadgk!((z, w) -> p.σ(z, t, w), σc, t, Tenors[i])
-                du[i] *= σc[i - 1]
+                quadgk!((z, w) -> p.σ(z, t, w), σI, t, Tenors[i])
+                du[i] *= σI[i - 1]
             end
         end
     end
@@ -88,7 +86,7 @@ end
     @inbounds begin
         for i in 2:D
             p.σ(σ, t, Tenors[i])
-            du[i] = t > Tenors[i] ? zero(eltype(du)) : σ[i - 1]
+            du[i] = t > Tenors[i] ? zero(eltype(u)) : σ[i - 1]
         end
     end
     return nothing
@@ -102,7 +100,7 @@ end
 
     @inbounds begin
         for i in 2:D
-            du[i] = t > Tenors[i] ? zero(eltype(du)) : σ(t, Tenors[i])[i - 1]
+            du[i] = t > Tenors[i] ? zero(eltype(u)) : σ(t, Tenors[i])[i - 1]
         end
     end
 

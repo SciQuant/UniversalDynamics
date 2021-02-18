@@ -18,6 +18,7 @@ for measure in (Terminal(), Spot())
         return (0.05 + 0.09 * (Tenors[i] - t)) * exp(-0.44 * (Tenors[i] - t)) + 0.2
     end
 
+    #! deberia ser una funcion de (p, t) y la version IIP de (u, p, t)?
     function σ(t)
 
         # this one computes unnecesary values

@@ -103,8 +103,10 @@ interpolation scheme is used in case `t` and/or `T` do not lie in the tenor stru
 model.
 """
 function (P::LiborMarketModelZeroCouponBond)(t::Real, T::Real)
+    p = parameters(P)
     @unpack L = P
-    @unpack Tenors, τ, imethod = parameters(P)
+    @unpack Tenors, τ = p
+    imethod = get_imethod(p)
 
     if 0 ≤ t < T
         rt = searchsorted(Tenors, t)
@@ -122,7 +124,7 @@ function (P::LiborMarketModelZeroCouponBond)(t::Real, T::Real)
             return interpolate(P, imethod, t, T)
         end
     elseif isequal(t, T)
-        return one(Base.promote_eltype(1/t, 1/T))
+        return one(Base.promote_eltype(1/t, 1/T)) #! el type puede salir de T de LiborMarketModelParameters
     else
         throw(DomainError("`t` must be ≤ `T` when computing a Zero Coupon Bond P(t, T)."))
     end
@@ -145,8 +147,10 @@ An interpolation scheme is used in case `t` does not lie in the tenor structure 
 model.
 """
 function (B::LiborMarketModelMoneyMarketAccount)(t::Real)
+    p = parameters(B)
     @unpack L = B
-    @unpack Tenors, τ, imethod = parameters(B)
+    @unpack Tenors, τ = p
+    imethod = get_imethod(p)
 
     if t > 0
         r = searchsorted(Tenors, t)
@@ -158,7 +162,7 @@ function (B::LiborMarketModelMoneyMarketAccount)(t::Real)
             return interpolate(B, imethod, t)
         end
     elseif iszero(t)
-        return one(1/t)
+        return one(1/t) #! el type puede salir de T de LiborMarketModelParameters
     else
         throw(DomainError("error?"))
     end
@@ -185,7 +189,7 @@ function (D::LiborMarketModelDiscountFactor)(t::Real, T::Real)
     if 0 ≤ t < T
         return B(t) / B(T)
     elseif isequal(t, T)
-        return one(Base.promote_eltype(1/t, 1/T))
+        return one(Base.promote_eltype(1/t, 1/T)) #! el type puede salir de T de LiborMarketModelParameters
     else
         throw(DomainError("`t` must be ≤ `T` when computing a Discount Factor D(t, T)."))
     end

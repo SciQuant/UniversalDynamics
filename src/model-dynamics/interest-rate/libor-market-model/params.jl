@@ -47,6 +47,9 @@ tenor_structure(τ) = prepend!(cumsum(τ), zero(eltype(τ)))
 tenor_structure(τ::SVector) = vcat(zero(eltype(τ)), cumsum(τ)) # vcat(similar_type(τ, Size(1))(zero(eltype(τ))), cumsum(τ))
 tenor_structure(::Nothing) = nothing
 
+get_measure(::LiborMarketModelParameters{IIP,D,M,DN,T,Q}) where {IIP,D,M,DN,T,Q} = Q
+get_imethod(::LiborMarketModelParameters{IIP,D,M,DN,T,Q,IT}) where {IIP,D,M,DN,T,Q,IT} = IT
+
 struct LiborMarketModelCache{V}
     σ::V
     LiborMarketModelCache(x::T) where {T} = new{T}(similar(x))

@@ -65,7 +65,7 @@ for measure in (Terminal(), Spot())
         return dL
     end
 
-    dynamics = OrderedDict(:L => L)
+    dynamics = [:L => L]
     ds_oop = DynamicalSystem(f, g, dynamics, nothing)
     sol_oop = solve(ds_oop, 6., seed=1)
 
@@ -119,7 +119,7 @@ for measure in (Terminal(), Spot())
         return nothing
     end
 
-    dynamics = OrderedDict(:L => L)
+    dynamics = [:L => L]
     ds_iip = DynamicalSystem(f!, g!, dynamics, nothing)
     sol_iip = solve(ds_iip, 6., seed=1)
 

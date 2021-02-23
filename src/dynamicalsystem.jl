@@ -65,7 +65,7 @@ function DynamicalSystem(f, g, dynamics, params=nothing)
         throw(ArgumentError("provide at least one `AbstractDynamics`."))
     end
 
-    _dynamics = values(dynamics)
+    _dynamics = getfield.(dynamics, :second)
 
     IIP = all(isinplace.(_dynamics))
     OOP = all((!isinplace).(_dynamics))

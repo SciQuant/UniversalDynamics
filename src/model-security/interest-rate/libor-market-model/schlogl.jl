@@ -12,7 +12,7 @@ Computes the zero coupon bond price `P(t, T)` when `t` and/or `T` do not lie in 
 structure of the Libor Market Model using the Schlogl interpolation method assuming zero
 volatility for short dated bonds.
 """
-function interpolate(P::LiborMarketModelZeroCouponBond, ::Schlogl{false}, t::Real, T::Real)
+function interpolate(P::LiborMarketModelZeroCouponBond, ::Type{Schlogl{false}}, t::Real, T::Real)
     @unpack L = P
     @unpack Tenors, τ = L.params
 
@@ -47,7 +47,7 @@ Computes the zero coupon bond price `P(t, T)` when `t` and/or `T` do not lie in 
 structure of the Libor Market Model using the Schlogl interpolation method relaxing the zero
 volatility for short dated bonds... describir α(t).
 """
-function interpolate(P::LiborMarketModelZeroCouponBond, ::Schlogl{true}, t::Real, T::Real)
+function interpolate(P::LiborMarketModelZeroCouponBond, ::Type{Schlogl{true}}, t::Real, T::Real)
     @unpack L = P
     @unpack Tenors, τ, σ = parameters(P)
 
@@ -98,7 +98,7 @@ Computes the money market account value `B(t)` when `t` does not lie in the teno
 of the Libor Market Model using the Schlogl interpolation method assuming zero volatility
 for short dated bonds.
 """
-function interpolate(B::LiborMarketModelMoneyMarketAccount, ::Schlogl{false}, t::Real)
+function interpolate(B::LiborMarketModelMoneyMarketAccount, ::Type{Schlogl{false}}, t::Real)
   @unpack L = B
   @unpack Tenors, τ = L.params
 

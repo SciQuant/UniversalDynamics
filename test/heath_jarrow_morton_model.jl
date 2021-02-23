@@ -8,7 +8,7 @@ for measure in (Terminal(), Spot())
     Tenors = vcat(zero(eltype(τ)), cumsum(τ))
 
     α₁ = 0.10
-    α₂ = 0.13   
+    α₂ = 0.13
 
     σ₁₁ = 0.11
     σ₂₁ = 0.12
@@ -23,6 +23,9 @@ for measure in (Terminal(), Spot())
     function σ(t, T)
         return SVector(ntuple(Val{4}()) do i
             if t ≤ T
+                # porque no mandas `i` como argumento de la funcion y calculas en base a
+                # eso en lugar de calcular todos y tomar la componente `i`? lo podes hacer
+                # definiendo los vectores/matrices σ y α correspondientes...
                 return σt(t, T)[i]
             else
                 return zero(promote_type(1/t))
@@ -58,7 +61,7 @@ for measure in (Terminal(), Spot())
         return dF
     end
 
-    dynamics = OrderedDict(:F => F)
+    dynamics = [:F => F]
     ds_oop = DynamicalSystem(f, g, dynamics, nothing)
     sol_oop = solve(ds_oop, 1., seed=1)
 
@@ -100,7 +103,7 @@ for measure in (Terminal(), Spot())
         return nothing
     end
 
-    dynamics = OrderedDict(:F => F1)
+    dynamics = [:F => F1]
     ds_iip = DynamicalSystem(f!, g!, dynamics, nothing)
     sol_iip = solve(ds_iip, 1., seed=1)
 

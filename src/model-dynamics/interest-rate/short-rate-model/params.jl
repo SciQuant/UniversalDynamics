@@ -23,16 +23,18 @@ struct AffineParameters{FM,IIP,D,DN,K,T,S,A,B,X0,X1,C} <: ShortRateParameters{FM
 end
 
 # TODO: update function (see MultiFactor case)
-function AffineParameters(
-    ::Type{OneFactor}, t0::Real, r0, κ::K, θ::T, Σ::S, α::A, β::B, ξ₀::X0, ξ₁::X1
-) where {K,T,S,A,B,X0,X1}
+function AffineParameters{OneFactor,IIP}(
+    t0::Real, r0, κ::K, θ::T, Σ::S, α::A, β::B, ξ₀::X0, ξ₁::X1
+) where {IIP,K,T,S,A,B,X0,X1}
 
-    IIP = isinplace(r0)
-    DN = true
-    cache = IIP ? AffineCache(OneFactorAffineModelDynamics, r0) : nothing
+    if IIP
+        cache = AffineCache(OneFactorAffineModelDynamics{IIP,1,true}, r0)
+    else
+        cache = nothing
+    end
     C = typeof(cache)
 
-    return AffineParameters{OneFactor,IIP,1,DN,K,T,S,A,B,X0,X1,C}(κ, θ, Σ, α, β, ξ₀, ξ₁, cache)
+    return AffineParameters{OneFactor,IIP,1,true,K,T,S,A,B,X0,X1,C}(κ, θ, Σ, α, β, ξ₀, ξ₁, cache)
 end
 
 function AffineParameters{MultiFactor,IIP,D,DN}(

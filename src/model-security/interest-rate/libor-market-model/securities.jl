@@ -14,8 +14,8 @@ end
     (L::LiborMarketModelForwardRate)(t::Real)
 
 Computes and returns all the simple forward interest rates at time `t` described by the
-implemented Libor Market Model such that `L_n(t) = L(t, T_n, T_{n+1})` is computed for each
-`n` and with `T` the Libor Market Model tenor structure.
+implemented Libor Market Model such that ``L_n(t) = L(t, T_n, T_{n+1})`` is computed for
+each `n` and with `T` the Libor Market Model tenor structure.
 """
 (L::LiborMarketModelForwardRate)(t::Real) = L.Ln(t)
 
@@ -23,7 +23,7 @@ implemented Libor Market Model such that `L_n(t) = L(t, T_n, T_{n+1})` is comput
     (L::LiborMarketModelForwardRate)(i::Int64, t::Real)
 
 Computes and returns the `i`-th simple forward interest rates at time `t` described by the
-implemented Libor Market Model such that `L_n(t) = L(t, T_n, T_{n+1})` is computed
+implemented Libor Market Model such that ``L_n(t) = L(t, T_n, T_{n+1})`` is computed
 for `n = i` and with `T` the Libor Market Model tenor structure.
 """
 (L::LiborMarketModelForwardRate)(i::Int64, t::Real) = L.Ln(i, t)
@@ -32,8 +32,8 @@ for `n = i` and with `T` the Libor Market Model tenor structure.
     (L::LiborMarketModelForwardRate)(idxs::Union{Vector{Int64},StepRange}, t::Real)
 
 Computes and returns some simple forward interest rates at time `t` described by the
-implemented Libor Market Model such that `L_n(t) = L(t, T_n, T_{n+1})` is computed for `n in
-idxs` and with `T` the Libor Market Model tenor structure.
+implemented Libor Market Model such that ``L_n(t) = L(t, T_n, T_{n+1})``` is computed for `n
+in idxs` and with `T` the Libor Market Model tenor structure.
 """
 (L::LiborMarketModelForwardRate)(idxs::Union{Vector{Int64},StepRange}, t::Real) = L.Ln(idxs, t)
 
@@ -98,9 +98,9 @@ end
 """
     (P::LiborMarketModelZeroCouponBond)(t, T)
 
-Computes and returns the zero coupon bond `P(t, T)` defined under the Libor Market Model. An
-interpolation scheme is used in case `t` and/or `T` do not lie in the tenor structure of the
-model.
+Computes and returns the zero coupon bond ``P(t, T)`` defined under the Libor Market Model.
+An interpolation scheme is used in case `t` and/or `T` do not lie in the tenor structure of
+the model.
 """
 function (P::LiborMarketModelZeroCouponBond)(t::Real, T::Real)
     p = parameters(P)
@@ -123,8 +123,8 @@ function (P::LiborMarketModelZeroCouponBond)(t::Real, T::Real)
         else
             return interpolate(P, imethod, t, T)
         end
-    elseif isequal(t, T)
-        return one(Base.promote_eltype(1/t, 1/T)) #! el type puede salir de T de LiborMarketModelParameters
+    elseif isapprox(t, T)
+        return one(eltype(p))
     else
         throw(DomainError("`t` must be ≤ `T` when computing a Zero Coupon Bond P(t, T)."))
     end
@@ -157,12 +157,12 @@ function (B::LiborMarketModelMoneyMarketAccount)(t::Real)
         if !isempty(r)
             # usamos la interpretacion q(Tn) = n, i.e. left continuous, para este calculo
             n = getindex(r)
-            return prod((1 + τ[i] * L(i, t)) for i in 1:n-1)
+            return prod((1 + τ[i] * L(i, Tenors[i])) for i in 1:n-1)
         else
             return interpolate(B, imethod, t)
         end
     elseif iszero(t)
-        return one(1/t) #! el type puede salir de T de LiborMarketModelParameters
+        return one(eltype(p))
     else
         throw(DomainError("error?"))
     end
@@ -180,16 +180,18 @@ end
 """
     (D::LiborMarketModelDiscountFactor)(t::Real, T::Real)
 
-Computes and returns the discount factor `D(t, T)` defined under the Libor Market Model. An
+Computes and returns the discount factor ``D(t, T)`` defined under the Libor Market Model. An
 interpolation scheme is used in case `t` and/or `T` do not lie in the tenor structure of the
 model.
 """
 function (D::LiborMarketModelDiscountFactor)(t::Real, T::Real)
     @unpack B = D
+    p = parameters(B)
+
     if 0 ≤ t < T
         return B(t) / B(T)
-    elseif isequal(t, T)
-        return one(Base.promote_eltype(1/t, 1/T)) #! el type puede salir de T de LiborMarketModelParameters
+    elseif isapprox(t, T)
+        return one(eltype(p))
     else
         throw(DomainError("`t` must be ≤ `T` when computing a Discount Factor D(t, T)."))
     end

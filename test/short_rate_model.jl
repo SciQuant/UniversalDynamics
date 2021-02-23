@@ -63,7 +63,7 @@ include("DaiSingletonParameters_A3_1.jl")
                                0       0       0 dB]
     end
 
-    dynamics = OrderedDict(:x => x, :B => B)
+    dynamics = [:x => x, :B => B]
     ds_oop = DynamicalSystem(f, g, dynamics, nothing)
     sol_oop = solve(ds_oop, 1., alg=EM(), dt=0.01, seed=1)
 
@@ -161,7 +161,7 @@ include("DaiSingletonParameters_A3_1.jl")
         return nothing
     end
 
-    dynamics = OrderedDict(:x => x, :B => B)
+    dynamics = [:x => x, :B => B]
     ds_iip = DynamicalSystem(f!, g!, dynamics, nothing)
     sol_iip = solve(ds_iip, 1., alg=EM(), dt=0.01, seed=1)
 

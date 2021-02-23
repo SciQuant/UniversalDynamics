@@ -29,7 +29,7 @@ end
         t0, x0, I, nothing, @SVector(ones(D))
     )
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics, ))
+    ds = DynamicalSystem([:x => x_dynamics])
     test_dynamics(
         ds,
         IIP, D, M, DN, T,
@@ -47,7 +47,7 @@ end
     x_dynamics = SystemDynamics(x0; t0=t0, noise=DiagonalNoise(M))
     test_dynamics(x_dynamics, IIP, D, M, DN, T, t0, x0, I, nothing, @SVector(ones(D)))
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics))
+    ds = DynamicalSystem([:x => x_dynamics])
     test_dynamics(ds, IIP, D, M, DN, T, t0, SVector(x0), I, nothing, nothing)
 end
 
@@ -68,7 +68,7 @@ end
         @SMatrix(ones(D, M))
     )
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics))
+    ds = DynamicalSystem([:x => x_dynamics])
     test_dynamics(
         ds,
         IIP, D, M, DN, T,
@@ -93,7 +93,7 @@ end
         @SVector(ones(D))
     )
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics))
+    ds = DynamicalSystem([:x => x_dynamics])
     test_dynamics(
         ds,
         IIP, D, M, DN, T,
@@ -116,7 +116,7 @@ end
         t0, x0, I, nothing, @SVector(ones(D))
     )
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics))
+    ds = DynamicalSystem([:x => x_dynamics])
     test_dynamics(
         ds,
         IIP, D, M, DN, T,
@@ -139,7 +139,7 @@ end
         @SMatrix(ones(D, M))
     )
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics))
+    ds = DynamicalSystem([:x => x_dynamics])
     test_dynamics(
         ds,
         IIP, D, M, DN, T,
@@ -186,7 +186,7 @@ end
         @SVector(ones(Dy))
     )
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics, :y => y_dynamics))
+    ds = DynamicalSystem([:x => x_dynamics, :y => y_dynamics])
     test_dynamics(
         ds,
         IIP, D, M, DN, T,
@@ -231,7 +231,7 @@ end
         t0, y0, I, nothing, @SVector(ones(Dy))
     )
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics, :y => y_dynamics))
+    ds = DynamicalSystem([:x => x_dynamics, :y => y_dynamics])
     test_dynamics(
         ds,
         IIP, D, M, DN, T,
@@ -278,7 +278,7 @@ end
         @SMatrix(ones(Dy, My))
     )
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics, :y => y_dynamics))
+    ds = DynamicalSystem([:x => x_dynamics, :y => y_dynamics])
     test_dynamics(
         ds,
         IIP, D, M, DN, T,
@@ -347,7 +347,7 @@ end
         @SMatrix(ones(Dz, Mz))
     )
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics, :y => y_dynamics, :z => z_dynamics))
+    ds = DynamicalSystem([:x => x_dynamics, :y => y_dynamics, :z => z_dynamics])
     test_dynamics(
         ds,
         IIP, D, M, DN, T,
@@ -415,7 +415,7 @@ end
         @SMatrix(ones(Dz, Mz))
     )
 
-    ds = DynamicalSystem(OrderedDict(:x => x_dynamics, :y => y_dynamics, :z => z_dynamics))
+    ds = DynamicalSystem([:x => x_dynamics, :y => y_dynamics, :z => z_dynamics])
     test_dynamics(
         ds,
         IIP, D, M, DN, T,

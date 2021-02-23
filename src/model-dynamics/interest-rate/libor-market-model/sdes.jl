@@ -128,7 +128,7 @@ end
 
     @inbounds begin
         for i in 2:D
-            du[i] = t > Tenors[i] ? zero(eltype(du)) : σ[i] * u[i]
+            du[i] = t > Tenors[i] ? zero(eltype(u)) : σ[i] * u[i]
         end
     end
 
@@ -143,7 +143,7 @@ end
 
     @inbounds begin
         for i in 2:D
-            du[i] = t > Tenors[i] ? zero(eltype(du)) : σ[i] * u[i]
+            du[i] = t > Tenors[i] ? zero(eltype(u)) : σ[i] * u[i]
         end
     end
 

@@ -32,7 +32,9 @@ struct OneFactorAffineModelDynamics{IIP,T,A,P,O} <: AffineModelDynamics{OneFacto
     prob::O
 end
 
-function OneFactorAffineModelDynamics(r0::S, κ, θ, Σ, α, β; ξ₀=zero, ξ₁=one, t0=zero(eltype(S))) where {S}
+function OneFactorAffineModelDynamics(
+    r0::S, κ, θ, Σ, α, β; ξ₀=zero, ξ₁=one, t0=zero(eltype(S))
+) where {S}
 
     if !(S <: Union{Real,AbstractVector})
         throw(ArgumentError("state *must* be <: Real/AbstractVector."))
@@ -40,7 +42,7 @@ function OneFactorAffineModelDynamics(r0::S, κ, θ, Σ, α, β; ξ₀=zero, ξ�
 
     D = length(r0)
     if !isone(D)
-        throw(ArgumentError("state *must* be 1 dimensional."))
+        throw(ArgumentError("state *must* be one dimensional."))
     end
 
     T = eltype(S)
@@ -48,7 +50,7 @@ function OneFactorAffineModelDynamics(r0::S, κ, θ, Σ, α, β; ξ₀=zero, ξ�
 
     IIP = isinplace(r0)
 
-    params = AffineParameters(OneFactor, t0, r0, κ, θ, Σ, α, β, ξ₀, ξ₁)
+    params = AffineParameters{OneFactor,IIP}(t0, r0, κ, θ, Σ, α, β, ξ₀, ξ₁)
     prob = riccati_problem(OneFactorAffineModelDynamics{IIP}, T, params)
 
     ρ = IIP ? one(T)*I(D) : Diagonal(SVector{D,T}(ones(D)))

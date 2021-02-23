@@ -1,3 +1,5 @@
+import Base: eltype
+
 """
     LiborMarketModelParameters
 
@@ -49,6 +51,8 @@ tenor_structure(::Nothing) = nothing
 
 get_measure(::LiborMarketModelParameters{IIP,D,M,DN,T,Q}) where {IIP,D,M,DN,T,Q} = Q
 get_imethod(::LiborMarketModelParameters{IIP,D,M,DN,T,Q,IT}) where {IIP,D,M,DN,T,Q,IT} = IT
+
+eltype(::LiborMarketModelParameters{IIP,D,M,DN,T}) where {IIP,D,M,DN,T} = T
 
 struct LiborMarketModelCache{V}
     σ::V

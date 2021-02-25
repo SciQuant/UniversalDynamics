@@ -79,17 +79,17 @@ function DynamicalSystem(f, g, dynamics, params=nothing)
 
     DN = !any((!diagonalnoise).(_dynamics))
 
-    t0 = initialtime(first(_dynamics))
-    if !all(t -> isequal(t, t0), initialtime.(_dynamics))
+    t0 = get_t0(first(_dynamics))
+    if !all(t -> isequal(t, t0), get_t0.(_dynamics))
         error("all dynamics *must* have the same initial time.")
     end
 
-    x0 = IIP ? vcat(state.(_dynamics)...) : vcat(SVector.(state.(_dynamics))...)
+    x0 = IIP ? vcat(get_state.(_dynamics)...) : vcat(SVector.(get_state.(_dynamics))...)
 
     T = eltype(x0)
     t0 = convert(T, t0)
 
-    ρ = cat(cor.(_dynamics)..., dims = (1, 2))
+    ρ = cat(get_cor.(_dynamics)..., dims = (1, 2))
     ρ = IIP ? Array{T,2}(ρ) : SMatrix{size(ρ)...,T}(ρ)
 
     noise_rate_prototype = diffeq_noise_rate_prototype(IIP, D, M, DN, _dynamics)
@@ -123,17 +123,17 @@ end
 
 DynamicalSystem(dynamics) = DynamicalSystem(nothing, nothing, dynamics)
 
-for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
+for method in (:get_t0, :get_state, :get_cor, :get_noise, :get_noise_rate_prototype)
     @eval begin
         $method(ds::DynamicalSystem) = $method(ds.attributes)
     end
 end
 
-parameters(ds::DynamicalSystem) = ds.params
+get_parameters(ds::DynamicalSystem) = ds.params
 
 function diffeqnoise(ds::DynamicalSystem, alg)
-    t0 = initialtime(ds)
-    ρ = cor(ds)
+    t0 = get_t0(ds)
+    ρ = get_cor(ds)
     IIP = isinplace(ds)
     D = dimension(ds)
     M = noise_dimension(ds)

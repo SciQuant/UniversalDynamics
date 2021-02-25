@@ -17,7 +17,7 @@ end
 function Base.show(io::IO, ad::AbstractDynamics)
     ps = 18
     text = summary(ad)
-    u0 = state(ad)'
+    u0 = get_state(ad)'
 
     ctx = IOContext(io, :limit => true, :compact => true, :displaysize => (10, 50))
 

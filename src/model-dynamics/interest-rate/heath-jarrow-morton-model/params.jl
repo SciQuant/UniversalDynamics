@@ -35,10 +35,8 @@ function HeathJarrowMortonModelParameters{IIP,D,M,DN,T}(
     end
     C = typeof(cache)
 
-
     return HeathJarrowMortonModelParameters{IIP,D,M,DN,T,Q,Te,U,S,R,C}(Tenors, τ, σ, ρ, cache)
 end
-
 
 struct HeathJarrowMortonModelCache{V}
     σ::V

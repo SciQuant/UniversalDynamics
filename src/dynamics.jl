@@ -50,11 +50,11 @@ struct DynamicsAttributes{T,S,R,N,P}
     noise_rate_prototype::P # it holds my gprototype for SystemDynamics while diffeq gprototype for DynamicalSystem
 end
 
-initialtime(attrs::DynamicsAttributes) = attrs.t0
-state(attrs::DynamicsAttributes) = attrs.x0
-cor(attrs::DynamicsAttributes) = attrs.ρ
-noise(attrs::DynamicsAttributes) = attrs.noise
-noise_rate_prototype(attrs::DynamicsAttributes) = attrs.noise_rate_prototype
+get_t0(attrs::DynamicsAttributes) = attrs.t0
+get_state(attrs::DynamicsAttributes) = attrs.x0
+get_cor(attrs::DynamicsAttributes) = attrs.ρ
+get_noise(attrs::DynamicsAttributes) = attrs.noise
+get_noise_rate_prototype(attrs::DynamicsAttributes) = attrs.noise_rate_prototype
 
 
 """
@@ -137,7 +137,7 @@ function SystemDynamics(
     return SystemDynamics{IIP,D,M,DN,T,typeof(attrs)}(attrs)
 end
 
-for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
+for method in (:get_t0, :get_state, :get_cor, :get_noise, :get_noise_rate_prototype)
     @eval begin
         $method(sd::SystemDynamics) = $method(sd.attributes)
     end

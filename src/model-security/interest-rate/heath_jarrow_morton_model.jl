@@ -1,5 +1,5 @@
 
-struct HeathJarrowMortonModelInstantaneousForwardRate{H<:HeathJarrowMortonModelDynamics,S<:Security} <: InstantaneousForwardRate 
+struct HeathJarrowMortonModelInstantaneousForwardRate{H<:HeathJarrowMortonModelDynamics,S<:Security} <: InstantaneousForwardRate
     hjm::H
     f::S
 end
@@ -25,20 +25,20 @@ model.
 """
 function (P::HeathJarrowMortonModelZeroCouponBond)(t::Real, T::Real)
     @unpack f = P
-    @unpack Tenors, τ = parameters(P)
+    @unpack Tenors, τ = get_parameters(P)
 
     if !(t in Tenors) || !(T in Tenors)
         throw(DomainError("`t` and `T` must lie in the tenor structure."))
-    
+
     elseif t > T
         throw(DomainError("`t` must be ≤ `T`."))
-    
+
     elseif 0 ≤ t < T
         return exp(-sum(f(i, t) * τ[i] for i = searchsortedfirst(Tenors, t):searchsortedfirst(Tenors, T)-1))
 
     elseif isequal(t, T)
         return one(Base.promote_eltype(1/t, 1/T))
-    
+
     end
 end
 
@@ -56,24 +56,24 @@ end
 (F::HeathJarrowMortonModelForwardRate)(t::Real, T::Real, S::Real)
 
 Computes and returns the simple forward interest rate `F(t, T, S)`, with contiguous times
-`T` and `S` over the Heath Jarrow Morton Model tenor structure. 
+`T` and `S` over the Heath Jarrow Morton Model tenor structure.
 """
 function (F::HeathJarrowMortonModelForwardRate)(t::Real, T::Real, S::Real)
     @unpack P = F
-    @unpack Tenors = parameters(P)
-    
+    @unpack Tenors = get_parameters(P)
+
     if !(t in Tenors) || !(T in Tenors) || !(S in Tenors)
         throw(DomainError("`t`, `T`, `S` must lie in the tenor structure."))
-    
+
     elseif t > T
         throw(DomainError("`t` must be ≤ `T`."))
-    
+
     elseif T >= S
         throw(DomainError("`T` must be < `S`."))
-    
+
     elseif 0 ≤ t ≤ T < S
         return 1 / (S - T) * (P(t, T) / P(t, S) - 1)
-    
+
     end
 end
 
@@ -105,7 +105,7 @@ model.
 """
 function (B::HeathJarrowMortonModelMoneyMarketAccount)(t::Real)
     @unpack f = B
-    @unpack Tenors, τ = parameters(f)
+    @unpack Tenors, τ = get_parameters(f)
 
     if !(t in Tenors)
         throw(DomainError("`t` must lie in the tenor structure."))
@@ -117,7 +117,7 @@ function (B::HeathJarrowMortonModelMoneyMarketAccount)(t::Real)
        return exp(sum(f(i, t) * τ[i] for i = 1:searchsortedfirst(Tenors, t)-1))
 
     end
-    
+
 end
 
 """
@@ -138,30 +138,30 @@ model.
 """
 function (D::HeathJarrowMortonModelDiscountFactor)(t::Real, T::Real)
     @unpack B = D
-    @unpack Tenors = parameters(B)
-    
+    @unpack Tenors = get_parameters(B)
+
     if !(t in Tenors) || !(T in Tenors)
         throw(DomainError("`t` and `T` must lie in the tenor structure."))
-    
+
     elseif t > T
         throw(DomainError("`t` must be ≤ `T`."))
 
     elseif 0 ≤ t < T
         return B(t) / B(T)
-    
+
     elseif isequal(t, T)
         return one(Base.promote_eltype(1/t, 1/T))
     end
-    
+
 end
 
-struct HeathJarrowMortonModelSpotRate{T<:HeathJarrowMortonModelInstantaneousForwardRate} <: SpotRate 
+struct HeathJarrowMortonModelSpotRate{T<:HeathJarrowMortonModelInstantaneousForwardRate} <: SpotRate
     f::T
 end
 
 function (r::HeathJarrowMortonModelSpotRate)(t::Real)
     @unpack f = r
-    @unpack Tenors = parameters(f)
+    @unpack Tenors = get_parameters(f)
 
     if !(t in Tenors)
         throw(DomainError("`t` must lie in the tenor structure."))
@@ -172,7 +172,7 @@ function (r::HeathJarrowMortonModelSpotRate)(t::Real)
     elseif iszero(t)
         return f(1)
     end
-      
+
 end
 
 
@@ -183,12 +183,12 @@ function FixedIncomeSecurities(hjm::HJM, f::Security) where {HJM<:HeathJarrowMor
     D = HeathJarrowMortonModelDiscountFactor(B)
     r = HeathJarrowMortonModelSpotRate(f)
     F = HeathJarrowMortonModelForwardRate(P)
-    
+
     return FixedIncomeSecurities{HJM}(r, B, D, P, F, f)
 end
 
-parameters(f::HeathJarrowMortonModelInstantaneousForwardRate) = parameters(f.hjm)
-parameters(P::HeathJarrowMortonModelZeroCouponBond) = parameters(P.f.hjm)
-parameters(B::HeathJarrowMortonModelMoneyMarketAccount) = parameters(B.f.hjm)
+get_parameters(f::HeathJarrowMortonModelInstantaneousForwardRate) = get_parameters(f.hjm)
+get_parameters(P::HeathJarrowMortonModelZeroCouponBond) = get_parameters(P.f.hjm)
+get_parameters(B::HeathJarrowMortonModelMoneyMarketAccount) = get_parameters(B.f.hjm)
 
-  
+

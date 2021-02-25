@@ -63,14 +63,14 @@ factormodel(::ShortRateModelDynamics{FM}) where {FM} = FM
 
 # IDEA: aca me parece que es conveniente usar traits, ya que tenemos DynamicalSystem,
 # ShortRateModelDynamics y SystemDynamics metidos y son todos hijos de AbstractDynamics
-for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
+for method in (:get_t0, :get_state, :get_cor, :get_noise, :get_noise_rate_prototype)
     @eval begin
         $method(srmd::ShortRateModelDynamics) = $method(srmd.attributes)
     end
 end
 
 # IDEA: usar Traits?
-parameters(srmd::ShortRateModelDynamics) = srmd.params
+get_parameters(srmd::ShortRateModelDynamics) = srmd.params
 
 include("short-rate-model/models.jl")
 include("short-rate-model/params.jl")

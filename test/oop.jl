@@ -4,15 +4,15 @@ function test_dynamics(d, IIP, D, M, DN, T, t0, x0, ρ, noise, noise_rate_protot
     @test dimension(d) == D
     @test noise_dimension(d) == M
     @test diagonalnoise(d) == DN
-    @test UniversalDynamics.eltype(d) == T
+    @test eltype(d) == T
 
-    @test initialtime(d) == t0 && typeof(initialtime(d)) == typeof(t0)
-    @test state(d) == x0 && typeof(state(d)) == typeof(x0)
-    @test cor(d) == ρ #&& typeof(cor(d)) == ρ
-    @test UniversalDynamics.noise(d) == noise
-    @test typeof(UniversalDynamics.noise(d)) == typeof(noise)
-    @test UniversalDynamics.noise_rate_prototype(d) == noise_rate_prototype
-    @test typeof(UniversalDynamics.noise_rate_prototype(d)) == typeof(noise_rate_prototype)
+    @test get_t0(d) == t0 && typeof(get_t0(d)) == typeof(t0)
+    @test get_state(d) == x0 && typeof(get_state(d)) == typeof(x0)
+    @test get_cor(d) == ρ #&& typeof(get_cor(d)) == ρ
+    @test get_noise(d) == noise
+    @test typeof(get_noise(d)) == typeof(noise)
+    @test get_noise_rate_prototype(d) == noise_rate_prototype
+    @test typeof(get_noise_rate_prototype(d)) == typeof(noise_rate_prototype)
 
     return nothing
 end

@@ -48,7 +48,7 @@ for measure in (Terminal(), Spot())
 
         IR = FixedIncomeSecurities(L_dynamics, L)
 
-        dL = UniversalDynamics.drift(L(t), UniversalDynamics.parameters(L_dynamics), t)
+        dL = drift(L(t), get_parameters(L_dynamics), t)
 
         return dL
     end
@@ -60,7 +60,7 @@ for measure in (Terminal(), Spot())
 
         IR = FixedIncomeSecurities(L_dynamics, L)
 
-        dL = UniversalDynamics.diffusion(L(t), UniversalDynamics.parameters(L_dynamics), t)
+        dL = diffusion(L(t), get_parameters(L_dynamics), t)
 
         return dL
     end
@@ -102,7 +102,7 @@ for measure in (Terminal(), Spot())
 
         IR = FixedIncomeSecurities(L_dynamics, L)
 
-        UniversalDynamics.drift!(L.dx, L(t), UniversalDynamics.parameters(L_dynamics), t)
+        drift!(L.dx, L(t), get_parameters(L_dynamics), t)
 
         return nothing
     end
@@ -114,7 +114,7 @@ for measure in (Terminal(), Spot())
 
         IR = FixedIncomeSecurities(L_dynamics, L)
 
-        UniversalDynamics.diffusion!(L.dx, L(t), UniversalDynamics.parameters(L_dynamics), t)
+        diffusion!(L.dx, L(t), get_parameters(L_dynamics), t)
 
         return nothing
     end

@@ -1,31 +1,31 @@
 
 import StochasticDiffEq: SDEProblem, solve
 
-function SDEProblem(ds::DynamicalSystem{IIP}, tspan; u0=state(ds), kwargs...) where {IIP}
+function SDEProblem(ds::DynamicalSystem{IIP}, tspan; u0=get_state(ds), kwargs...) where {IIP}
     return SDEProblem{IIP}(
         SDEFunction(ds.f, ds.g),
         ds.g,
         u0,
         tspan,
-        parameters(ds);
-        # noise=noise(ds),
-        noise_rate_prototype=noise_rate_prototype(ds),
+        get_parameters(ds);
+        # noise=get_noise(ds),
+        noise_rate_prototype=get_noise_rate_prototype(ds),
         kwargs...
     )
 end
 
-function solve(ds::DynamicalSystem, T; u0=state(ds), alg=SRIW1(), diffeq...)
+function solve(ds::DynamicalSystem, T; u0=get_state(ds), alg=SRIW1(), diffeq...)
     noise = diffeqnoise(ds, alg)
-    prob = SDEProblem(ds, (initialtime(ds), T); u0=u0, noise=noise)
+    prob = SDEProblem(ds, (get_t0(ds), T); u0=u0, noise=noise)
     sol = solve(prob, alg; diffeq...)
     return sol
 end
 
 function montecarlo(
     ds::DynamicalSystem, T, trials::Integer=1;
-    u0=state(ds), alg=SRIW1(), ensemblealg=EnsembleThreads(), seed::Integer=314159, diffeq...
+    u0=get_state(ds), alg=SRIW1(), ensemblealg=EnsembleThreads(), seed::Integer=314159, diffeq...
 )
-    tspan = (initialtime(ds), T)
+    tspan = (get_t0(ds), T)
     noise = diffeqnoise(ds, alg)
     prob = SDEProblem(ds, tspan; u0=u0, noise=noise)
 

@@ -37,12 +37,12 @@ include("DaiSingletonParameters_A3_1.jl")
     function f(u, p, t)
         @unpack x_dynamics, x_security, B_security = p
 
-        x = UniversalDynamics.remake(x_security, u)
-        B = UniversalDynamics.remake(B_security, u)
+        x = remake(x_security, u)
+        B = remake(B_security, u)
 
         IR = FixedIncomeSecurities(x_dynamics, x, B)
 
-        dx = UniversalDynamics.drift(x(t), UniversalDynamics.parameters(x_dynamics), t)
+        dx = drift(x(t), get_parameters(x_dynamics), t)
         dB = IR.r(t) * B(t)
 
         return vcat(dx, dB)
@@ -51,10 +51,10 @@ include("DaiSingletonParameters_A3_1.jl")
     function g(u, p, t)
         @unpack x_dynamics, x_security, B_security = p
 
-        x = UniversalDynamics.remake(x_security, u)
-        B = UniversalDynamics.remake(B_security, u)
+        x = remake(x_security, u)
+        B = remake(B_security, u)
 
-        dx = UniversalDynamics.diffusion(x(t), x_dynamics, t)
+        dx = diffusion(x(t), get_parameters(x_dynamics), t)
         dB = zero(eltype(u)) # @SMatrix zeros(eltype(u), 1, 1)
 
         return @SMatrix [dx[1,1] dx[1,2] dx[1,3]  0
@@ -137,12 +137,12 @@ include("DaiSingletonParameters_A3_1.jl")
     function f!(du, u, p, t)
         @unpack x_dynamics, x_security, B_security = p
 
-        x = UniversalDynamics.remake(x_security, u, du)
-        B = UniversalDynamics.remake(B_security, u, du)
+        x = remake(x_security, u, du)
+        B = remake(B_security, u, du)
 
         IR = FixedIncomeSecurities(x_dynamics, x, B)
 
-        UniversalDynamics.drift!(x.dx, x(t), UniversalDynamics.parameters(x_dynamics), t)
+        drift!(x.dx, x(t), get_parameters(x_dynamics), t)
         B.dx[] = IR.r(t) * B(t)
 
         return nothing
@@ -152,10 +152,10 @@ include("DaiSingletonParameters_A3_1.jl")
     function g!(du, u, p, t)
         @unpack x_dynamics, x_security, B_security = p
 
-        x = UniversalDynamics.remake(x_security, u, du)
-        B = UniversalDynamics.remake(B_security, u, du)
+        x = remake(x_security, u, du)
+        B = remake(B_security, u, du)
 
-        UniversalDynamics.diffusion!(x.dx, x(t), UniversalDynamics.parameters(x_dynamics), t)
+        diffusion!(x.dx, x(t), get_parameters(x_dynamics), t)
         B.dx[] = zero(eltype(u))
 
         return nothing

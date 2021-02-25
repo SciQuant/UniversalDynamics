@@ -47,14 +47,14 @@ end
 
 # IDEA: aca me parece que es conveniente usar traits, ya que tenemos DynamicalSystem,
 # ShortRateModelDynamics y SystemDynamics metidos y son todos hijos de AbstractDynamics
-for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
+for method in (:get_t0, :get_state, :get_cor, :get_noise, :get_noise_rate_prototype)
     @eval begin
         $method(hjmd::HeathJarrowMortonModelDynamics) = $method(hjmd.attributes)
     end
 end
 
 # IDEA: usar Traits?
-parameters(hjmd::HeathJarrowMortonModelDynamics) = hjmd.params
+get_parameters(hjmd::HeathJarrowMortonModelDynamics) = hjmd.params
 
 include("heath-jarrow-morton-model/params.jl")
 include("heath-jarrow-morton-model/sdes.jl")

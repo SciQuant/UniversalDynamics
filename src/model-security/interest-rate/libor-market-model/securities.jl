@@ -45,7 +45,7 @@ Computes and returns the simple forward interest rate `L(t, T, S)`, with contigu
 contiguous... (we should investigate this and allow for a interpolation scheme).
 """
 function (L::LiborMarketModelForwardRate)(t::Real, T::Real, S::Real)
-  @unpack Tenors = parameters(L)
+  @unpack Tenors = get_parameters(L)
 
     if 0 ≤ t ≤ T < S
         rT = searchsorted(Tenors, T)
@@ -103,7 +103,7 @@ An interpolation scheme is used in case `t` and/or `T` do not lie in the tenor s
 the model.
 """
 function (P::LiborMarketModelZeroCouponBond)(t::Real, T::Real)
-    p = parameters(P)
+    p = get_parameters(P)
     @unpack L = P
     @unpack Tenors, τ = p
     imethod = get_imethod(p)
@@ -147,7 +147,7 @@ An interpolation scheme is used in case `t` does not lie in the tenor structure 
 model.
 """
 function (B::LiborMarketModelMoneyMarketAccount)(t::Real)
-    p = parameters(B)
+    p = get_parameters(B)
     @unpack L = B
     @unpack Tenors, τ = p
     imethod = get_imethod(p)
@@ -186,7 +186,7 @@ model.
 """
 function (D::LiborMarketModelDiscountFactor)(t::Real, T::Real)
     @unpack B = D
-    p = parameters(B)
+    p = get_parameters(B)
 
     if 0 ≤ t < T
         return B(t) / B(T)
@@ -217,6 +217,6 @@ function FixedIncomeSecurities(lmm::LMM, Ln::Security) where {LMM<:LiborMarketMo
     return FixedIncomeSecurities{LMM}(r, B, D, P, L, f)
 end
 
-parameters(L::LiborMarketModelForwardRate) = parameters(L.lmm)
-parameters(P::LiborMarketModelZeroCouponBond) = parameters(P.L.lmm)
-parameters(B::LiborMarketModelMoneyMarketAccount) = parameters(B.L.lmm)
+get_parameters(L::LiborMarketModelForwardRate) = get_parameters(L.lmm)
+get_parameters(P::LiborMarketModelZeroCouponBond) = get_parameters(P.L.lmm)
+get_parameters(B::LiborMarketModelMoneyMarketAccount) = get_parameters(B.L.lmm)

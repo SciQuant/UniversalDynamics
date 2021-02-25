@@ -83,14 +83,14 @@ end
 
 # IDEA: aca me parece que es conveniente usar traits, ya que tenemos DynamicalSystem,
 # ShortRateModelDynamics y SystemDynamics metidos y son todos hijos de AbstractDynamics
-for method in (:initialtime, :state, :cor, :noise, :noise_rate_prototype)
+for method in (:get_t0, :get_state, :get_cor, :get_noise, :get_noise_rate_prototype)
     @eval begin
         $method(lmmd::LiborMarketModelDynamics) = $method(lmmd.attributes)
     end
 end
 
 # IDEA: usar Traits?
-parameters(lmmd::LiborMarketModelDynamics) = lmmd.params
+get_parameters(lmmd::LiborMarketModelDynamics) = lmmd.params
 
 include("libor-market-model/params.jl")
 include("libor-market-model/sdes.jl")

@@ -2,8 +2,8 @@
 for method in (:drift, :diffusion)
     method! = Symbol(method, !)
     @eval begin
-        $method(x, srmd::ShortRateModelDynamics, t) = $method(x, parameters(srmd), t)
-        $method!(dx, x, srmd::ShortRateModelDynamics, t) = $method!(dx, x, parameters(srmd), t)
+        $method(x, srmd::ShortRateModelDynamics, t) = $method(x, get_parameters(srmd), t)
+        $method!(dx, x, srmd::ShortRateModelDynamics, t) = $method!(dx, x, get_parameters(srmd), t)
     end
 end
 
@@ -11,12 +11,12 @@ end
 
 function drift(r, p::AffineParameters{OneFactor,false,D,DN}, t) where {D,DN}
     @unpack κ, θ = p
-    return κ(t) * (θ(t) - r)
+    return κ(t) * (θ(t) - r[1])
 end
 
 function diffusion(r, p::AffineParameters{OneFactor,false,D,DN}, t) where {D,DN}
     @unpack Σ, α, β = p
-    return Σ(t) * sqrt(α(t) + β(t) * r)
+    return Σ(t) * sqrt(α(t) + β(t) * r[1])
 end
 
 ############################### One Factor Affine + In Place ################################
@@ -25,13 +25,13 @@ end
 
 function drift!(dr, r, p::AffineParameters{OneFactor,true,D,DN}, t) where {D,DN}
     @unpack κ, θ = p
-    dr[1] = κ(t) * (θ(t) - r)
+    dr[1] = κ(t) * (θ(t) - r[1])
     return nothing
 end
 
 function diffusion!(dr, r, p::AffineParameters{OneFactor,true,D,DN}, t) where {D,DN}
     @unpack Σ, α, β = p
-    dr[1] = Σ(t) * sqrt(α(t) + β(t) * r)
+    dr[1] = Σ(t) * sqrt(α(t) + β(t) * r[1])
     return nothing
 end
 

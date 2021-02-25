@@ -25,7 +25,8 @@ for measure in (Terminal(), Spot())
             if t ≤ T
                 # porque no mandas `i` como argumento de la funcion y calculas en base a
                 # eso en lugar de calcular todos y tomar la componente `i`? lo podes hacer
-                # definiendo los vectores/matrices σ y α correspondientes...
+                # definiendo los vectores/matrices σ y α correspondientes... y si necesitas
+                # una componente `j` para hacerlo mejor aun, hacelo...
                 return σt(t, T)[i]
             else
                 return zero(promote_type(1/t))
@@ -44,7 +45,7 @@ for measure in (Terminal(), Spot())
 
         IR = FixedIncomeSecurities(F_dynamics, F)
 
-        dF = UniversalDynamics.drift(F(t), UniversalDynamics.parameters(F_dynamics), t)
+        dF = drift(F(t), get_parameters(F_dynamics), t)
 
         return dF
     end
@@ -56,7 +57,7 @@ for measure in (Terminal(), Spot())
 
         IR = FixedIncomeSecurities(F_dynamics, F)
 
-        dF = UniversalDynamics.diffusion(F(t), UniversalDynamics.parameters(F_dynamics), t)
+        dF = diffusion(F(t), get_parameters(F_dynamics), t)
 
         return dF
     end
@@ -69,6 +70,7 @@ for measure in (Terminal(), Spot())
         for i in 1:4
             u[i] = zero(eltype(u))
             if t ≤ T
+                #! FIXME: idem al comentario de arriba...
                 u[i] = σt(t, T)[i]
             end
         end
@@ -86,7 +88,7 @@ for measure in (Terminal(), Spot())
 
         IR = FixedIncomeSecurities(F_dynamics, F)
 
-        UniversalDynamics.drift!(F.dx, F(t), UniversalDynamics.parameters(F_dynamics), t)
+        drift!(F.dx, F(t), get_parameters(F_dynamics), t)
 
         return nothing
     end
@@ -98,7 +100,7 @@ for measure in (Terminal(), Spot())
 
         IR = FixedIncomeSecurities(F_dynamics, F)
 
-        UniversalDynamics.diffusion!(F.dx, F(t), UniversalDynamics.parameters(F_dynamics), t)
+        diffusion!(F.dx, F(t), get_parameters(F_dynamics), t)
 
         return nothing
     end

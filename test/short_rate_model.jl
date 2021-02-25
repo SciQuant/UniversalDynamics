@@ -35,26 +35,30 @@ include("DaiSingletonParameters_A3_1.jl")
     B = SystemDynamics(one(eltype(x)))
 
     function f(u, p, t)
-        @unpack x_dynamics, x_security, B_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _x = _dynamics
+        @unpack _x_, _B_ = _securities_
 
-        x = remake(x_security, u)
-        B = remake(B_security, u)
+        x = remake(_x_, u)
+        B = remake(_B_, u)
 
-        IR = FixedIncomeSecurities(x_dynamics, x, B)
+        IR = FixedIncomeSecurities(_x, x, B)
 
-        dx = drift(x(t), get_parameters(x_dynamics), t)
+        dx = drift(x(t), get_parameters(_x), t)
         dB = IR.r(t) * B(t)
 
         return vcat(dx, dB)
     end
 
     function g(u, p, t)
-        @unpack x_dynamics, x_security, B_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _x = _dynamics
+        @unpack _x_, _B_ = _securities_
 
-        x = remake(x_security, u)
-        B = remake(B_security, u)
+        x = remake(_x_, u)
+        B = remake(_B_, u)
 
-        dx = diffusion(x(t), get_parameters(x_dynamics), t)
+        dx = diffusion(x(t), get_parameters(_x), t)
         dB = zero(eltype(u)) # @SMatrix zeros(eltype(u), 1, 1)
 
         return @SMatrix [dx[1,1] dx[1,2] dx[1,3]  0
@@ -135,14 +139,16 @@ include("DaiSingletonParameters_A3_1.jl")
 
     # in place drift coefficient
     function f!(du, u, p, t)
-        @unpack x_dynamics, x_security, B_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _x = _dynamics
+        @unpack _x_, _B_ = _securities_
 
-        x = remake(x_security, u, du)
-        B = remake(B_security, u, du)
+        x = remake(_x_, u, du)
+        B = remake(_B_, u, du)
 
-        IR = FixedIncomeSecurities(x_dynamics, x, B)
+        IR = FixedIncomeSecurities(_x, x, B)
 
-        drift!(x.dx, x(t), get_parameters(x_dynamics), t)
+        drift!(x.dx, x(t), get_parameters(_x), t)
         B.dx[] = IR.r(t) * B(t)
 
         return nothing
@@ -150,12 +156,14 @@ include("DaiSingletonParameters_A3_1.jl")
 
     # in place diffusion coefficient
     function g!(du, u, p, t)
-        @unpack x_dynamics, x_security, B_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _x = _dynamics
+        @unpack _x_, _B_ = _securities_
 
-        x = remake(x_security, u, du)
-        B = remake(B_security, u, du)
+        x = remake(_x_, u, du)
+        B = remake(_B_, u, du)
 
-        diffusion!(x.dx, x(t), get_parameters(x_dynamics), t)
+        diffusion!(x.dx, x(t), get_parameters(_x), t)
         B.dx[] = zero(eltype(u))
 
         return nothing

@@ -103,19 +103,19 @@ function DynamicalSystem(f, g, dynamics, params=nothing)
     securities = Dict()
     for (name, abstract_dynamics) in dynamics
         x = Security(abstract_dynamics, d, m)
-        push!(securities, Symbol(name, :_security) => x)
+        push!(securities, Symbol(:_, name, :_) => x)
         d += dimension(abstract_dynamics)
         m += noise_dimension(abstract_dynamics)
     end
     securities = (; securities...)
 
-    _dynamics = Dict(Symbol(key, :_dynamics) => value for (key, value) in dynamics)
+    _dynamics = Dict(Symbol(:_, key) => value for (key, value) in dynamics)
     _dynamics = (; _dynamics...)
 
     if isnothing(params)
-        params = merge(_dynamics, securities)
+        params = (_dynamics = _dynamics, _securities_ = securities)
     else
-        params = merge(params, _dynamics, securities)
+        params = (params..., _dynamics = _dynamics, _securities_ = securities)
     end
 
     return DynamicalSystem{IIP,D,M,DN,T}(f, g, attrs, params, _dynamics, securities)

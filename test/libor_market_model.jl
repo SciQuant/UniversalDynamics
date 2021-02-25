@@ -42,25 +42,25 @@ for measure in (Terminal(), Spot())
     L = LiborMarketModelDynamics(L0, τ, σ, ρ, measure=measure, imethod=Schlogl(true))
 
     function f(u, p, t)
-        @unpack L_dynamics, L_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _L = _dynamics
+        @unpack _L_ = _securities_
 
-        L = remake(L_security, u)
+        L = remake(_L_, u)
 
-        IR = FixedIncomeSecurities(L_dynamics, L)
-
-        dL = drift(L(t), get_parameters(L_dynamics), t)
+        dL = drift(L(t), get_parameters(_L), t)
 
         return dL
     end
 
     function g(u, p, t)
-        @unpack L_dynamics, L_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _L = _dynamics
+        @unpack _L_ = _securities_
 
-        L = remake(L_security, u)
+        L = remake(_L_, u)
 
-        IR = FixedIncomeSecurities(L_dynamics, L)
-
-        dL = diffusion(L(t), get_parameters(L_dynamics), t)
+        dL = diffusion(L(t), get_parameters(_L), t)
 
         return dL
     end
@@ -96,25 +96,25 @@ for measure in (Terminal(), Spot())
     L = LiborMarketModelDynamics(L0, τ, σ!, ρ, measure=measure, imethod=Schlogl(true))
 
     function f!(du, u, p, t)
-        @unpack L_dynamics, L_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _L = _dynamics
+        @unpack _L_ = _securities_
 
-        L = remake(L_security, u, du)
+        L = remake(_L_, u, du)
 
-        IR = FixedIncomeSecurities(L_dynamics, L)
-
-        drift!(L.dx, L(t), get_parameters(L_dynamics), t)
+        drift!(L.dx, L(t), get_parameters(_L), t)
 
         return nothing
     end
 
     function g!(du, u, p, t)
-        @unpack L_dynamics, L_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _L = _dynamics
+        @unpack _L_ = _securities_
 
-        L = remake(L_security, u, du)
+        L = remake(_L_, u, du)
 
-        IR = FixedIncomeSecurities(L_dynamics, L)
-
-        diffusion!(L.dx, L(t), get_parameters(L_dynamics), t)
+        diffusion!(L.dx, L(t), get_parameters(_L), t)
 
         return nothing
     end

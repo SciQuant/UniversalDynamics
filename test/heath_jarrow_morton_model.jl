@@ -39,25 +39,25 @@ for measure in (Terminal(), Spot())
     F = HeathJarrowMortonModelDynamics(F0, τ, σ, measure=measure)
 
     function f(u, p, t)
-        @unpack F_dynamics, F_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _F = _dynamics
+        @unpack _F_ = _securities_
 
-        F = remake(F_security, u)
+        F = remake(_F_, u)
 
-        IR = FixedIncomeSecurities(F_dynamics, F)
-
-        dF = drift(F(t), get_parameters(F_dynamics), t)
+        dF = drift(F(t), get_parameters(_F), t)
 
         return dF
     end
 
     function g(u, p, t)
-        @unpack F_dynamics, F_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _F = _dynamics
+        @unpack _F_ = _securities_
 
-        F = remake(F_security, u)
+        F = remake(_F_, u)
 
-        IR = FixedIncomeSecurities(F_dynamics, F)
-
-        dF = diffusion(F(t), get_parameters(F_dynamics), t)
+        dF = diffusion(F(t), get_parameters(_F), t)
 
         return dF
     end
@@ -82,25 +82,25 @@ for measure in (Terminal(), Spot())
     F1 = HeathJarrowMortonModelDynamics(F0, τ, σ!, measure=measure)
 
     function f!(du, u, p, t)
-        @unpack F_dynamics, F_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _F = _dynamics
+        @unpack _F_ = _securities_
 
-        F = remake(F_security, u, du)
+        F = remake(_F_, u, du)
 
-        IR = FixedIncomeSecurities(F_dynamics, F)
-
-        drift!(F.dx, F(t), get_parameters(F_dynamics), t)
+        drift!(F.dx, F(t), get_parameters(_F), t)
 
         return nothing
     end
 
     function g!(du, u, p, t)
-        @unpack F_dynamics, F_security = p
+        @unpack _dynamics, _securities_ = p
+        @unpack _F = _dynamics
+        @unpack _F_ = _securities_
 
-        F = remake(F_security, u, du)
+        F = remake(_F_, u, du)
 
-        IR = FixedIncomeSecurities(F_dynamics, F)
-
-        diffusion!(F.dx, F(t), get_parameters(F_dynamics), t)
+        diffusion!(F.dx, F(t), get_parameters(_F), t)
 
         return nothing
     end

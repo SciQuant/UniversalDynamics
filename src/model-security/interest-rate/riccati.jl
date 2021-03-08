@@ -14,7 +14,13 @@ function riccati_problem(
 end
 
 function riccati(du, u, p::AffineParameters{OneFactor,true}, t)
-    κ, θ, Σ, α, β, ξ₀, ξ₁ = p(t)
+    κ = p.κ(t)
+    θ = p.θ(t)
+    Σ = p.Σ(t)
+    α = p.α(t)
+    β = p.β(t)
+    ξ₀ = p.ξ₀(t)
+    ξ₁ = p.ξ₁(t)
 
     ξ₀′ = ForwardDiff.derivative(p.ξ₀, t)
     ξ₁′ = ForwardDiff.derivative(p.ξ₁, t)

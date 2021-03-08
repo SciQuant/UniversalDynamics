@@ -25,8 +25,8 @@ function Base.show(io::IO, ad::AbstractDynamics)
     prefix = rpad(" state: ", ps)
     print(io, prefix); printlimited(io, u0, Δx = length(prefix)); print(io, "\n")
     println(io, rpad(" in-place? ", ps),        isinplace(ad))
-    println(io, rpad(" Dimension: ", ps),       dimension(ad))
-    println(io, rpad(" Noise dimension: ", ps), noise_dimension(ad))
+    println(io, rpad(" dimension: ", ps),       dimension(ad))
+    println(io, rpad(" noise dimension: ", ps), noise_dimension(ad))
     print(io,   rpad(" diagonal noise? ", ps),  diagonalnoise(ad))
 end
 

@@ -39,8 +39,8 @@ include("DaiSingletonParameters_A3_1.jl")
         @unpack _x = _dynamics
         @unpack _x_, _B_ = _securities_
 
-        x = remake(_x_, u)
-        B = remake(_B_, u)
+        x = remake(_x_, u, t)
+        B = remake(_B_, u, t)
 
         IR = FixedIncomeSecurities(_x, x, B)
 
@@ -55,8 +55,8 @@ include("DaiSingletonParameters_A3_1.jl")
         @unpack _x = _dynamics
         @unpack _x_, _B_ = _securities_
 
-        x = remake(_x_, u)
-        B = remake(_B_, u)
+        x = remake(_x_, u, t)
+        B = remake(_B_, u, t)
 
         dx = diffusion(x(t), get_parameters(_x), t)
         dB = zero(eltype(u)) # @SMatrix zeros(eltype(u), 1, 1)
@@ -143,8 +143,8 @@ include("DaiSingletonParameters_A3_1.jl")
         @unpack _x = _dynamics
         @unpack _x_, _B_ = _securities_
 
-        x = remake(_x_, u, du)
-        B = remake(_B_, u, du)
+        x = remake(_x_, du, u, t)
+        B = remake(_B_, du, u, t)
 
         IR = FixedIncomeSecurities(_x, x, B)
 
@@ -160,8 +160,8 @@ include("DaiSingletonParameters_A3_1.jl")
         @unpack _x = _dynamics
         @unpack _x_, _B_ = _securities_
 
-        x = remake(_x_, u, du)
-        B = remake(_B_, u, du)
+        x = remake(_x_, du, u, t)
+        B = remake(_B_, du, u, t)
 
         diffusion!(x.dx, x(t), get_parameters(_x), t)
         B.dx[] = zero(eltype(u))

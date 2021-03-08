@@ -3,6 +3,7 @@ import DiffEqBase: remake
 
 abstract type AbstractSecurity end
 
+# FIXME: porque estoy guardando `u` y `du`?
 struct Security{Di,Df,Mi,Mf,U,X,DU,DX} <: AbstractSecurity
     u::U
     x::X
@@ -19,22 +20,39 @@ function Security(::AbstractDynamics{IIP,D,M}, d::Integer, m::Integer) where {II
     return Security{Di,Df,Mi,Mf}(ntuple(_ -> nothing, 4)...)
 end
 
-function remake(::Security{Di,Df,Mi,Mf}, u::AbstractVector) where {Di,Df,Mi,Mf}
-    return Security{Di,Df,Mi,Mf}(u, view(u, Di:Df), nothing, nothing)
+function remake(::Security{Di,Df,Mi,Mf}, u::AbstractVector, t::Real) where {Di,Df,Mi,Mf}
+    return Security{Di,Df,Mi,Mf}(
+        u,
+        s -> in_domain(s, t, view(u, Di:Df)),
+        nothing,
+        nothing
+    )
 end
 
-function remake(::Security{Di,Df,Mi,Mf}, u::AbstractVector, du::AbstractVector) where {Di,Df,Mi,Mf}
-    return Security{Di,Df,Mi,Mf}(u, view(u, Di:Df), du, view(du, Di:Df))
+function remake(::Security{Di,Df,Mi,Mf}, du::AbstractVector, u::AbstractVector, t::Real) where {Di,Df,Mi,Mf}
+    return Security{Di,Df,Mi,Mf}(
+        u,
+        s -> in_domain(s, t, view(u, Di:Df)),
+        du,
+        view(du, Di:Df)
+    )
 end
 
-function remake(::Security{Di,Df,Mi,Mf}, u::AbstractVector, du::AbstractMatrix) where {Di,Df,Mi,Mf}
-    return Security{Di,Df,Mi,Mf}(u, view(u, Di:Df), du, view(du, Di:Df, Mi:Mf))
+function remake(::Security{Di,Df,Mi,Mf}, du::AbstractMatrix, u::AbstractVector, t::Real) where {Di,Df,Mi,Mf}
+    return Security{Di,Df,Mi,Mf}(
+        u,
+        s -> in_domain(s, t, view(u, Di:Df)),
+        du,
+        view(du, Di:Df, Mi:Mf)
+    )
 end
 
-(s::Security)() = s.x
-(s::Security{D,D,M,M})() where {D,M} = s.x[]
-(s::Security)(::Real) = s.x # s()
-(s::Security{D,D,M,M})(::Real) where {D,M} = s.x[] # s()
+# (s::Security)() = s.x
+# (s::Security{D,D,M,M})() where {D,M} = s.x[]
+(s::Security)(t::Real) = s.x(t)
+(s::Security{D,D,M,M})(t::Real) where {D,M} = getindex(s.x(t), 1)
+
+in_domain(s, t, result) = isequal(s, t) ? result : error("Outside time domain.")
 
 
 #! IMPORTANTE:

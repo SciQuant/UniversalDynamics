@@ -3,6 +3,7 @@ module UniversalDynamics
 using UnPack: @unpack
 using QuadGK
 using Memoize
+using ForwardDiff
 using StaticArrays
 using LinearAlgebra
 using OrdinaryDiffEq

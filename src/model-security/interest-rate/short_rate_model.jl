@@ -1,6 +1,16 @@
 include("riccati.jl")
 
 
+function FixedIncomeSecurities(srmd::SRMD, x::Security, β::Security) where {SRMD<:ShortRateModelDynamics}
+    r = ShortRateModelSpotRate(srmd, x)
+    B = ShortRateModelMoneyMarketAccount(β)
+    D = ShortRateModelDiscountFactor(B)
+    P = ShortRateModelZeroCouponBond(r)
+    L = ShortRateModelForwardRate(P)
+    f = ShortRateModelInstantaneousForwardRate(P)
+    return FixedIncomeSecurities{SRMD}(r, B, D, P, L, f)
+end
+
 struct ShortRateModelSpotRate{S<:ShortRateModelDynamics,X,R} <: SpotRate
     srm::S
     x::X
@@ -16,6 +26,9 @@ end
 function ShortRateModelSpotRate(srm::MultiFactorAffineModelDynamics{false}, x::Security)
     @unpack ξ₀, ξ₁ = get_parameters(srm)
     r(t::Real) = ξ₀(t) + dot(ξ₁(t), x(t))
+    # esta declaracion alloca cuando defino FixedIncomeSecurities en un coeficiente... por
+    # ahi lo que convenga es que modeldynamics sea un field en FixedIncomeSecurities y no
+    # aca dentro.
     return ShortRateModelSpotRate(srm, x, r)
 end
 
@@ -82,19 +95,18 @@ struct ShortRateModelZeroCouponBond{R<:ShortRateModelSpotRate} <: ZeroCouponBond
     r::R
 end
 
-shortratemodel(P::ShortRateModelZeroCouponBond) = P.r.srm
-
 function (P::ShortRateModelZeroCouponBond)(t::Real, T::Real, xt::Union{Real,AbstractVector{<:Real}})
+    srm = get_shortratemodel(P)
     if 0 ≤ t < T
-        return zerocouponbond(shortratemodel(P), P, t, T, xt) # dispatch by model
+        return zerocouponbond(srm, P, t, T, xt) # dispatch by model
     elseif isapprox(t, T)
-        return one(eltype(P.r.srm)) # one(Base.promote_eltype(1/t, 1/T))
+        return one(eltype(srm))
     else
         throw(DomainError("`t` must be ≤ `T` for Zero Coupon Bond P(t, T)."))
     end
 end
 
-# TODO: allocates x(t), use x(out, t) if Array
+# TODO: allocates x(t), use x(out, t) if Array (if IIP?)
 (P::ShortRateModelZeroCouponBond)(t::Real, T::Real) = P(t, T, P.r.x(t))
 
 # TODO: las allocations de las funciones zerocouponbond hay que estudiarlas para cuando nos
@@ -106,12 +118,12 @@ function zerocouponbond(
 )
     u = solve_riccati(P, t, T)
     a, b = u
-    # aca falta multiplicar por \frac{\exp \left( \int_0^T \xi_0(s) ds \right)}{\exp \left( \int_0^t \xi_0(s) ds \right}.
-    # Podemos pedir un parametro que sea P(s) = \exp \left( \int_0^s \xi_0(s) \right) ya que
-    # comunmente ξ₀(t) = fᴹ(0, t), por lo que P(s) = Pᴹ(0, s) y evitamos hacer las
-    # integrales. numericamente. Otra idea que habria que experimentar es ver si podemos
-    # subir este termino al exponente y que quede en funcion de rt? O sea, que aparezca algo
-    # como x(t) - ξ₀(t)?
+    # aca falta multiplicar por \frac{\exp \left( \int_0^T \xi_0(s) ds \right)}{\exp
+    # \left(\int_0^t \xi_0(s) ds \right}. Podemos pedir un parametro que sea P(s) = \exp
+    # \left(\int_0^s \xi_0(s) \right) ya que comunmente ξ₀(t) = fᴹ(0, t), por lo que P(s) =
+    # Pᴹ(0, s) y evitamos hacer las integrales. numericamente. Otra idea que habria que
+    # experimentar es ver si podemos subir este termino al exponente y que quede en funcion
+    # de rt? O sea, que aparezca algo como x(t) - ξ₀(t)?
     return exp(a - b * xt)
     # @muladd return exp(a - B * xt)
 end
@@ -161,12 +173,12 @@ end
 
 function solve_riccati(P::ShortRateModelZeroCouponBond, t::Real, T::Real)
     # solve Riccati only if needed
-    srm = shortratemodel(P)
+    srm = get_shortratemodel(P)
     sol = remake_and_solve(srm.prob, T)
 
     # for now, both allocate (see #1270 in OrdinaryDiffEq)
     if isinplace(srm)
-        u = srm.cache.rout
+        u = srm.params.cache.rout
         sol(u, t)
     else
         u = sol(t)
@@ -216,12 +228,6 @@ end
 # ver si cambia la cosa si paso el closure a la estructura de InstantaneousForwardRate
 (f::ShortRateModelInstantaneousForwardRate)(t::Real, T::Real) = ForwardDiff.derivative(s -> -log(f.P(t, s)), T)
 
-function FixedIncomeSecurities(srmd::SRMD, x::Security, β::Security) where {SRMD<:ShortRateModelDynamics}
-    r = ShortRateModelSpotRate(srmd, x)
-    B = ShortRateModelMoneyMarketAccount(β)
-    D = ShortRateModelDiscountFactor(B)
-    P = ShortRateModelZeroCouponBond(r)
-    L = ShortRateModelForwardRate(P)
-    f = ShortRateModelInstantaneousForwardRate(P)
-    return FixedIncomeSecurities{SRMD}(r, B, D, P, L, f)
-end
+
+# getters
+get_shortratemodel(P::ShortRateModelZeroCouponBond) = P.r.srm

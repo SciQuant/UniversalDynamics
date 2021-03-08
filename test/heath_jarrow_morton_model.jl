@@ -43,7 +43,7 @@ for measure in (Terminal(), Spot())
         @unpack _F = _dynamics
         @unpack _F_ = _securities_
 
-        F = remake(_F_, u)
+        F = remake(_F_, u, t)
 
         dF = drift(F(t), get_parameters(_F), t)
 
@@ -55,7 +55,7 @@ for measure in (Terminal(), Spot())
         @unpack _F = _dynamics
         @unpack _F_ = _securities_
 
-        F = remake(_F_, u)
+        F = remake(_F_, u, t)
 
         dF = diffusion(F(t), get_parameters(_F), t)
 
@@ -86,7 +86,7 @@ for measure in (Terminal(), Spot())
         @unpack _F = _dynamics
         @unpack _F_ = _securities_
 
-        F = remake(_F_, u, du)
+        F = remake(_F_, du, u, t)
 
         drift!(F.dx, F(t), get_parameters(_F), t)
 
@@ -98,7 +98,7 @@ for measure in (Terminal(), Spot())
         @unpack _F = _dynamics
         @unpack _F_ = _securities_
 
-        F = remake(_F_, u, du)
+        F = remake(_F_, du, u, t)
 
         diffusion!(F.dx, F(t), get_parameters(_F), t)
 

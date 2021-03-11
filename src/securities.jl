@@ -47,9 +47,8 @@ function remake(::Security{Di,Df,Mi,Mf}, du::AbstractMatrix, u::AbstractVector, 
     )
 end
 
-# (s::Security)() = s.x
-# (s::Security{D,D,M,M})() where {D,M} = s.x[]
 (s::Security)(t::Real) = s.x(t)
+(s::Security)(i::Integer, t::Real) = getindex(s.x(t), i)
 (s::Security{D,D,M,M})(t::Real) where {D,M} = getindex(s.x(t), 1)
 
 in_domain(s, t, result) = isequal(s, t) ? result : error("Outside time domain.")

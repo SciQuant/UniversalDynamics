@@ -56,5 +56,5 @@ eltype(::LiborMarketModelParameters{IIP,D,M,DN,T}) where {IIP,D,M,DN,T} = T
 
 struct LiborMarketModelCache{V}
     σ::V
-    LiborMarketModelCache(x::T) where {T} = new{T}(similar(x))
+    LiborMarketModelCache(x::T) where {T} = new{T}(zero(x))
 end

@@ -1,5 +1,5 @@
 """
-    LiborMarketModelDynamics{IIP,D,M,DN,T} <: TermStructureModelDynamicsTermStructureModelDynamics{IIP,D,M,DN,T}
+    LiborMarketModelDynamics{IIP,D,M,DN,T} <: TermStructureModelDynamics{IIP,D,M,DN,T}
 
 Represents the simply-compounded forward interest rates or simple forward rates ``L(t, T,
 T+τ)`` under the Libor Market Model.

@@ -191,7 +191,7 @@ end
 # como cache el default. Quiero destacar que esta tarda casi lo mismo con Memoize que con
 # Memoization y es el mismo codigo, pero Memoization tenia una allocation
 Memoize.@memoize function remake_and_solve(prob, T)
-    println("Running")
+    # println("Running")
     newprob = OrdinaryDiffEq.remake(prob, tspan = (T, zero(eltype(prob.u0))))
     sol = OrdinaryDiffEq.solve(newprob, Tsit5())
     return sol
